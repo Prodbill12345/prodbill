@@ -40,6 +40,26 @@ const DevisFormSchema = z.object({
 
 type DevisFormData = z.infer<typeof DevisFormSchema>;
 
+interface DevisInitialData {
+  clientId: string;
+  objet: string;
+  tauxCsComedien: number;
+  tauxCsTech: number;
+  tauxFg: number;
+  tauxMarge: number;
+  dateValidite?: string | null;
+  notes?: string | null;
+  sections: {
+    titre: string;
+    lignes: {
+      libelle: string;
+      tag: "COMEDIEN" | "TECHNICIEN_HCS" | "DROIT" | "FORFAIT" | "MATERIEL" | "AGENT";
+      quantite: number;
+      prixUnit: number;
+    }[];
+  }[];
+}
+
 interface DevisBuilderProps {
   clients: Client[];
   defaultTaux: {
@@ -48,12 +68,17 @@ interface DevisBuilderProps {
     tauxFg: number;
     tauxMarge: number;
   };
+  /** Présent en mode édition */
+  devisId?: string;
+  initialData?: DevisInitialData;
 }
 
-export function DevisBuilder({ clients, defaultTaux }: DevisBuilderProps) {
+export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0]));
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(
+    new Set(initialData ? initialData.sections.map((_, i) => i) : [0])
+  );
 
   const {
     register,
@@ -65,13 +90,25 @@ export function DevisBuilder({ clients, defaultTaux }: DevisBuilderProps) {
   } = useForm<DevisFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(DevisFormSchema) as any,
-    defaultValues: {
-      tauxCsComedien: defaultTaux.tauxCsComedien,
-      tauxCsTech: defaultTaux.tauxCsTech,
-      tauxFg: defaultTaux.tauxFg,
-      tauxMarge: defaultTaux.tauxMarge,
-      sections: [{ titre: "Prestations", lignes: [] }],
-    },
+    defaultValues: initialData
+      ? {
+          clientId: initialData.clientId,
+          objet: initialData.objet,
+          tauxCsComedien: initialData.tauxCsComedien,
+          tauxCsTech: initialData.tauxCsTech,
+          tauxFg: initialData.tauxFg,
+          tauxMarge: initialData.tauxMarge,
+          dateValidite: initialData.dateValidite ?? undefined,
+          notes: initialData.notes ?? undefined,
+          sections: initialData.sections,
+        }
+      : {
+          tauxCsComedien: defaultTaux.tauxCsComedien,
+          tauxCsTech: defaultTaux.tauxCsTech,
+          tauxFg: defaultTaux.tauxFg,
+          tauxMarge: defaultTaux.tauxMarge,
+          sections: [{ titre: "Prestations", lignes: [] }],
+        },
   });
 
   const {
@@ -112,42 +149,60 @@ export function DevisBuilder({ clients, defaultTaux }: DevisBuilderProps) {
   async function onSubmit(data: DevisFormData) {
     setSubmitting(true);
     try {
-      const payload = {
-        ...data,
-        sections: data.sections.map((s, si) => ({
-          ...s,
-          ordre: si,
-          lignes: s.lignes.map((l, li) => ({
-            ...l,
-            quantite: Number(l.quantite),
-            prixUnit: Number(l.prixUnit),
-            ordre: li,
-          })),
+      const sections = data.sections.map((s, si) => ({
+        ...s,
+        ordre: si,
+        lignes: s.lignes.map((l, li) => ({
+          ...l,
+          quantite: Number(l.quantite),
+          prixUnit: Number(l.prixUnit),
+          ordre: li,
         })),
-      };
+      }));
 
-      const res = await fetch("/api/devis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error ?? "Erreur");
-        return;
+      if (devisId) {
+        // Mode édition — PUT
+        const res = await fetch(`/api/devis/${devisId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, sections }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.error ?? "Erreur");
+          return;
+        }
+        router.push(`/devis/${devisId}`);
+        router.refresh();
+      } else {
+        // Mode création — POST
+        const res = await fetch("/api/devis", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, sections }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert(err.error ?? "Erreur");
+          return;
+        }
+        const { data: devis } = await res.json();
+        router.push(`/devis/${devis.id}`);
+        router.refresh();
       }
-
-      const { data: devis } = await res.json();
-      router.push(`/devis/${devis.id}`);
-      router.refresh();
     } finally {
       setSubmitting(false);
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-3 gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="grid grid-cols-3 gap-6">
       {/* Colonne principale (2/3) */}
       <div className="col-span-2 space-y-5">
         {/* En-tête du devis */}
@@ -307,7 +362,7 @@ export function DevisBuilder({ clients, defaultTaux }: DevisBuilderProps) {
           {submitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : null}
-          Enregistrer le devis
+          {devisId ? "Enregistrer les modifications" : "Enregistrer le devis"}
         </button>
       </div>
     </form>
