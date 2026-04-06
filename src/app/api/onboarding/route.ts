@@ -83,7 +83,6 @@ export async function POST(req: Request) {
         role: "ADMIN", // Premier utilisateur = Admin
         companyId: company.id,
     },
-      },
     });
 
     return { company, user };
