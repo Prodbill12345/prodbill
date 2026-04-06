@@ -159,17 +159,31 @@ export function DevisBuilder({ clients, defaultTaux }: DevisBuilderProps) {
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Client *
               </label>
-              <select
-                {...register("clientId")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="">Sélectionner un client...</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              {(() => {
+                const clientIdField = register("clientId");
+                return (
+                  <select
+                    {...clientIdField}
+                    onChange={(e) => {
+                      if (e.target.value === "__nouveau__") {
+                        router.push("/clients/nouveau?redirect=devis");
+                        return;
+                      }
+                      clientIdField.onChange(e);
+                    }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="">Sélectionner un client...</option>
+                    {clients.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                    <option disabled>──────────────</option>
+                    <option value="__nouveau__">+ Créer un nouveau client</option>
+                  </select>
+                );
+              })()}
               {errors.clientId && (
                 <p className="text-red-500 text-xs mt-1">{errors.clientId.message}</p>
               )}
