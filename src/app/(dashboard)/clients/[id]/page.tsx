@@ -41,7 +41,7 @@ export default async function ClientDetailPage({
   if (!client) notFound();
 
   const caTotal = client.factures
-    .filter((f) => f.statut === "PAYEE")
+    .filter((f: any) => f.statut === "PAYEE")
     .reduce((sum, f) => sum + f.totalTtc, 0);
 
   return (
