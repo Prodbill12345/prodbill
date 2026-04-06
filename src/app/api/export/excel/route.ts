@@ -235,3 +235,4 @@ export async function GET(req: Request) {
     return handleAuthError(err);
   }
 }
+export const dynamic = 'force-dynamic';

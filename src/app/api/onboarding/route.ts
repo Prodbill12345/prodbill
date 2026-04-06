@@ -86,3 +86,4 @@ export async function POST(req: Request) {
 
   return Response.json({ data: { userId: user.id } }, { status: 201 });
 }
+export const dynamic = 'force-dynamic';

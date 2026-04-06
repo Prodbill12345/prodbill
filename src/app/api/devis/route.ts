@@ -116,3 +116,4 @@ export async function POST(req: Request) {
     return handleAuthError(err);
   }
 }
+export const dynamic = 'force-dynamic';

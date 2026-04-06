@@ -45,3 +45,4 @@ export async function POST(
     return handleAuthError(err);
   }
 }
+export const dynamic = 'force-dynamic';

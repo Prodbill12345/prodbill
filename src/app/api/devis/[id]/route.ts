@@ -189,3 +189,4 @@ export async function DELETE(
     return handleAuthError(err);
   }
 }
+export const dynamic = 'force-dynamic';
