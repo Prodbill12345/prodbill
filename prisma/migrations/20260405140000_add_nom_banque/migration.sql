@@ -1,0 +1,2 @@
+ALTER TABLE "Company" ADD COLUMN "nomBanque" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Facture" ADD COLUMN "nomBanqueEmetteur" TEXT NOT NULL DEFAULT '';

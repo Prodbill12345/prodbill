@@ -1,0 +1,391 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  DIRECTEUR_PROD
+  CHARGE_DE_PROD
+  COMPTABLE
+  STAGIAIRE
+}
+
+enum LigneTag {
+  COMEDIEN
+  TECHNICIEN_HCS
+  DROIT
+  FORFAIT
+  MATERIEL
+  AGENT     // Commission agent voix off (10% des lignes Comédien/Droit sélectionnées)
+}
+
+enum DevisStatut {
+  BROUILLON
+  ENVOYE
+  ACCEPTE
+  REFUSE
+  EXPIRE
+}
+
+enum FactureType {
+  ACOMPTE
+  SOLDE
+  AVOIR
+}
+
+enum FactureStatut {
+  BROUILLON
+  EMISE
+  PAYEE_PARTIEL
+  PAYEE
+  EN_RETARD
+  ANNULEE
+}
+
+enum CounterType {
+  DEVIS
+  FACTURE
+  BDC
+}
+
+enum RelanceType {
+  ENVOI           // Premier envoi de la facture
+  RELANCE_1       // Première relance (J+15)
+  RELANCE_2       // Deuxième relance (J+30)
+  MISE_EN_DEMEURE // Mise en demeure (J+45)
+}
+
+// ─────────────────────────────────────────────
+// COMPANY (Tenant)
+// ─────────────────────────────────────────────
+
+model Company {
+  id           String @id @default(cuid())
+  name         String
+  siret        String @unique
+  tvaIntra     String
+  address      String
+  city         String @default("")
+  postalCode   String @default("")
+  email        String @default("")
+  phone        String @default("")
+  iban         String
+  bic          String
+  nomBanque    String  @default("")
+  logoUrl      String?
+  primaryColor String @default("#3B82F6")
+
+  // Taux par défaut (surchargeables par devis ou par client)
+  defaultTauxFg         Float @default(0.05)
+  defaultTauxMarge      Float @default(0.15)
+  defaultTauxCsComedien Float @default(0.57)
+  defaultTauxCsTech     Float @default(0.65)
+
+  // Conditions de paiement par défaut (mention L441-9)
+  conditionsPaiement String @default("Paiement à 30 jours. Pénalités de retard : 15% par an exigibles à 45 jours. Indemnité forfaitaire de recouvrement : 40 €.")
+
+  clerkOrgId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  users     User[]
+  clients   Client[]
+  devis     Devis[]
+  factures  Facture[]
+  counters  Counter[]
+  auditLogs AuditLog[]
+}
+
+// ─────────────────────────────────────────────
+// USER (synced from Clerk webhook)
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String
+  name      String
+  role      Role     @default(STAGIAIRE)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// CLIENT
+// ─────────────────────────────────────────────
+
+model Client {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  name       String
+  siret      String?
+  tvaIntra   String?
+  address    String
+  city       String  @default("")
+  postalCode String  @default("")
+  email      String
+  phone      String?
+
+  // Tarification spéciale client (override des taux société)
+  tauxFgOverride    Float?
+  tauxMargeOverride Float?
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devis    Devis[]
+  factures Facture[]
+
+  @@index([companyId])
+}
+
+// ─────────────────────────────────────────────
+// DEVIS
+// ─────────────────────────────────────────────
+
+model Devis {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  clientId  String
+  client    Client  @relation(fields: [clientId], references: [id])
+
+  numero String?     // "25-0042" — généré à l'envoi (null en brouillon)
+  objet  String
+  statut DevisStatut @default(BROUILLON)
+
+  // Taux appliqués pour ce devis
+  tauxCsComedien Float
+  tauxCsTech     Float
+  tauxFg         Float
+  tauxMarge      Float
+
+  // Totaux calculés et dénormalisés (recalculés à chaque sauvegarde)
+  sousTotal     Float @default(0)
+  csComedien    Float @default(0)
+  csTechniciens Float @default(0)
+  baseMarge     Float @default(0)
+  fraisGeneraux Float @default(0)
+  marge         Float @default(0)
+  totalHt       Float @default(0)
+  tva           Float @default(0)
+  totalTtc      Float @default(0)
+
+  dateEmission DateTime?
+  dateValidite DateTime?
+  notes        String?
+  pdfUrl       String?   // Vercel Blob URL
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  sections  DevisSection[]
+  factures  Facture[]
+  bdc       BDC?
+  auditLogs AuditLog[]
+
+  @@index([companyId])
+  @@index([clientId])
+}
+
+// ─────────────────────────────────────────────
+// DEVIS SECTION
+// ─────────────────────────────────────────────
+
+model DevisSection {
+  id      String @id @default(cuid())
+  devisId String
+  devis   Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
+
+  titre String
+  ordre Int
+
+  lignes DevisLigne[]
+
+  @@index([devisId])
+}
+
+// ─────────────────────────────────────────────
+// DEVIS LIGNE
+// ─────────────────────────────────────────────
+
+model DevisLigne {
+  id        String       @id @default(cuid())
+  sectionId String
+  section   DevisSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  libelle  String
+  tag      LigneTag
+  quantite Float    @default(1)
+  prixUnit Float
+  total    Float    // quantite × prixUnit (dénormalisé)
+  ordre    Int
+
+  @@index([sectionId])
+}
+
+// ─────────────────────────────────────────────
+// FACTURE
+// ─────────────────────────────────────────────
+
+model Facture {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  clientId  String
+  client    Client  @relation(fields: [clientId], references: [id])
+  devisId   String?
+  devis     Devis?  @relation(fields: [devisId], references: [id])
+
+  numero String        @unique // "25-0042-A1", "25-0042-S1", "AV-25-0042"
+  type   FactureType
+  statut FactureStatut @default(BROUILLON)
+
+  // Montants
+  totalHt  Float
+  tva      Float
+  totalTtc Float
+
+  // Dates
+  dateEmission DateTime?
+  dateEcheance DateTime?
+  datePaiement DateTime?
+
+  // Mentions légales L441-9 (snapshot au moment de l'émission)
+  siretEmetteur      String @default("")
+  tvaIntraEmetteur   String @default("")
+  ibanEmetteur       String @default("")
+  bicEmetteur        String @default("")
+  nomBanqueEmetteur  String @default("")
+  conditionsPaiement String @default("")
+  nomEmetteur        String @default("")
+  adresseEmetteur    String @default("")
+
+  // Stockage
+  pdfUrl     String? // Vercel Blob
+  facturxUrl String? // XML ZUGFeRD
+
+  // Immuabilité légale : une fois EMISE, aucune modification autorisée
+  emiseAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  paiements Paiement[]
+  relances  Relance[]
+  auditLogs AuditLog[]
+
+  @@index([companyId])
+  @@index([clientId])
+  @@index([devisId])
+}
+
+// ─────────────────────────────────────────────
+// RELANCE EMAIL
+// ─────────────────────────────────────────────
+
+model Relance {
+  id          String      @id @default(cuid())
+  factureId   String
+  facture     Facture     @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  companyId   String
+  type        RelanceType
+  sentAt      DateTime    @default(now())
+  sentTo      String      // email destinataire
+  subject     String
+  createdById String
+
+  @@index([factureId])
+  @@index([companyId])
+}
+
+// ─────────────────────────────────────────────
+// BON DE COMMANDE
+// ─────────────────────────────────────────────
+
+model BDC {
+  id      String @id @default(cuid())
+  devisId String @unique
+  devis   Devis  @relation(fields: [devisId], references: [id])
+
+  numero    String   @unique // "BDC-25-0042"
+  pdfUrl    String?
+  createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// PAIEMENT / LETTRAGE
+// ─────────────────────────────────────────────
+
+model Paiement {
+  id        String  @id @default(cuid())
+  factureId String
+  facture   Facture @relation(fields: [factureId], references: [id])
+
+  montant   Float
+  date      DateTime
+  reference String?  // Référence bancaire
+  mode      String?  // Virement, chèque, CB…
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([factureId])
+}
+
+// ─────────────────────────────────────────────
+// COUNTER — numérotation séquentielle par année
+// ─────────────────────────────────────────────
+
+model Counter {
+  id        String      @id @default(cuid())
+  companyId String
+  company   Company     @relation(fields: [companyId], references: [id])
+  year      Int
+  type      CounterType
+  value     Int         @default(0)
+
+  @@unique([companyId, year, type])
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id         String  @id @default(cuid())
+  companyId  String
+  company    Company @relation(fields: [companyId], references: [id])
+  userId     String
+  userName   String  @default("")
+  action     String  // "DEVIS_CREE", "FACTURE_EMISE", "CLIENT_MODIFIE"…
+  entityType String  // "Devis", "Facture", "Client"…
+  entityId   String
+  details    Json?
+
+  devisId   String?
+  devis     Devis?   @relation(fields: [devisId], references: [id])
+  factureId String?
+  facture   Facture? @relation(fields: [factureId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+}
