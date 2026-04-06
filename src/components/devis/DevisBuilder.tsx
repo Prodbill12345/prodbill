@@ -107,7 +107,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           tauxCsTech: defaultTaux.tauxCsTech,
           tauxFg: defaultTaux.tauxFg,
           tauxMarge: defaultTaux.tauxMarge,
-          sections: [{ titre: "Prestations", lignes: [] }],
+          sections: [{ titre: "", lignes: [] }],
         },
   });
 
@@ -327,7 +327,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           <button
             type="button"
             onClick={() =>
-              appendSection({ titre: `Section ${sectionFields.length + 1}`, lignes: [] })
+              appendSection({ titre: "", lignes: [] })
             }
             className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-blue-300 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
           >
@@ -476,37 +476,6 @@ function SectionBlock({
     }
     remove(i);
   }
-  // ── HC Technicien (Hors Charges) — quantité auto ────────────────────────────
-  // Sources : TECHNICIEN_HCS dont le libellé contient "Studio Enregistrement" ou "Studio Mixage"
-  // Cibles  : TECHNICIEN_HCS dont le libellé contient "HC" (mais pas Studio source)
-  const isStudioSource = (l: Partial<z.infer<typeof LigneSchema>>) =>
-    l?.tag === "TECHNICIEN_HCS" &&
-    (l?.libelle?.toLowerCase().includes("studio enregistrement") ||
-      l?.libelle?.toLowerCase().includes("studio mixage"));
-
-  const isHcTarget = (l: Partial<z.infer<typeof LigneSchema>>) =>
-    l?.tag === "TECHNICIEN_HCS" &&
-    (l?.libelle ?? "").includes("HC") &&
-    !isStudioSource(l);
-
-  const studioQtyTotal = watchedLignes
-    .filter(isStudioSource)
-    .reduce((sum, l) => sum + (Number(l?.quantite) || 0), 0);
-
-  const hcLineIndices = watchedLignes
-    .map((l, i) => ({ l, i }))
-    .filter(({ l }) => isHcTarget(l))
-    .map(({ i }) => i);
-
-  const hcIndicesKey = hcLineIndices.join(",");
-  useEffect(() => {
-    if (hcLineIndices.length === 0) return;
-    hcLineIndices.forEach((idx) => {
-      setValue(`sections.${sectionIndex}.lignes.${idx}.quantite`, studioQtyTotal);
-    });
-  }, [studioQtyTotal, hcIndicesKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  // ─────────────────────────────────────────────────────────────────────────────
-
   const sectionTotal = watchedLignes.reduce(
     (s, l) => s + (Number(l?.quantite) || 0) * (Number(l?.prixUnit) || 0),
     0
@@ -575,8 +544,6 @@ function SectionBlock({
             const isAgentLine = tagValue === "AGENT";
             const isSourceLine =
               agentEnabled && (tagValue === "COMEDIEN" || tagValue === "DROIT");
-            const isHcLine = hcLineIndices.includes(li);
-
             // ── Ligne AGENT : affichage spécial, champs en hidden ──────────────
             if (isAgentLine) {
               return (
@@ -678,13 +645,7 @@ function SectionBlock({
                   step="0.5"
                   min="0"
                   {...register(`sections.${sectionIndex}.lignes.${li}.quantite`)}
-                  readOnly={isHcLine}
-                  title={isHcLine ? "Calculé automatiquement (somme Studio Enregistrement + Studio Mixage)" : undefined}
-                  className={`px-2 py-1.5 border rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    isHcLine
-                      ? "border-blue-100 bg-blue-50 text-blue-700 cursor-not-allowed"
-                      : "border-slate-200"
-                  }`}
+                  className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <input
                   type="number"
