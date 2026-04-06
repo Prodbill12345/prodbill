@@ -82,3 +82,4 @@ export async function PUT(
     return handleAuthError(err);
   }
 }
+export const dynamic = 'force-dynamic';
