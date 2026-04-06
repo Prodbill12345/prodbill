@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
   // Créer la société et l'utilisateur en une seule transaction
   const { user } = await prisma.$transaction(async (tx) => {
-    const company = await tx.company.create({
+    const company = await tx.company.upsert({ where: { siret: input.siret || "" }, update: {}, create: {
       data: {
         clerkOrgId: clerkId, // On utilise le clerkId comme identifiant unique en mode solo
         name: input.companyName,
@@ -71,13 +71,14 @@ export async function POST(req: Request) {
       },
     });
 
-    const user = await tx.user.create({
+    const user = await tx.user.upsert({ where: { clerkId: clerkId }, update: { email: userEmail, name: userName }, create: {
       data: {
         clerkId,
         email: userEmail,
         name: userName,
         role: "ADMIN", // Premier utilisateur = Admin
         companyId: company.id,
+    },
       },
     });
 
