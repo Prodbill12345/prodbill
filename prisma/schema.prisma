@@ -233,12 +233,13 @@ model DevisLigne {
   sectionId String
   section   DevisSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
-  libelle  String
-  tag      LigneTag
-  quantite Float    @default(1)
-  prixUnit Float
-  total    Float    // quantite × prixUnit (dénormalisé)
-  ordre    Int
+  libelle        String
+  tag            LigneTag
+  quantite       Float    @default(1)
+  prixUnit       Float
+  total          Float    // quantite × prixUnit (dénormalisé)
+  tauxIndexation Float    @default(0) // pourcentage, ex: 2.0 pour 2%
+  ordre          Int
 
   @@index([sectionId])
 }

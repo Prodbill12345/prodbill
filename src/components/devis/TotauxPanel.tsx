@@ -46,6 +46,11 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
       value: result.marge,
       sub: true,
     },
+    ...(result.indexations > 0 ? [{
+      label: "Indexation annuelle",
+      value: result.indexations,
+      sub: true,
+    }] : []),
     { label: "TOTAL HT", value: result.totalHt, separator: true, highlight: true },
     ...(result.remise > 0 ? [
       { label: "Remise exceptionnelle", value: result.remise, sub: true, negative: true },

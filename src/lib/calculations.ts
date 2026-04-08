@@ -46,17 +46,23 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
   const fraisGeneraux = round2(fraisGeneraux_raw);
   const marge = round2(marge_raw);
 
-  // 6. Total HT calculé sur les valeurs BRUTES (non arrondies) pour éviter
-  //    les cumuls d'erreurs d'arrondi — cf. exemple de référence : 4 603,20 €
+  // 6. Indexations annuelles — exclues de la base marge (comme CS Artistes)
+  const indexations_raw = lignes.reduce(
+    (sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100),
+    0
+  );
+  const indexations = round2(indexations_raw);
+
+  // 7. Total HT — inclut les indexations (valeurs brutes pour éviter cumuls d'arrondi)
   const totalHt = round2(
-    sousTotal + csComedien + csTechniciens + fraisGeneraux_raw + marge_raw
+    sousTotal + csComedien + csTechniciens + fraisGeneraux_raw + marge_raw + indexations_raw
   );
 
-  // 7. Remise et total après remise
+  // 8. Remise et total après remise
   const remiseArrondie = round2(remise);
   const totalApresRemise = round2(totalHt - remiseArrondie);
 
-  // 8. TVA et TTC calculés sur le total après remise
+  // 9. TVA et TTC calculés sur le total après remise
   const tva = round2(totalApresRemise * 0.2);
   const totalTtc = round2(totalApresRemise + tva);
 
@@ -67,6 +73,7 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
     baseMarge,
     fraisGeneraux,
     marge,
+    indexations,
     totalHt,
     remise: remiseArrondie,
     totalApresRemise,

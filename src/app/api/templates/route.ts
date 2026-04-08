@@ -7,6 +7,7 @@ const LigneTemplateSchema = z.object({
   tag: z.enum(["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE", "AGENT"]),
   quantite: z.number(),
   prixUnit: z.number().min(0),
+  tauxIndexation: z.number().min(0).max(100).default(0),
   ordre: z.number().int(),
 });
 

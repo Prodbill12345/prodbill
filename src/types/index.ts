@@ -99,6 +99,7 @@ export interface LigneInput {
   tag: LigneTag;
   quantite: number;
   prixUnit: number;
+  tauxIndexation?: number; // pourcentage, ex: 2.0 pour 2%
 }
 
 export interface TauxConfig {
@@ -115,6 +116,7 @@ export interface CalculResult {
   baseMarge: number;
   fraisGeneraux: number;
   marge: number;
+  indexations: number;
   totalHt: number;
   remise: number;
   totalApresRemise: number;

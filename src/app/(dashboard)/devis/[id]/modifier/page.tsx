@@ -68,6 +68,7 @@ export default async function ModifierDevisPage({
         tag: l.tag as "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT",
         quantite: l.quantite,
         prixUnit: l.prixUnit,
+        tauxIndexation: l.tauxIndexation ?? 0,
       })),
     })),
   };

@@ -10,6 +10,7 @@ type TemplateLigne = {
   tag: "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT";
   quantite: number;
   prixUnit: number;
+  tauxIndexation: number;
   ordre: number;
 };
 
@@ -73,6 +74,7 @@ export function NouveauDevisClient({ clients, defaultTaux, templates }: NouveauD
             tag: l.tag,
             quantite: l.quantite,
             prixUnit: l.prixUnit,
+            tauxIndexation: l.tauxIndexation,
           })),
         })),
       }

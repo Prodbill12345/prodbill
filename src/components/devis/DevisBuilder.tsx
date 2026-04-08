@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,7 @@ const LigneSchema = z.object({
   tag: z.enum(["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE", "AGENT"]),
   quantite: z.coerce.number().positive("Quantité > 0"),
   prixUnit: z.coerce.number().min(0, "Prix ≥ 0"),
+  tauxIndexation: z.coerce.number().min(0).max(100).optional(),
 });
 
 const SectionSchema = z.object({
@@ -58,6 +59,7 @@ interface DevisInitialData {
       tag: "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT";
       quantite: number;
       prixUnit: number;
+      tauxIndexation?: number;
     }[];
   }[];
 }
@@ -134,6 +136,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
       tag: l.tag ?? "ARTISTE",
       quantite: Number(l.quantite) || 0,
       prixUnit: Number(l.prixUnit) || 0,
+      tauxIndexation: Number(l.tauxIndexation) || 0,
     }))
   ) ?? [];
 
@@ -167,6 +170,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           tag: l.tag ?? "ARTISTE",
           quantite: Number(l.quantite) || 0,
           prixUnit: Number(l.prixUnit) || 0,
+          tauxIndexation: Number(l.tauxIndexation) || 0,
           ordre: li,
         })),
       }));
@@ -589,6 +593,16 @@ function SectionBlock({
     name: `sections.${sectionIndex}.lignes`,
   });
 
+  // ── Indexation annuelle ──────────────────────────────────────────────────────
+  // Set des field.id des lignes ARTISTE/MUSIQUE avec indexation activée
+  const [indexedLineIds, setIndexedLineIds] = useState<Set<string>>(() => {
+    const ids = new Set<string>();
+    fields.forEach((f, i) => {
+      if ((Number(watchedLignes[i]?.tauxIndexation) || 0) > 0) ids.add(f.id);
+    });
+    return ids;
+  });
+
   // ── Agent Voix Off ───────────────────────────────────────────────────────────
   // Set des field.id (stables) des lignes ARTISTE sélectionnées comme sources
   const [selectedForAgent, setSelectedForAgent] = useState<Set<string>>(new Set());
@@ -649,12 +663,11 @@ function SectionBlock({
 
   function removeLigne(i: number) {
     const fieldId = fields[i]?.id;
-    if (fieldId && selectedForAgent.has(fieldId)) {
-      setSelectedForAgent((prev) => {
-        const next = new Set(prev);
-        next.delete(fieldId);
-        return next;
-      });
+    if (fieldId) {
+      if (selectedForAgent.has(fieldId)) {
+        setSelectedForAgent((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
+      }
+      setIndexedLineIds((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
     }
     remove(i);
   }
@@ -770,9 +783,11 @@ function SectionBlock({
             }
 
             // ── Ligne normale ──────────────────────────────────────────────────
+            const isIndexable = tagValue === "ARTISTE" || tagValue === "MUSIQUE";
+            const indexationMontant = Math.round(total * (Number(ligne.tauxIndexation) || 0) / 100 * 100) / 100;
             return (
+              <Fragment key={field.id}>
               <div
-                key={field.id}
                 className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center"
               >
                 {/* Libellé — avec checkbox agent si applicable */}
@@ -854,6 +869,55 @@ function SectionBlock({
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
+
+              {/* ── Indexation annuelle (ARTISTE / MUSIQUE seulement) ── */}
+              {isIndexable && (
+                indexedLineIds.has(field.id) ? (
+                  <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center ml-1 pl-3 border-l-2 border-violet-200 -mt-0.5 pb-0.5">
+                    <span className="text-xs text-violet-600 font-medium">Indexation annuelle</span>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        {...register(`sections.${sectionIndex}.lignes.${li}.tauxIndexation`)}
+                        className="w-16 px-2 py-1 border border-violet-200 rounded-lg text-xs text-right focus:outline-none focus:ring-1 focus:ring-violet-400"
+                      />
+                      <span className="text-xs text-violet-400">%</span>
+                    </div>
+                    <span />{/* Qté */}
+                    <span />{/* P.U. */}
+                    <span className="text-xs text-right tabular-nums text-violet-600 font-medium">
+                      {indexationMontant === 0
+                        ? <span className="text-slate-300">—</span>
+                        : fmtEur(indexationMontant)
+                      }
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setValue(`sections.${sectionIndex}.lignes.${li}.tauxIndexation`, 0);
+                        setIndexedLineIds((prev) => { const n = new Set(prev); n.delete(field.id); return n; });
+                      }}
+                      className="text-violet-300 hover:text-red-500 transition-colors flex items-center justify-center"
+                      title="Retirer l'indexation"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIndexedLineIds((prev) => { const n = new Set(prev); n.add(field.id); return n; })}
+                    className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-600 ml-1 transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Indexation annuelle
+                  </button>
+                )
+              )}
+              </Fragment>
             );
           })}
 
