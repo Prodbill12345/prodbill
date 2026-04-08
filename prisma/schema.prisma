@@ -103,6 +103,22 @@ model Company {
   counters  Counter[]
   auditLogs AuditLog[]
   templates DevisTemplate[]
+  documents Document[]
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENT (pièces jointes PDF réutilisables)
+// ─────────────────────────────────────────────
+
+model Document {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────

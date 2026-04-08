@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { ParametresForm } from "@/components/parametres/ParametresForm";
+import { DocumentsSection } from "@/components/parametres/DocumentsSection";
 
 export default async function ParametresPage() {
   const { userId: clerkId } = await auth();
@@ -21,6 +22,7 @@ export default async function ParametresPage() {
         <p className="text-slate-500 mt-1">Configuration de votre société</p>
       </div>
       <ParametresForm company={user.company} userRole={user.role} />
+      <DocumentsSection canEdit={user.role === "ADMIN"} />
     </div>
   );
 }

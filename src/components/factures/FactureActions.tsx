@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileDown, Send, RotateCcw, Loader2, Bell } from "lucide-react";
 import type { Facture } from "@/types";
+import { PdfModal } from "@/components/shared/PdfModal";
 
 interface FactureActionsProps {
   facture: Facture;
@@ -14,6 +15,7 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   async function post(endpoint: string, key: string) {
     setLoading(key);
@@ -131,15 +133,23 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
           </button>
         )}
 
-        <a
-          href={`/api/factures/${facture.id}/pdf`}
-          download
+        <button
+          onClick={() => setShowPdfModal(true)}
           className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
         >
           <FileDown className="w-4 h-4" />
           PDF
-        </a>
+        </button>
       </div>
+
+      {showPdfModal && (
+        <PdfModal
+          type="facture"
+          id={facture.id}
+          numero={facture.numero}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
 
       {/* Toast confirmation */}
       {toast && (

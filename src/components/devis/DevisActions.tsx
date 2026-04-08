@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil } from "lucide-react";
 import type { Devis } from "@/types";
+import { PdfModal } from "@/components/shared/PdfModal";
 
 interface DevisActionsProps {
   devis: Devis & { factures?: { id: string }[] };
@@ -14,6 +15,7 @@ export function DevisActions({ devis }: DevisActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [acomptePct, setAcomptePct] = useState(50);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   async function action(endpoint: string, key: string) {
     setLoading(key);
@@ -128,14 +130,22 @@ export function DevisActions({ devis }: DevisActionsProps) {
         </>
       )}
 
-      <a
-        href={`/api/devis/${devis.id}/pdf`}
-        download
+      <button
+        onClick={() => setShowPdfModal(true)}
         className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
       >
         <FileDown className="w-4 h-4" />
         PDF
-      </a>
+      </button>
+
+      {showPdfModal && (
+        <PdfModal
+          type="devis"
+          id={devis.id}
+          numero={devis.numero}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
     </div>
   );
 }
