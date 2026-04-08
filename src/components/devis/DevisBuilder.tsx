@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2 } from "lucide-react";
@@ -609,6 +609,12 @@ function SectionBlock({
     name: `sections.${sectionIndex}.lignes`,
   });
 
+  // Abonnement direct aux valeurs temps réel de la section (bypass prop drilling)
+  const watchedLignesLive = (useWatch({
+    control,
+    name: `sections.${sectionIndex}.lignes`,
+  }) ?? watchedLignes) as Partial<z.infer<typeof LigneSchema>>[];
+
   // ── Indexation annuelle ──────────────────────────────────────────────────────
   // Set des field.id des lignes ARTISTE/MUSIQUE avec indexation activée
   const [indexedLineIds, setIndexedLineIds] = useState<Set<string>>(() => {
@@ -630,7 +636,7 @@ function SectionBlock({
   const sourceFields = fields
     .map((f, i) => ({
       id: f.id,
-      ligne: watchedLignes[i] ?? ({} as Partial<z.infer<typeof LigneSchema>>),
+      ligne: watchedLignesLive[i] ?? watchedLignes[i] ?? ({} as Partial<z.infer<typeof LigneSchema>>),
       idx: i,
     }))
     .filter(({ idx, ligne }) =>
@@ -638,6 +644,7 @@ function SectionBlock({
     );
 
   // Total des lignes sources sélectionnées (base + indexation annuelle)
+  // Utilise watchedLignesLive (useWatch) pour garantir les valeurs temps réel
   const selectedSourceTotal = sourceFields
     .filter(({ id }) => selectedForAgent.has(id))
     .reduce((s, { ligne }) => {
@@ -672,6 +679,7 @@ function SectionBlock({
 
   function addAgentLine() {
     setSelectedForAgent(new Set(sourceFields.map((f) => f.id)));
+    // sourceFields.ligne utilise déjà watchedLignesLive → inclut tauxIndexation à jour
     const prix = Math.round(
       sourceFields.reduce((s, { ligne }) => {
         const base = (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0);
