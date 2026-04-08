@@ -103,6 +103,7 @@ model Company {
   factures  Facture[]
   counters  Counter[]
   auditLogs AuditLog[]
+  templates DevisTemplate[]
 }
 
 // ─────────────────────────────────────────────
@@ -119,6 +120,8 @@ model User {
   company   Company  @relation(fields: [companyId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  templates DevisTemplate[]
 }
 
 // ─────────────────────────────────────────────
@@ -388,4 +391,31 @@ model AuditLog {
 
   @@index([companyId])
   @@index([entityType, entityId])
+}
+
+// ─────────────────────────────────────────────
+// DEVIS TEMPLATE
+// ─────────────────────────────────────────────
+
+model DevisTemplate {
+  id             String   @id @default(cuid())
+  companyId      String
+  userId         String
+  name           String
+  description    String?
+  // JSON : TemplateSection[] = { titre, lignes: { libelle, tag, quantite, ordre }[] }[]
+  sections       Json
+  tauxCsComedien Float
+  tauxCsTech     Float
+  tauxFg         Float
+  tauxMarge      Float
+  isShared       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([userId])
 }

@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { DevisBuilder } from "@/components/devis/DevisBuilder";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { redirect } from "next/navigation";
+import { NouveauDevisClient } from "@/components/devis/NouveauDevisClient";
 
 export default async function NouveauDevisPage() {
   const { userId: clerkId } = await auth();
@@ -16,10 +16,20 @@ export default async function NouveauDevisPage() {
 
   if (!user) redirect("/sign-in");
 
-  const clients = await prisma.client.findMany({
-    where: { companyId: user.companyId },
-    orderBy: { name: "asc" },
-  });
+  const [clients, templates] = await Promise.all([
+    prisma.client.findMany({
+      where: { companyId: user.companyId },
+      orderBy: { name: "asc" },
+    }),
+    prisma.devisTemplate.findMany({
+      where: {
+        companyId: user.companyId,
+        OR: [{ userId: user.id }, { isShared: true }],
+      },
+      include: { user: { select: { name: true } } },
+      orderBy: [{ isShared: "desc" }, { createdAt: "desc" }],
+    }),
+  ]);
 
   const defaultTaux = {
     tauxCsComedien: user.company.defaultTauxCsComedien,
@@ -52,7 +62,11 @@ export default async function NouveauDevisPage() {
           </p>
         </div>
       ) : (
-        <DevisBuilder clients={clients} defaultTaux={defaultTaux} />
+        <NouveauDevisClient
+          clients={clients}
+          defaultTaux={defaultTaux}
+          templates={templates}
+        />
       )}
     </div>
   );

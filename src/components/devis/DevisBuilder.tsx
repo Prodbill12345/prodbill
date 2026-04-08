@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2 } from "lucide-react";
 import { calculerDevis, calculerLigne } from "@/lib/calculations";
 import { TotauxPanel } from "./TotauxPanel";
 import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
@@ -76,6 +76,12 @@ interface DevisBuilderProps {
 export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [templateDesc, setTemplateDesc] = useState("");
+  const [templateShared, setTemplateShared] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateSaved, setTemplateSaved] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(
     new Set(initialData ? initialData.sections.map((_, i) => i) : [0])
   );
@@ -145,6 +151,53 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
       return next;
     });
   }, []);
+
+  async function handleSaveTemplate() {
+    if (!templateName.trim()) return;
+    setSavingTemplate(true);
+    try {
+      const sections = (watchedValues.sections ?? []).map((s, si) => ({
+        titre: s.titre ?? "",
+        lignes: (s.lignes ?? []).map((l, li) => ({
+          libelle: l.libelle ?? "",
+          tag: l.tag ?? "FORFAIT",
+          quantite: Number(l.quantite) || 0,
+          prixUnit: Number(l.prixUnit) || 0,
+          ordre: li,
+        })),
+      }));
+
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: templateName.trim(),
+          description: templateDesc.trim() || undefined,
+          isShared: templateShared,
+          tauxCsComedien: Number(watchedValues.tauxCsComedien) || defaultTaux.tauxCsComedien,
+          tauxCsTech: Number(watchedValues.tauxCsTech) || defaultTaux.tauxCsTech,
+          tauxFg: Number(watchedValues.tauxFg) || defaultTaux.tauxFg,
+          tauxMarge: Number(watchedValues.tauxMarge) || defaultTaux.tauxMarge,
+          sections,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error ?? "Erreur lors de l'enregistrement");
+        return;
+      }
+
+      setShowTemplateModal(false);
+      setTemplateName("");
+      setTemplateDesc("");
+      setTemplateShared(false);
+      setTemplateSaved(true);
+      setTimeout(() => setTemplateSaved(false), 3000);
+    } finally {
+      setSavingTemplate(false);
+    }
+  }
 
   async function onSubmit(data: DevisFormData) {
     setSubmitting(true);
@@ -348,7 +401,113 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
             placeholder="Conditions particulières, délais, informations complémentaires..."
           />
         </div>
+
+        {/* Sauvegarder comme modèle */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setShowTemplateModal(true)}
+            className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+          >
+            <BookmarkPlus className="w-4 h-4" />
+            Sauvegarder comme modèle
+          </button>
+          {templateSaved && (
+            <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+              <CheckCircle2 className="w-4 h-4" />
+              Modèle enregistré
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* Modal — Sauvegarder comme modèle */}
+      {showTemplateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">Sauvegarder comme modèle</h2>
+              <button
+                type="button"
+                onClick={() => setShowTemplateModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              La structure des sections et lignes sera sauvegardée <strong>sans les prix</strong>.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Nom du modèle *
+                </label>
+                <input
+                  type="text"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="Ex : Spot TV 30s avec comédien"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Description <span className="text-slate-400 font-normal">(optionnel)</span>
+                </label>
+                <textarea
+                  value={templateDesc}
+                  onChange={(e) => setTemplateDesc(e.target.value)}
+                  placeholder="Décrivez les cas d'usage de ce modèle..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={templateShared}
+                  onChange={(e) => setTemplateShared(e.target.checked)}
+                  className="w-4 h-4 rounded accent-blue-600"
+                />
+                <div>
+                  <span className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                    Partager avec mon équipe
+                  </span>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Visible par tous les membres de votre société
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowTemplateModal(false)}
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveTemplate}
+                disabled={!templateName.trim() || savingTemplate}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 rounded-lg text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {savingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookmarkPlus className="w-4 h-4" />}
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Colonne droite — Totaux (1/3) */}
       <div className="space-y-4">
