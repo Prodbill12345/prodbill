@@ -637,10 +637,14 @@ function SectionBlock({
       idx !== agentIdx && ligne.tag === "ARTISTE"
     );
 
-  // Total des lignes sources sélectionnées
+  // Total des lignes sources sélectionnées (base + indexation annuelle)
   const selectedSourceTotal = sourceFields
     .filter(({ id }) => selectedForAgent.has(id))
-    .reduce((s, { ligne }) => s + (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0), 0);
+    .reduce((s, { ligne }) => {
+      const base = (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0);
+      const indexation = base * ((Number(ligne.tauxIndexation) || 0) / 100);
+      return s + base + indexation;
+    }, 0);
 
   const agentPrix = Math.round(selectedSourceTotal * 0.1 * 100) / 100;
 
@@ -669,10 +673,11 @@ function SectionBlock({
   function addAgentLine() {
     setSelectedForAgent(new Set(sourceFields.map((f) => f.id)));
     const prix = Math.round(
-      sourceFields.reduce(
-        (s, { ligne }) => s + (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0),
-        0
-      ) * 0.1 * 100
+      sourceFields.reduce((s, { ligne }) => {
+        const base = (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0);
+        const indexation = base * ((Number(ligne.tauxIndexation) || 0) / 100);
+        return s + base + indexation;
+      }, 0) * 0.1 * 100
     ) / 100;
     append({ libelle: "Agent Voix Off (10%)", tag: "AGENT", quantite: 1, prixUnit: prix });
   }
