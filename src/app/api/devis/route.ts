@@ -22,6 +22,7 @@ const CreateDevisSchema = z.object({
   // .cuid() ne valide que CUID1 — Prisma 7 génère du CUID2 (format différent)
   clientId: z.string().min(1),
   objet: z.string().min(1),
+  description: z.string().optional(),
   tauxCsComedien: z.number().min(0).max(1).default(0.57),
   tauxCsTech: z.number().min(0).max(1).default(0.65),
   tauxFg: z.number().min(0).max(1).default(0.05),
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
         companyId: user.companyId,
         clientId: input.clientId,
         objet: input.objet,
+        description: input.description,
         ...taux,
         ...totaux,
         dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,

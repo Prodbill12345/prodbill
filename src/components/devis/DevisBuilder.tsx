@@ -30,6 +30,7 @@ const SectionSchema = z.object({
 const DevisFormSchema = z.object({
   clientId: z.string().min(1, "Client requis"),
   objet: z.string().min(1, "Objet requis"),
+  description: z.string().optional(),
   tauxCsComedien: z.coerce.number().min(0).max(1),
   tauxCsTech: z.coerce.number().min(0).max(1),
   tauxFg: z.coerce.number().min(0).max(1),
@@ -45,6 +46,7 @@ type DevisFormData = z.infer<typeof DevisFormSchema>;
 interface DevisInitialData {
   clientId: string;
   objet: string;
+  description?: string | null;
   tauxCsComedien: number;
   tauxCsTech: number;
   tauxFg: number;
@@ -104,6 +106,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
       ? {
           clientId: initialData.clientId,
           objet: initialData.objet,
+          description: initialData.description ?? undefined,
           tauxCsComedien: initialData.tauxCsComedien,
           tauxCsTech: initialData.tauxCsTech,
           tauxFg: initialData.tauxFg,
@@ -328,6 +331,18 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
               {errors.objet && (
                 <p className="text-red-500 text-xs mt-1">{errors.objet.message}</p>
               )}
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Description du projet
+              </label>
+              <textarea
+                {...register("description")}
+                rows={3}
+                placeholder="Décrivez le projet, le contexte, les détails importants..."
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
             </div>
           </div>
         </div>

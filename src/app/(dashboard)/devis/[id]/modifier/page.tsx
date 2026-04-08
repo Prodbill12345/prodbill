@@ -52,6 +52,7 @@ export default async function ModifierDevisPage({
   const initialData = {
     clientId: devis.clientId,
     objet: devis.objet,
+    description: devis.description,
     tauxCsComedien: devis.tauxCsComedien,
     tauxCsTech: devis.tauxCsTech,
     tauxFg: devis.tauxFg,

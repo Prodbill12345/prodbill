@@ -166,9 +166,10 @@ model Devis {
   clientId  String
   client    Client  @relation(fields: [clientId], references: [id])
 
-  numero String?     // "25-0042" — généré à l'envoi (null en brouillon)
-  objet  String
-  statut DevisStatut @default(BROUILLON)
+  numero      String?     // "25-0042" — généré à l'envoi (null en brouillon)
+  objet       String
+  description String?
+  statut      DevisStatut @default(BROUILLON)
 
   // Taux appliqués pour ce devis
   tauxCsComedien Float

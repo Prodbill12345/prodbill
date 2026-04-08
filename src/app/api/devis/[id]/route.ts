@@ -22,6 +22,7 @@ const SectionSchema = z.object({
 
 const UpdateDevisSchema = z.object({
   objet: z.string().min(1).optional(),
+  description: z.string().optional(),
   tauxCsComedien: z.number().min(0).max(1).optional(),
   tauxCsTech: z.number().min(0).max(1).optional(),
   tauxFg: z.number().min(0).max(1).optional(),
@@ -116,6 +117,7 @@ export async function PUT(
         where: { id },
         data: {
           ...(input.objet && { objet: input.objet }),
+          ...(input.description !== undefined && { description: input.description }),
           ...(input.tauxCsComedien !== undefined && { tauxCsComedien: input.tauxCsComedien }),
           ...(input.tauxCsTech !== undefined && { tauxCsTech: input.tauxCsTech }),
           ...(input.tauxFg !== undefined && { tauxFg: input.tauxFg }),
