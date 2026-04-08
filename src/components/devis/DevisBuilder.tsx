@@ -609,11 +609,13 @@ function SectionBlock({
     name: `sections.${sectionIndex}.lignes`,
   });
 
-  // Abonnement direct aux valeurs temps réel de la section (bypass prop drilling)
-  const watchedLignesLive = (useWatch({
+  // Abonnement direct sur chaque path tauxIndexation (valeur scalaire → subscription garantie)
+  // useWatch sur un tableau de paths scalaires se déclenche dès qu'un seul change.
+  // Contrairement à useWatch sur l'array entière, pas de problème de référence stable.
+  const tauxIndexationsLive = useWatch({
     control,
-    name: `sections.${sectionIndex}.lignes`,
-  }) ?? watchedLignes) as Partial<z.infer<typeof LigneSchema>>[];
+    name: fields.map((_, i) => `sections.${sectionIndex}.lignes.${i}.tauxIndexation` as const),
+  }) as (number | string | undefined)[];
 
   // ── Indexation annuelle ──────────────────────────────────────────────────────
   // Set des field.id des lignes ARTISTE/MUSIQUE avec indexation activée
@@ -636,7 +638,8 @@ function SectionBlock({
   const sourceFields = fields
     .map((f, i) => ({
       id: f.id,
-      ligne: watchedLignesLive[i] ?? watchedLignes[i] ?? ({} as Partial<z.infer<typeof LigneSchema>>),
+      ligne: watchedLignes[i] ?? ({} as Partial<z.infer<typeof LigneSchema>>),
+      tauxIndexation: Number(tauxIndexationsLive[i]) || 0,
       idx: i,
     }))
     .filter(({ idx, ligne }) =>
@@ -644,12 +647,12 @@ function SectionBlock({
     );
 
   // Total des lignes sources sélectionnées (base + indexation annuelle)
-  // Utilise watchedLignesLive (useWatch) pour garantir les valeurs temps réel
+  // tauxIndexation vient de useWatch par path scalaire — garanti à jour
   const selectedSourceTotal = sourceFields
     .filter(({ id }) => selectedForAgent.has(id))
-    .reduce((s, { ligne }) => {
+    .reduce((s, { ligne, tauxIndexation }) => {
       const base = (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0);
-      const indexation = base * ((Number(ligne.tauxIndexation) || 0) / 100);
+      const indexation = base * (tauxIndexation / 100);
       return s + base + indexation;
     }, 0);
 
@@ -679,11 +682,10 @@ function SectionBlock({
 
   function addAgentLine() {
     setSelectedForAgent(new Set(sourceFields.map((f) => f.id)));
-    // sourceFields.ligne utilise déjà watchedLignesLive → inclut tauxIndexation à jour
     const prix = Math.round(
-      sourceFields.reduce((s, { ligne }) => {
+      sourceFields.reduce((s, { ligne, tauxIndexation }) => {
         const base = (Number(ligne.quantite) || 0) * (Number(ligne.prixUnit) || 0);
-        const indexation = base * ((Number(ligne.tauxIndexation) || 0) / 100);
+        const indexation = base * (tauxIndexation / 100);
         return s + base + indexation;
       }, 0) * 0.1 * 100
     ) / 100;
