@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const LigneTemplateSchema = z.object({
   libelle: z.string().min(1),
-  tag: z.enum(["COMEDIEN", "TECHNICIEN_HCS", "DROIT", "FORFAIT", "MATERIEL", "AGENT"]),
+  tag: z.enum(["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE", "AGENT"]),
   quantite: z.number(),
   prixUnit: z.number().min(0),
   ordre: z.number().int(),

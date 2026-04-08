@@ -64,7 +64,7 @@ export default async function ModifierDevisPage({
       titre: s.titre,
       lignes: s.lignes.map((l) => ({
         libelle: l.libelle,
-        tag: l.tag as "COMEDIEN" | "TECHNICIEN_HCS" | "DROIT" | "FORFAIT" | "MATERIEL" | "AGENT",
+        tag: l.tag as "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT",
         quantite: l.quantite,
         prixUnit: l.prixUnit,
       })),

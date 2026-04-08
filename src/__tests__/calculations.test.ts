@@ -20,9 +20,9 @@ describe("calculerDevis", () => {
    */
   test("cas de référence : TOTAL HT = 4 603,20 €", () => {
     const lignes: LigneInput[] = [
-      { tag: "COMEDIEN", quantite: 1, prixUnit: 900 },
+      { tag: "ARTISTE", quantite: 1, prixUnit: 900 },
       { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 90 },
-      { tag: "FORFAIT", quantite: 1, prixUnit: 2360 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 2360 },
     ];
 
     const result = calculerDevis(lignes, tauxRef);
@@ -30,7 +30,7 @@ describe("calculerDevis", () => {
     expect(result.sousTotal).toBe(3350);
     expect(result.csComedien).toBe(513); // 900 × 57%
     expect(result.csTechniciens).toBe(58.5); // 90 × 65%
-    expect(result.baseMarge).toBe(3408.5); // 3350 + 58.50 (csComedien EXCLUS)
+    expect(result.baseMarge).toBe(3408.5); // 3350 + 58.50 (csArtistes EXCLUS)
     expect(result.fraisGeneraux).toBe(170.43); // 3408.50 × 5%
     expect(result.marge).toBe(511.28); // 3408.50 × 15%
     expect(result.totalHt).toBe(4603.2); // ✓
@@ -38,15 +38,15 @@ describe("calculerDevis", () => {
     expect(result.totalTtc).toBe(5523.84);
   });
 
-  test("cs_comedien exclue de la base marge", () => {
+  test("cs_artistes exclue de la base marge", () => {
     const lignes: LigneInput[] = [
-      { tag: "COMEDIEN", quantite: 1, prixUnit: 1000 },
+      { tag: "ARTISTE", quantite: 1, prixUnit: 1000 },
     ];
     const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0, tauxMarge: 0 });
 
     // sousTotal = 1000
     // baseMarge = 1000 + 0 (pas de techniciens) = 1000
-    // csComedien = 1000 × 57% = 570
+    // csArtistes = 1000 × 57% = 570
     // totalHt = 1000 + 570 + 0 + 0 + 0 = 1570
     expect(result.sousTotal).toBe(1000);
     expect(result.csComedien).toBe(570);
@@ -55,19 +55,10 @@ describe("calculerDevis", () => {
     expect(result.totalHt).toBe(1570);
   });
 
-  test("lignes DROIT traitées comme COMEDIEN pour cs", () => {
+  test("lignes STUDIO et MUSIQUE n'ont pas de charges sociales", () => {
     const lignes: LigneInput[] = [
-      { tag: "DROIT", quantite: 1, prixUnit: 500 },
-    ];
-    const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0, tauxMarge: 0 });
-
-    expect(result.csComedien).toBe(285); // 500 × 57%
-  });
-
-  test("lignes FORFAIT et MATERIEL n'ont pas de charges sociales", () => {
-    const lignes: LigneInput[] = [
-      { tag: "FORFAIT", quantite: 2, prixUnit: 500 },
-      { tag: "MATERIEL", quantite: 1, prixUnit: 300 },
+      { tag: "STUDIO", quantite: 2, prixUnit: 500 },
+      { tag: "MUSIQUE", quantite: 1, prixUnit: 300 },
     ];
     const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0, tauxMarge: 0 });
 
@@ -99,7 +90,7 @@ describe("calculerDevis", () => {
 
   test("frais generaux 15%", () => {
     const lignes: LigneInput[] = [
-      { tag: "FORFAIT", quantite: 1, prixUnit: 1000 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 1000 },
     ];
     const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0.15, tauxMarge: 0 });
     expect(result.fraisGeneraux).toBe(150); // 1000 × 15%

@@ -11,12 +11,12 @@ import { TotauxPanel } from "./TotauxPanel";
 import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import type { Client } from "@/types";
 
-const TAGS = ["COMEDIEN", "TECHNICIEN_HCS", "DROIT", "FORFAIT", "MATERIEL"] as const;
+const TAGS = ["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE"] as const;
 
 const LigneSchema = z.object({
   libelle: z.string().min(1, "Libellé requis"),
   // AGENT inclus pour la validation de type — le dropdown utilisateur n'expose pas AGENT
-  tag: z.enum(["COMEDIEN", "TECHNICIEN_HCS", "DROIT", "FORFAIT", "MATERIEL", "AGENT"]),
+  tag: z.enum(["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE", "AGENT"]),
   quantite: z.coerce.number().positive("Quantité > 0"),
   prixUnit: z.coerce.number().min(0, "Prix ≥ 0"),
 });
@@ -53,7 +53,7 @@ interface DevisInitialData {
     titre: string;
     lignes: {
       libelle: string;
-      tag: "COMEDIEN" | "TECHNICIEN_HCS" | "DROIT" | "FORFAIT" | "MATERIEL" | "AGENT";
+      tag: "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT";
       quantite: number;
       prixUnit: number;
     }[];
@@ -128,7 +128,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
   // Calcul temps réel
   const allLignes = watchedValues.sections?.flatMap((s) =>
     (s.lignes ?? []).map((l) => ({
-      tag: l.tag ?? "FORFAIT",
+      tag: l.tag ?? "ARTISTE",
       quantite: Number(l.quantite) || 0,
       prixUnit: Number(l.prixUnit) || 0,
     }))
@@ -160,7 +160,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
         titre: s.titre ?? "",
         lignes: (s.lignes ?? []).map((l, li) => ({
           libelle: l.libelle ?? "",
-          tag: l.tag ?? "FORFAIT",
+          tag: l.tag ?? "ARTISTE",
           quantite: Number(l.quantite) || 0,
           prixUnit: Number(l.prixUnit) || 0,
           ordre: li,
@@ -567,13 +567,13 @@ function SectionBlock({
   });
 
   // ── Agent Voix Off ───────────────────────────────────────────────────────────
-  // Set des field.id (stables) des lignes COMEDIEN/DROIT sélectionnées comme sources
+  // Set des field.id (stables) des lignes ARTISTE sélectionnées comme sources
   const [selectedForAgent, setSelectedForAgent] = useState<Set<string>>(new Set());
 
   const agentIdx = watchedLignes.findIndex((l) => l?.tag === "AGENT");
   const agentEnabled = agentIdx !== -1;
 
-  // Lignes COMEDIEN/DROIT candidates (hors ligne AGENT elle-même)
+  // Lignes ARTISTE candidates (hors ligne AGENT elle-même)
   const sourceFields = fields
     .map((f, i) => ({
       id: f.id,
@@ -581,7 +581,7 @@ function SectionBlock({
       idx: i,
     }))
     .filter(({ idx, ligne }) =>
-      idx !== agentIdx && (ligne.tag === "COMEDIEN" || ligne.tag === "DROIT")
+      idx !== agentIdx && ligne.tag === "ARTISTE"
     );
 
   // Total des lignes sources sélectionnées
@@ -598,8 +598,8 @@ function SectionBlock({
   }, [agentPrix, agentIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Quand les lignes sources changent (ajout/suppression/changement de tag) :
-  // — ajoute automatiquement les nouvelles lignes COMEDIEN/DROIT à la sélection
-  // — retire les ids qui ne correspondent plus à une ligne COMEDIEN/DROIT
+  // — ajoute automatiquement les nouvelles lignes ARTISTE à la sélection
+  // — retire les ids qui ne correspondent plus à une ligne ARTISTE
   const sourceIdsKey = sourceFields.map((f) => f.id).join(",");
   useEffect(() => {
     if (agentIdx === -1) return;
@@ -699,10 +699,10 @@ function SectionBlock({
             const qty = Number(ligne.quantite) || 0;
             const pu = Number(ligne.prixUnit) || 0;
             const total = calculerLigne(qty, pu);
-            const tagValue = ligne.tag ?? "FORFAIT";
+            const tagValue = ligne.tag ?? "ARTISTE";
             const isAgentLine = tagValue === "AGENT";
             const isSourceLine =
-              agentEnabled && (tagValue === "COMEDIEN" || tagValue === "DROIT");
+              agentEnabled && tagValue === "ARTISTE";
             // ── Ligne AGENT : affichage spécial, champs en hidden ──────────────
             if (isAgentLine) {
               return (
@@ -782,7 +782,7 @@ function SectionBlock({
                 <Controller
                   control={control}
                   name={`sections.${sectionIndex}.lignes.${li}.tag`}
-                  defaultValue="FORFAIT"
+                  defaultValue="ARTISTE"
                   render={({ field: f }) => (
                     <select
                       {...f}
@@ -837,14 +837,14 @@ function SectionBlock({
           {/* Bouton ajouter une ligne normale */}
           <button
             type="button"
-            onClick={() => append({ libelle: "", tag: "FORFAIT", quantite: 1, prixUnit: 0 })}
+            onClick={() => append({ libelle: "", tag: "ARTISTE", quantite: 1, prixUnit: 0 })}
             className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-700 mt-2 px-2 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             Ajouter une ligne
           </button>
 
-          {/* Bouton Agent Voix Off — visible dès qu'il y a des lignes COMEDIEN/DROIT et pas encore de ligne AGENT */}
+          {/* Bouton Agent Voix Off — visible dès qu'il y a des lignes ARTISTE et pas encore de ligne AGENT */}
           {sourceFields.length > 0 && !agentEnabled && (
             <button
               type="button"

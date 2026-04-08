@@ -21,12 +21,12 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
   const rows: Row[] = [
     { label: "Sous-total HT", value: result.sousTotal, separator: true },
     {
-      label: `CS Comédiens/Droits (${formatPct(taux.tauxCsComedien)})`,
+      label: `CS Artistes (${formatPct(taux.tauxCsComedien)})`,
       value: result.csComedien,
       sub: true,
     },
     {
-      label: `CS Techniciens HCS (${formatPct(taux.tauxCsTech)})`,
+      label: `CS Technicien.ne.s HCS (${formatPct(taux.tauxCsTech)})`,
       value: result.csTechniciens,
       sub: true,
     },
@@ -56,7 +56,7 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
       <div className="px-5 py-4 border-b border-slate-100">
         <h3 className="font-semibold text-slate-900">Récapitulatif</h3>
         <p className="text-xs text-slate-400 mt-0.5">
-          CS Comédiens exclus de la base marge
+          CS Artistes exclus de la base marge
         </p>
       </div>
       <div className="px-5 py-4 space-y-1.5">

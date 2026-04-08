@@ -7,7 +7,7 @@ import type { Client } from "@/types";
 
 type TemplateLigne = {
   libelle: string;
-  tag: "COMEDIEN" | "TECHNICIEN_HCS" | "DROIT" | "FORFAIT" | "MATERIEL" | "AGENT";
+  tag: "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT";
   quantite: number;
   prixUnit: number;
   ordre: number;

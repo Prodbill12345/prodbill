@@ -45,12 +45,11 @@ function fmtDate(d: Date | string | null): string {
 }
 
 const TAG_LABELS: Record<string, string> = {
-  COMEDIEN: "Comédien",
+  ARTISTE: "Artistes",
   TECHNICIEN_HCS: "Tech. HCS",
-  DROIT: "Droit",
-  FORFAIT: "Forfait",
-  MATERIEL: "Matériel",
-  AGENT: "Agent comédien (10%)",
+  STUDIO: "Studio",
+  MUSIQUE: "Musique",
+  AGENT: "Agent (10%)",
 };
 
 // ─── styles ─────────────────────────────────────────────────────────────────

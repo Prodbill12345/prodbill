@@ -3,7 +3,7 @@
  *
  * Formule validée avec l'exemple de référence :
  *   Sous-total HT : 3 350 €
- *   CS Comédien 57% (base 900 €) : 513 €
+ *   CS Artistes 57% (base 900 €) : 513 €
  *   CS Techniciens 65% (base 90 €) : 58,50 €
  *   Base marge = 3 350 + 58,50 = 3 408,50 €  ← CS_COMEDIEN EXCLUS
  *   Frais généraux 5% : 170,43 €
@@ -25,7 +25,7 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig): CalculRes
 
   // 2. Base de calcul des charges sociales
   const baseComedien = lignes
-    .filter((l) => l.tag === "COMEDIEN" || l.tag === "DROIT")
+    .filter((l) => l.tag === "ARTISTE")
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
 
   const baseTech = lignes

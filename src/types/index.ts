@@ -160,20 +160,18 @@ export interface ApiError {
 // ─────────────────────────────────────────────
 
 export const LIGNE_TAG_LABELS: Record<LigneTag, string> = {
-  COMEDIEN: "Comédien",
-  TECHNICIEN_HCS: "Technicien HCS",
-  DROIT: "Droit",
-  FORFAIT: "Forfait",
-  MATERIEL: "Matériel",
+  ARTISTE: "Artistes",
+  TECHNICIEN_HCS: "Technicien.ne.s HCS",
+  STUDIO: "Studio",
+  MUSIQUE: "Musique",
   AGENT: "Agent (10%)",
 };
 
 export const LIGNE_TAG_COLORS: Record<LigneTag, string> = {
-  COMEDIEN: "bg-purple-100 text-purple-800",
+  ARTISTE: "bg-purple-100 text-purple-800",
   TECHNICIEN_HCS: "bg-blue-100 text-blue-800",
-  DROIT: "bg-yellow-100 text-yellow-800",
-  FORFAIT: "bg-green-100 text-green-800",
-  MATERIEL: "bg-gray-100 text-gray-800",
+  STUDIO: "bg-teal-100 text-teal-800",
+  MUSIQUE: "bg-pink-100 text-pink-800",
   AGENT: "bg-amber-100 text-amber-800",
 };
 

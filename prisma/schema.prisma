@@ -20,12 +20,11 @@ enum Role {
 }
 
 enum LigneTag {
-  COMEDIEN
-  TECHNICIEN_HCS
-  DROIT
-  FORFAIT
-  MATERIEL
-  AGENT     // Commission agent voix off (10% des lignes Comédien/Droit sélectionnées)
+  ARTISTE        // Remplace COMEDIEN + DROIT — CS Comédiens appliquée
+  TECHNICIEN_HCS // CS Techniciens appliquée
+  STUDIO         // Pas de CS
+  MUSIQUE        // Pas de CS
+  AGENT          // Commission agent voix off (10% des lignes Artistes sélectionnées)
 }
 
 enum DevisStatut {
