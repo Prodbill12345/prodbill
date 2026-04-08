@@ -121,6 +121,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           tauxCsTech: defaultTaux.tauxCsTech,
           tauxFg: defaultTaux.tauxFg,
           tauxMarge: defaultTaux.tauxMarge,
+          notes: "Conditions de paiement : Paiement à 45 jours. Pénalités de retard : 15% par an exigibles à 45 jours. Indemnité forfaitaire de recouvrement : 40 € (art. D. 441-6 C. com.)",
           sections: [{ titre: "", lignes: [] }],
         },
   });

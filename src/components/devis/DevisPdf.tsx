@@ -368,7 +368,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                   Indemnité forfaitaire de recouvrement
                 </Text>
                 <Text style={s.mentionText}>
-                  40 € (art. D. 441-5 C. com.)
+                  40 € (art. D. 441-6 C. com.)
                 </Text>
               </View>
             </View>
