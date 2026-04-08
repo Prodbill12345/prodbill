@@ -84,8 +84,7 @@ export function NouveauDevisClient({ clients, defaultTaux, templates }: NouveauD
   return (
     <div className="space-y-4">
       {/* Template picker trigger */}
-      {templates.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
           <button
             type="button"
             onClick={() => setShowPicker((v) => !v)}
@@ -162,10 +161,15 @@ export function NouveauDevisClient({ clients, defaultTaux, templates }: NouveauD
                   </div>
                 </div>
               )}
+
+              {templates.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-3">
+                  Aucun modèle disponible. Créez votre premier modèle depuis un devis.
+                </p>
+              )}
             </div>
           )}
         </div>
-      )}
 
       {/* DevisBuilder — remounted when template changes via key */}
       <DevisBuilder
