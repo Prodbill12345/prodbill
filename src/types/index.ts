@@ -116,6 +116,8 @@ export interface CalculResult {
   fraisGeneraux: number;
   marge: number;
   totalHt: number;
+  remise: number;
+  totalApresRemise: number;
   tva: number;
   totalTtc: number;
 }

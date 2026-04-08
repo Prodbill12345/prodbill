@@ -35,6 +35,7 @@ const DevisFormSchema = z.object({
   tauxMarge: z.coerce.number().min(0).max(1),
   dateValidite: z.string().optional(),
   notes: z.string().optional(),
+  remise: z.coerce.number().min(0).optional(),
   sections: z.array(SectionSchema).min(1, "Au moins une section"),
 });
 
@@ -49,6 +50,7 @@ interface DevisInitialData {
   tauxMarge: number;
   dateValidite?: string | null;
   notes?: string | null;
+  remise?: number | null;
   sections: {
     titre: string;
     lignes: {
@@ -106,6 +108,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           tauxMarge: initialData.tauxMarge,
           dateValidite: initialData.dateValidite ?? undefined,
           notes: initialData.notes ?? undefined,
+          remise: initialData.remise ?? undefined,
           sections: initialData.sections,
         }
       : {
@@ -141,7 +144,8 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
     tauxMarge: Number(watchedValues.tauxMarge) || defaultTaux.tauxMarge,
   };
 
-  const calculResult = calculerDevis(allLignes, taux);
+  const remiseValue = Number(watchedValues.remise) || 0;
+  const calculResult = calculerDevis(allLignes, taux, remiseValue);
 
   const toggleSection = useCallback((idx: number) => {
     setExpandedSections((prev) => {
@@ -387,6 +391,25 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
             <Plus className="w-4 h-4" />
             Ajouter une section
           </button>
+        </div>
+
+        {/* Remise exceptionnelle */}
+        <div className="bg-white rounded-xl border border-slate-100 p-6">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Remise exceptionnelle
+          </label>
+          <p className="text-xs text-slate-400 mb-3">Montant déduit du Total HT — TVA et TTC recalculés</p>
+          <div className="flex items-center gap-2 max-w-xs">
+            <input
+              {...register("remise")}
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0,00"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-slate-500 shrink-0">€</span>
+          </div>
         </div>
 
         {/* Notes */}

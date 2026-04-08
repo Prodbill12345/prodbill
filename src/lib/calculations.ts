@@ -17,7 +17,7 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export function calculerDevis(lignes: LigneInput[], taux: TauxConfig): CalculResult {
+export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: number = 0): CalculResult {
   // 1. Sous-total de toutes les lignes
   const sousTotal = round2(
     lignes.reduce((sum, l) => sum + l.quantite * l.prixUnit, 0)
@@ -52,9 +52,13 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig): CalculRes
     sousTotal + csComedien + csTechniciens + fraisGeneraux_raw + marge_raw
   );
 
-  // 7. TVA et TTC
-  const tva = round2(totalHt * 0.2);
-  const totalTtc = round2(totalHt + tva);
+  // 7. Remise et total après remise
+  const remiseArrondie = round2(remise);
+  const totalApresRemise = round2(totalHt - remiseArrondie);
+
+  // 8. TVA et TTC calculés sur le total après remise
+  const tva = round2(totalApresRemise * 0.2);
+  const totalTtc = round2(totalApresRemise + tva);
 
   return {
     sousTotal,
@@ -64,6 +68,8 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig): CalculRes
     fraisGeneraux,
     marge,
     totalHt,
+    remise: remiseArrondie,
+    totalApresRemise,
     tva,
     totalTtc,
   };

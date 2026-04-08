@@ -28,6 +28,7 @@ const UpdateDevisSchema = z.object({
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
   dateValidite: z.string().nullable().optional(),
   notes: z.string().optional(),
+  remise: z.number().min(0).optional(),
   sections: z.array(SectionSchema).optional(),
 });
 
@@ -99,7 +100,8 @@ export async function PUT(
         tauxFg: input.tauxFg ?? existing.tauxFg,
         tauxMarge: input.tauxMarge ?? existing.tauxMarge,
       };
-      totaux = calculerDevis(allLignes, taux);
+      const remise = input.remise ?? existing.remise;
+      totaux = calculerDevis(allLignes, taux, remise);
     }
 
     // Mettre à jour le devis avec remplacement des sections
@@ -121,6 +123,7 @@ export async function PUT(
             dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,
           }),
           ...(input.notes !== undefined && { notes: input.notes }),
+          ...(input.remise !== undefined && { remise: input.remise }),
           ...totaux,
           ...(input.sections && {
             sections: {

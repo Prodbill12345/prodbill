@@ -28,6 +28,7 @@ const CreateDevisSchema = z.object({
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
   dateValidite: z.string().optional(),
   notes: z.string().optional(),
+  remise: z.number().min(0).default(0),
   sections: z.array(SectionSchema),
 });
 
@@ -72,7 +73,7 @@ export async function POST(req: Request) {
       tauxFg: input.tauxFg,
       tauxMarge: input.tauxMarge,
     };
-    const totaux = calculerDevis(allLignes, taux);
+    const totaux = calculerDevis(allLignes, taux, input.remise);
 
     const devis = await prisma.devis.create({
       data: {

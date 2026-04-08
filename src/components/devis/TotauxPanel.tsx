@@ -47,6 +47,10 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
       sub: true,
     },
     { label: "TOTAL HT", value: result.totalHt, separator: true, highlight: true },
+    ...(result.remise > 0 ? [
+      { label: "Remise exceptionnelle", value: result.remise, sub: true, negative: true },
+      { label: "Total après remise", value: result.totalApresRemise, sub: true, highlight: true },
+    ] : []),
     { label: "TVA 20%", value: result.tva, sub: true },
     { label: "TOTAL TTC", value: result.totalTtc, highlight: true },
   ];
@@ -92,6 +96,8 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
               >
                 {row.value === 0 && row.sub ? (
                   <span className="text-slate-300">—</span>
+                ) : row.negative ? (
+                  `-${formatEuros(row.value)}`
                 ) : (
                   formatEuros(row.value)
                 )}

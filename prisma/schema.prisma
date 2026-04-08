@@ -177,15 +177,17 @@ model Devis {
   tauxMarge      Float
 
   // Totaux calculés et dénormalisés (recalculés à chaque sauvegarde)
-  sousTotal     Float @default(0)
-  csComedien    Float @default(0)
-  csTechniciens Float @default(0)
-  baseMarge     Float @default(0)
-  fraisGeneraux Float @default(0)
-  marge         Float @default(0)
-  totalHt       Float @default(0)
-  tva           Float @default(0)
-  totalTtc      Float @default(0)
+  sousTotal        Float @default(0)
+  csComedien       Float @default(0)
+  csTechniciens    Float @default(0)
+  baseMarge        Float @default(0)
+  fraisGeneraux    Float @default(0)
+  marge            Float @default(0)
+  totalHt          Float @default(0)
+  remise           Float @default(0)
+  totalApresRemise Float @default(0)
+  tva              Float @default(0)
+  totalTtc         Float @default(0)
 
   dateEmission DateTime?
   dateValidite DateTime?
