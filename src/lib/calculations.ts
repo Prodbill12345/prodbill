@@ -105,9 +105,6 @@ export function formatEuros(amount: number): string {
  * Formate un taux en pourcentage
  */
 export function formatPct(rate: number): string {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "percent",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(rate);
+  const pct = Math.round(rate * 10000) / 100;
+  return `${pct}%`;
 }

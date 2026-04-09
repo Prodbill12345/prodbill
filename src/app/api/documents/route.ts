@@ -28,19 +28,29 @@ export async function PUT(req: Request) {
       return Response.json({ error: "Nom de fichier PDF requis" }, { status: 400 });
     }
 
-    const contentType = req.headers.get("content-type") ?? "";
-    if (!contentType.includes("application/pdf") && !contentType.includes("octet-stream")) {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
+
+    if (!file) {
+      return Response.json({ error: "Fichier manquant" }, { status: 400 });
+    }
+
+    if (file.type !== "application/pdf" && !filename.toLowerCase().endsWith(".pdf")) {
       return Response.json({ error: "Seuls les fichiers PDF sont acceptés" }, { status: 400 });
     }
 
-    if (!req.body) {
-      return Response.json({ error: "Corps de requête manquant" }, { status: 400 });
+    if (file.size > 10 * 1024 * 1024) {
+      return Response.json({ error: "Le fichier ne doit pas dépasser 10 Mo" }, { status: 400 });
     }
 
     const blob = await put(
       `documents/${user.companyId}/${Date.now()}-${filename}`,
-      req.body,
-      { access: "public", contentType: "application/pdf" }
+      file,
+      {
+        access: "public",
+        contentType: "application/pdf",
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      }
     );
 
     const doc = await prisma.document.create({

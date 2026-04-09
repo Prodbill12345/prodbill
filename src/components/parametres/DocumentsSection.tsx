@@ -44,10 +44,11 @@ export function DocumentsSection({ canEdit }: DocumentsSectionProps) {
 
     setUploading(true);
     try {
+      const formData = new FormData();
+      formData.append("file", file);
       const res = await fetch(`/api/documents?filename=${encodeURIComponent(file.name)}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/pdf" },
-        body: file,
+        body: formData,
       });
 
       if (!res.ok) {

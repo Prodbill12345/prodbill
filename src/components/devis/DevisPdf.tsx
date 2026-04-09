@@ -36,7 +36,7 @@ function euros(n: number): string {
 }
 
 function pct(r: number): string {
-  return `${(r * 100).toLocaleString("fr-FR", { maximumFractionDigits: 0 })} %`;
+  return `${Math.round(r * 10000) / 100}%`;
 }
 
 function fmtDate(d: Date | string | null): string {
@@ -332,7 +332,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
               <Text style={s.totHtValue}>{euros(totaux.totalHt)}</Text>
             </View>
             <View style={s.totRow}>
-              <Text style={s.totLabel}>TVA 20 %</Text>
+              <Text style={s.totLabel}>TVA 20%</Text>
               <Text style={s.totValue}>{euros(totaux.tva)}</Text>
             </View>
 
@@ -358,7 +358,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
               <View style={s.mentionItem}>
                 <Text style={s.mentionLabel}>Pénalités de retard</Text>
                 <Text style={s.mentionText}>
-                  15 % par an, exigibles à 45 jours date de facture.
+                  15% par an, exigibles à 45 jours date de facture.
                 </Text>
               </View>
             </View>

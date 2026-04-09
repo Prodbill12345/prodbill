@@ -54,7 +54,7 @@ function emailWrapper(companyName: string, accentColor: string, body: string) {
         ${body}
         <hr style="border:none;border-top:1px solid #e2e8f0;margin:28px 0;" />
         <p style="color:#94a3b8;font-size:11px;line-height:1.6;margin:0;">
-          Pénalités de retard : 15 % par an, exigibles à 45 jours.<br />
+          Pénalités de retard : 15% par an, exigibles à 45 jours.<br />
           Indemnité forfaitaire de recouvrement : 40 € (art. D.441-5 C. com.).
         </p>
       </div>
@@ -153,7 +153,7 @@ function templateRelance2(p: RelanceEmailParams) {
     </p>
     ${p.penalites > 0 ? `
     <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:12px 16px;margin:16px 0;font-size:13px;color:#78350f;">
-      Pénalités de retard applicables (15 %/an) : <strong>${fmt(p.penalites)}</strong>
+      Pénalités de retard applicables (15%/an) : <strong>${fmt(p.penalites)}</strong>
     </div>` : ""}
     ${bankTable(p.iban, p.bic)}
     <p style="color:#64748b;font-size:13px;">
@@ -188,7 +188,7 @@ function templateMiseEnDemeure(p: RelanceEmailParams) {
         <td style="padding:8px 10px;border:1px solid #fecaca;font-weight:700;">${fmt(p.totalTtc)}</td>
       </tr>
       <tr>
-        <td style="padding:8px 10px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;">Pénalités (15 %/an — ${p.joursRetard} j)</td>
+        <td style="padding:8px 10px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;">Pénalités (15%/an — ${p.joursRetard} j)</td>
         <td style="padding:8px 10px;border:1px solid #fecaca;font-weight:700;">${fmt(p.penalites)}</td>
       </tr>
       <tr>

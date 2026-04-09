@@ -307,7 +307,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
               </Text>
             </View>
             <View style={s.totRow}>
-              <Text style={s.totLabel}>TVA 20 %</Text>
+              <Text style={s.totLabel}>TVA 20%</Text>
               <Text style={s.totValue}>
                 {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
               </Text>
@@ -339,7 +339,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                 <View style={s.mentionItem}>
                   <Text style={s.mentionLabel}>Pénalités de retard</Text>
                   <Text style={s.mentionText}>
-                    15 % par an, exigibles à 45 jours date de facture.
+                    15% par an, exigibles à 45 jours date de facture.
                   </Text>
                 </View>
               </View>
