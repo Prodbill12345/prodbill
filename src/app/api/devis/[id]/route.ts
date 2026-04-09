@@ -103,7 +103,8 @@ export async function PUT(
         tauxMarge: input.tauxMarge ?? existing.tauxMarge,
       };
       const remise = input.remise ?? existing.remise;
-      totaux = calculerDevis(allLignes, taux, remise);
+      const { indexations: _indexations, ...totauxPrisma } = calculerDevis(allLignes, taux, remise);
+      totaux = totauxPrisma;
     }
 
     // Mettre à jour le devis avec remplacement des sections
