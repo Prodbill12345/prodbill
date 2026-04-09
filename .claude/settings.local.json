@@ -18,7 +18,10 @@
       "Bash(curl:*)",
       "Bash(pkill -f \"next dev\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('error','ok'\\)\\)\")",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_wtYZO9SuV1WE@ep-winter-sea-ag34x9sc.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma generate)"
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_wtYZO9SuV1WE@ep-winter-sea-ag34x9sc.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma generate)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

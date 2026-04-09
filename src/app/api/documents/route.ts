@@ -63,7 +63,7 @@ export async function PUT(req: Request) {
 
     return Response.json({ data: doc }, { status: 201 });
   } catch (err) {
-    return handleAuthError(err);
+    return Response.json({ error: String(err) }, { status: 500 });
   }
 }
 
