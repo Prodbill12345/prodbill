@@ -13,7 +13,7 @@ const LigneSchema = z.object({
 });
 
 const SectionSchema = z.object({
-  titre: z.string().min(1),
+  titre: z.string().default(""),
   ordre: z.number().int(),
   lignes: z.array(LigneSchema),
 });
