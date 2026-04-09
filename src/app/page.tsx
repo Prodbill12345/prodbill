@@ -65,7 +65,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (isSignedIn) {
-      router.push("/dashboard");
+      router.push("/devis")
     }
   }, [isSignedIn, router]);
 
