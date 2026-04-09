@@ -23,7 +23,7 @@ const LigneSchema = z.object({
 });
 
 const SectionSchema = z.object({
-  titre: z.string().min(1, "Titre requis"),
+  titre: z.string().default(""),
   lignes: z.array(LigneSchema),
 });
 
