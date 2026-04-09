@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, FileDown, Loader2, FileText } from "lucide-react";
+import { X, FileDown, FileCode2, Loader2, FileText } from "lucide-react";
 
 interface Document {
   id: string;
@@ -21,6 +21,7 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generatingFacturx, setGeneratingFacturx] = useState(false);
 
   useEffect(() => {
     fetch("/api/documents")
@@ -36,6 +37,27 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
       else next.add(id);
       return next;
     });
+  }
+
+  async function generateFacturx() {
+    setGeneratingFacturx(true);
+    try {
+      const res = await fetch(`/api/factures/${id}/facturx`);
+      if (!res.ok) {
+        alert("Erreur lors de la génération du Factur-X");
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = numero ? `facturx-${numero}.pdf` : "facturx.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      onClose();
+    } finally {
+      setGeneratingFacturx(false);
+    }
   }
 
   async function generate() {
@@ -129,6 +151,20 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
           >
             Annuler
           </button>
+          {type === "facture" && (
+            <button
+              onClick={generateFacturx}
+              disabled={generatingFacturx}
+              className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 bg-white text-sm font-medium rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-colors"
+            >
+              {generatingFacturx ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FileCode2 className="w-4 h-4" />
+              )}
+              {generatingFacturx ? "Génération…" : "Télécharger Factur-X"}
+            </button>
+          )}
           <button
             onClick={generate}
             disabled={generating}
