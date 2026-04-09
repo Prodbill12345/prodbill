@@ -32,7 +32,8 @@
       "Bash(grep -E \"^d|\\\\.json$|\\\\.ts$\")",
       "Bash(grep -E \"\\\\.ts$\")",
       "Bash(npx tsx:*)",
-      "Bash(find /Users/roselaine.touati/Desktop/prodbill/src/app/\\\\\\(auth\\\\\\)/sign-in -type f -exec cat {} \\\\;)"
+      "Bash(find /Users/roselaine.touati/Desktop/prodbill/src/app/\\\\\\(auth\\\\\\)/sign-in -type f -exec cat {} \\\\;)",
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: redirect dashboard si connecté\")"
     ]
   }
 }

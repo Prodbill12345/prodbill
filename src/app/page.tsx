@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { DM_Serif_Display, DM_Sans } from "next/font/google";
 
 const dmSerif = DM_Serif_Display({
@@ -57,6 +60,15 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isSignedIn, router]);
+
   return (
     <div
       className={`${dmSerif.variable} ${dmSans.variable}`}
