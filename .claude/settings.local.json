@@ -33,7 +33,10 @@
       "Bash(grep -E \"\\\\.ts$\")",
       "Bash(npx tsx:*)",
       "Bash(find /Users/roselaine.touati/Desktop/prodbill/src/app/\\\\\\(auth\\\\\\)/sign-in -type f -exec cat {} \\\\;)",
-      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: redirect dashboard si connecté\")"
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: redirect dashboard si connecté\")",
+      "Bash(mkdir -p /Users/roselaine.touati/Desktop/prodbill/src/app/landing)",
+      "Bash(mv /Users/roselaine.touati/Desktop/prodbill/src/app/page.tsx /Users/roselaine.touati/Desktop/prodbill/src/app/landing/page.tsx)",
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: landing vers /landing, dashboard back sur /\")"
     ]
   }
 }
