@@ -117,6 +117,16 @@ const s = StyleSheet.create({
     paddingHorizontal: 6,
   },
   tableRowAlt: { backgroundColor: "#fafafa" },
+  sectionSubtotalRow: {
+    flexDirection: "row",
+    backgroundColor: "#e2e8f0",
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    borderTopWidth: 1,
+    borderTopColor: "#cbd5e1",
+  },
+  sectionSubtotalLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#334155", flex: 1 },
+  sectionSubtotalValue: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#1e293b", textAlign: "right", flex: 1.1 },
   tdText: { fontSize: 8, color: "#334155" },
   tdRight: { fontSize: 8, color: "#334155", textAlign: "right" },
   colLib: { flex: 3.5 },
@@ -321,6 +331,27 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
               }
               return rows;
             })}
+            {/* Sous-total de section */}
+            {(() => {
+              const sectionSubtotal = Math.round(
+                section.lignes.reduce((sum, l) => {
+                  const base = l.total;
+                  const idx = (l.tag === "ARTISTE" || l.tag === "MUSIQUE")
+                    ? Math.round(base * (l.tauxIndexation ?? 0) / 100 * 100) / 100
+                    : 0;
+                  return sum + base + idx;
+                }, 0) * 100
+              ) / 100;
+              const label = `SOUS TOTAL ${(section.titre || "SECTION").toUpperCase()}`;
+              return (
+                <View style={s.sectionSubtotalRow}>
+                  <Text style={s.sectionSubtotalLabel}>{label}</Text>
+                  <Text style={[s.tdRight, s.colQte]} />
+                  <Text style={[s.tdRight, s.colPu]} />
+                  <Text style={s.sectionSubtotalValue}>{euros(sectionSubtotal)}</Text>
+                </View>
+              );
+            })()}
           </View>
         ))}
 
