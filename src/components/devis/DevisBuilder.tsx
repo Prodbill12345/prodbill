@@ -906,7 +906,9 @@ function SectionBlock({
               {isIndexable && (
                 indexedLineIds.has(field.id) ? (
                   <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center ml-1 pl-3 border-l-2 border-violet-200 -mt-0.5 pb-0.5">
-                    <span className="text-xs text-violet-600 font-medium">Indexation annuelle</span>
+                    <span className="text-xs text-violet-600 font-medium">
+                      {tagValue === "ARTISTE" ? "Indexation annuelle artiste" : "Indexation annuelle musique"}
+                    </span>
                     <div className="flex items-center gap-1">
                       <input
                         type="number"
@@ -945,7 +947,7 @@ function SectionBlock({
                     className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-600 ml-1 transition-colors"
                   >
                     <Plus className="w-3 h-3" />
-                    Indexation annuelle
+                    {tagValue === "ARTISTE" ? "Indexation annuelle artiste" : "Indexation annuelle musique"}
                   </button>
                 )
               )}

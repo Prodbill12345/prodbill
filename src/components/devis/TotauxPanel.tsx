@@ -46,9 +46,14 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
       value: result.marge,
       sub: true,
     },
-    ...(result.indexations > 0 ? [{
-      label: "Indexation annuelle",
-      value: result.indexations,
+    ...(result.indexationsArtiste > 0 ? [{
+      label: "Indexation annuelle artiste",
+      value: result.indexationsArtiste,
+      sub: true,
+    }] : []),
+    ...(result.indexationsMusique > 0 ? [{
+      label: "Indexation annuelle musique",
+      value: result.indexationsMusique,
       sub: true,
     }] : []),
     { label: "TOTAL HT", value: result.totalHt, separator: true, highlight: true },

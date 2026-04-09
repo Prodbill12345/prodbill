@@ -32,8 +32,20 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
     .filter((l) => l.tag === "TECHNICIEN_HCS")
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
 
+  // 2b. Indexations annuelles par type
+  // — ARTISTE : entre dans la base CS comédien
+  // — MUSIQUE : hors-CS (comme avant)
+  const indexationsArtiste_raw = lignes
+    .filter((l) => l.tag === "ARTISTE")
+    .reduce((sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0);
+
+  const indexationsMusique_raw = lignes
+    .filter((l) => l.tag === "MUSIQUE")
+    .reduce((sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0);
+
   // 3. Charges sociales
-  const csComedien = round2(baseComedien * taux.tauxCsComedien);
+  // ⚠️ La base CS artiste inclut l'indexation annuelle artiste
+  const csComedien = round2((baseComedien + indexationsArtiste_raw) * taux.tauxCsComedien);
   const csTechniciens = round2(baseTech * taux.tauxCsTech);
 
   // 4. Base marge — ⚠️ csComedien N'ENTRE PAS dans la base marge
@@ -46,16 +58,15 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
   const fraisGeneraux = round2(fraisGeneraux_raw);
   const marge = round2(marge_raw);
 
-  // 6. Indexations annuelles — exclues de la base marge (comme CS Artistes)
-  const indexations_raw = lignes.reduce(
-    (sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100),
-    0
-  );
-  const indexations = round2(indexations_raw);
+  // 6. Indexations (arrondies pour affichage/stockage)
+  const indexationsArtiste = round2(indexationsArtiste_raw);
+  const indexationsMusique = round2(indexationsMusique_raw);
 
-  // 7. Total HT — inclut les indexations (valeurs brutes pour éviter cumuls d'arrondi)
+  // 7. Total HT — indexationsArtiste_raw déjà reflétées dans csComedien,
+  //    mais leur montant brut s'ajoute aussi au total (coût réel de la prestation)
   const totalHt = round2(
-    sousTotal + csComedien + csTechniciens + fraisGeneraux_raw + marge_raw + indexations_raw
+    sousTotal + csComedien + csTechniciens + fraisGeneraux_raw + marge_raw
+    + indexationsArtiste_raw + indexationsMusique_raw
   );
 
   // 8. Remise et total après remise
@@ -73,7 +84,8 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
     baseMarge,
     fraisGeneraux,
     marge,
-    indexations,
+    indexationsArtiste,
+    indexationsMusique,
     totalHt,
     remise: remiseArrondie,
     totalApresRemise,

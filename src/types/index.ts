@@ -116,7 +116,8 @@ export interface CalculResult {
   baseMarge: number;
   fraisGeneraux: number;
   marge: number;
-  indexations: number;
+  indexationsArtiste: number;
+  indexationsMusique: number;
   totalHt: number;
   remise: number;
   totalApresRemise: number;

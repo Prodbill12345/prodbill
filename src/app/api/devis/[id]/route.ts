@@ -103,7 +103,7 @@ export async function PUT(
         tauxMarge: input.tauxMarge ?? existing.tauxMarge,
       };
       const remise = input.remise ?? existing.remise;
-      const { indexations: _indexations, ...totauxPrisma } = calculerDevis(allLignes, taux, remise);
+      const { indexationsArtiste: _ia, indexationsMusique: _im, ...totauxPrisma } = calculerDevis(allLignes, taux, remise);
       totaux = totauxPrisma;
     }
 

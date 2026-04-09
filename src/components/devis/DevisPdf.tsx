@@ -202,7 +202,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
   // Recalcul depuis les lignes — plus fiable que les valeurs dénormalisées en DB
   // (elles peuvent être à 0 si le devis a été créé avec une ancienne version du code)
   const allLignes = devis.sections.flatMap((sec) =>
-    sec.lignes.map((l) => ({ tag: l.tag, quantite: l.quantite, prixUnit: l.prixUnit }))
+    sec.lignes.map((l) => ({ tag: l.tag, quantite: l.quantite, prixUnit: l.prixUnit, tauxIndexation: l.tauxIndexation }))
   );
   const taux = {
     tauxCsComedien: devis.tauxCsComedien,
@@ -283,15 +283,33 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
               <Text style={[s.thText, s.colPu]}>P.U. HT</Text>
               <Text style={[s.thText, s.colTot]}>Total HT</Text>
             </View>
-            {section.lignes.map((ligne, i) => (
-              <View key={ligne.id} style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}>
-                <Text style={[s.tdText, s.colLib]}>{ligne.libelle}</Text>
-                <Text style={[s.tdText, s.colTag]}>{TAG_LABELS[ligne.tag] ?? ligne.tag}</Text>
-                <Text style={[s.tdRight, s.colQte]}>{ligne.quantite}</Text>
-                <Text style={[s.tdRight, s.colPu]}>{euros(ligne.prixUnit)}</Text>
-                <Text style={[s.tdRight, s.colTot]}>{euros(ligne.total)}</Text>
-              </View>
-            ))}
+            {section.lignes.flatMap((ligne, i) => {
+              const rows = [
+                <View key={ligne.id} style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}>
+                  <Text style={[s.tdText, s.colLib]}>{ligne.libelle}</Text>
+                  <Text style={[s.tdText, s.colTag]}>{TAG_LABELS[ligne.tag] ?? ligne.tag}</Text>
+                  <Text style={[s.tdRight, s.colQte]}>{ligne.quantite}</Text>
+                  <Text style={[s.tdRight, s.colPu]}>{euros(ligne.prixUnit)}</Text>
+                  <Text style={[s.tdRight, s.colTot]}>{euros(ligne.total)}</Text>
+                </View>,
+              ];
+              if ((ligne.tauxIndexation ?? 0) > 0 && (ligne.tag === "ARTISTE" || ligne.tag === "MUSIQUE")) {
+                const label = ligne.tag === "ARTISTE"
+                  ? "Indexation annuelle artiste"
+                  : "Indexation annuelle musique";
+                const montant = Math.round(ligne.total * (ligne.tauxIndexation ?? 0) / 100 * 100) / 100;
+                rows.push(
+                  <View key={`${ligne.id}-idx`} style={[s.tableRow, { backgroundColor: "#f5f3ff" }]}>
+                    <Text style={[s.tdText, s.colLib, { color: "#7c3aed", paddingLeft: 10 }]}>{label}</Text>
+                    <Text style={[s.tdText, s.colTag, { color: "#7c3aed" }]}>{ligne.tauxIndexation}%</Text>
+                    <Text style={[s.tdRight, s.colQte]} />
+                    <Text style={[s.tdRight, s.colPu]} />
+                    <Text style={[s.tdRight, s.colTot, { color: "#7c3aed" }]}>{euros(montant)}</Text>
+                  </View>
+                );
+              }
+              return rows;
+            })}
           </View>
         ))}
 
@@ -324,6 +342,18 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
               <Text style={s.totLabel}>Marge ({pct(devis.tauxMarge)})</Text>
               <Text style={s.totValue}>{euros(totaux.marge)}</Text>
             </View>
+            {totaux.indexationsArtiste > 0 && (
+              <View style={s.totRow}>
+                <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle artiste</Text>
+                <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(totaux.indexationsArtiste)}</Text>
+              </View>
+            )}
+            {totaux.indexationsMusique > 0 && (
+              <View style={s.totRow}>
+                <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle musique</Text>
+                <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(totaux.indexationsMusique)}</Text>
+              </View>
+            )}
 
             <View style={s.totDivider} />
 

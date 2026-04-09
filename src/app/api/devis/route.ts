@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       tauxFg: input.tauxFg,
       tauxMarge: input.tauxMarge,
     };
-    const { indexations: _indexations, ...totaux } = calculerDevis(allLignes, taux, input.remise);
+    const { indexationsArtiste: _ia, indexationsMusique: _im, ...totaux } = calculerDevis(allLignes, taux, input.remise);
 
     const devis = await prisma.devis.create({
       data: {
