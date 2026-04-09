@@ -91,6 +91,9 @@ export default function LandingPage() {
             borderRadius: "8px",
             padding: "6px 16px",
             transition: "border-color 0.2s",
+            position: "relative",
+            zIndex: 100,
+            cursor: "pointer",
           }}
           onMouseEnter={e => (e.currentTarget.style.borderColor = GOLD)}
           onMouseLeave={e => (e.currentTarget.style.borderColor = BORDER)}
@@ -165,6 +168,9 @@ export default function LandingPage() {
             textDecoration: "none",
             letterSpacing: "-0.01em",
             transition: "opacity 0.2s",
+            position: "relative",
+            zIndex: 100,
+            cursor: "pointer",
           }}
           onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
           onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
@@ -258,6 +264,9 @@ export default function LandingPage() {
             padding: "14px 32px",
             textDecoration: "none",
             transition: "opacity 0.2s",
+            position: "relative",
+            zIndex: 100,
+            cursor: "pointer",
           }}
           onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
           onMouseLeave={e => (e.currentTarget.style.opacity = "1")}

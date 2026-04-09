@@ -28,7 +28,11 @@
       "Bash(rm /Users/roselaine.touati/Desktop/prodbill/src/middleware.ts)",
       "Bash(git -C /Users/roselaine.touati/Desktop/prodbill add .)",
       "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: route / publique dans proxy.ts, suppression middleware.ts en doublon\")",
-      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill push)"
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill push)",
+      "Bash(grep -E \"^d|\\\\.json$|\\\\.ts$\")",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(npx tsx:*)",
+      "Bash(find /Users/roselaine.touati/Desktop/prodbill/src/app/\\\\\\(auth\\\\\\)/sign-in -type f -exec cat {} \\\\;)"
     ]
   }
 }
