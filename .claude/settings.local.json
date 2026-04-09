@@ -24,7 +24,11 @@
       "Bash(git push:*)",
       "Bash(awk '/model Company \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)",
       "Bash(awk '/model Facture \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)",
-      "Bash(awk '/model Client \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)"
+      "Bash(awk '/model Client \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)",
+      "Bash(rm /Users/roselaine.touati/Desktop/prodbill/src/middleware.ts)",
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill add .)",
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: route / publique dans proxy.ts, suppression middleware.ts en doublon\")",
+      "Bash(git -C /Users/roselaine.touati/Desktop/prodbill push)"
     ]
   }
 }
