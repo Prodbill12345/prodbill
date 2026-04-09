@@ -21,7 +21,10 @@
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_wtYZO9SuV1WE@ep-winter-sea-ag34x9sc.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx prisma generate)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(awk '/model Company \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)",
+      "Bash(awk '/model Facture \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)",
+      "Bash(awk '/model Client \\\\{/,/^}/' /Users/roselaine.touati/Desktop/prodbill/prisma/schema.prisma)"
     ]
   }
 }
