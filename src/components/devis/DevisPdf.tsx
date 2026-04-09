@@ -84,9 +84,13 @@ const s = StyleSheet.create({
   partyDetail: { fontSize: 8, color: "#475569", lineHeight: 1.55 },
 
   // Objet
-  objetRow: { flexDirection: "row", marginBottom: 18 },
+  objetRow: { flexDirection: "row", marginBottom: 10 },
   objetLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#64748b", marginRight: 6 },
   objetText: { fontSize: 9, color: "#1e293b", flex: 1 },
+
+  // Description
+  descriptionBlock: { marginBottom: 16 },
+  descriptionText: { fontSize: 8.5, color: "#64748b", lineHeight: 1.6, fontStyle: "italic" },
 
   // Section / table
   sectionBlock: { marginBottom: 8 },
@@ -270,6 +274,13 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
           <Text style={s.objetLabel}>Objet :</Text>
           <Text style={s.objetText}>{devis.objet}</Text>
         </View>
+
+        {/* ── Description ───────────────────────────────────────── */}
+        {devis.description && (
+          <View style={s.descriptionBlock}>
+            <Text style={s.descriptionText}>{devis.description}</Text>
+          </View>
+        )}
 
         {/* ── Sections / lignes ─────────────────────────────────── */}
         {devis.sections.map((section) => (
