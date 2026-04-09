@@ -212,7 +212,6 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
   }
 
   async function onSubmit(data: DevisFormData) {
-    console.log("onSubmit appelé", data);
     setSubmitting(true);
     try {
       const sections = data.sections.map((s, si) => ({
@@ -268,7 +267,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, (errors) => console.log("Erreurs validation:", errors))} onKeyDown={handleKeyDown} className="grid grid-cols-3 gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="grid grid-cols-3 gap-6">
       {/* Colonne principale (2/3) */}
       <div className="col-span-2 space-y-5">
         {/* En-tête du devis */}
