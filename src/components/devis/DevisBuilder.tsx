@@ -702,10 +702,11 @@ function SectionBlock({
     }
     remove(i);
   }
-  const sectionTotal = watchedLignes.reduce(
-    (s, l) => s + (Number(l?.quantite) || 0) * (Number(l?.prixUnit) || 0),
-    0
-  );
+  const sectionTotal = watchedLignes.reduce((s, l, i) => {
+    const base = (Number(l?.quantite) || 0) * (Number(l?.prixUnit) || 0);
+    const indexation = base * ((Number(tauxIndexationsLive[i]) || 0) / 100);
+    return s + base + indexation;
+  }, 0);
 
   const fmtEur = (n: number) =>
     new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
