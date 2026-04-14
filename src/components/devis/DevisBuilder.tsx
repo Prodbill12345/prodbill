@@ -31,6 +31,11 @@ const DevisFormSchema = z.object({
   clientId: z.string().min(1, "Client requis"),
   objet: z.string().min(1, "Objet requis"),
   description: z.string().optional(),
+  nomProjet: z.string().optional(),
+  refDevis: z.string().optional(),
+  nomCommercial: z.string().optional(),
+  numeroBdc: z.string().optional(),
+  annee: z.coerce.number().int().min(2000).max(2100).optional(),
   tauxCsComedien: z.coerce.number().min(0).max(1),
   tauxCsTech: z.coerce.number().min(0).max(1),
   tauxFg: z.coerce.number().min(0).max(1),
@@ -47,6 +52,11 @@ interface DevisInitialData {
   clientId: string;
   objet: string;
   description?: string | null;
+  nomProjet?: string | null;
+  refDevis?: string | null;
+  nomCommercial?: string | null;
+  numeroBdc?: string | null;
+  annee?: number | null;
   tauxCsComedien: number;
   tauxCsTech: number;
   tauxFg: number;
@@ -107,6 +117,11 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           clientId: initialData.clientId,
           objet: initialData.objet,
           description: initialData.description ?? undefined,
+          nomProjet: initialData.nomProjet ?? undefined,
+          refDevis: initialData.refDevis ?? undefined,
+          nomCommercial: initialData.nomCommercial ?? undefined,
+          numeroBdc: initialData.numeroBdc ?? undefined,
+          annee: initialData.annee ?? undefined,
           tauxCsComedien: initialData.tauxCsComedien,
           tauxCsTech: initialData.tauxCsTech,
           tauxFg: initialData.tauxFg,
@@ -343,6 +358,63 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
                 rows={3}
                 placeholder="Décrivez le projet, le contexte, les détails importants..."
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            {/* Champs d'identification */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nom du projet
+              </label>
+              <input
+                {...register("nomProjet")}
+                placeholder="Ex : Campagne TV Été 2025"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Numéro de devis
+              </label>
+              <input
+                {...register("refDevis")}
+                placeholder="Ex : DEV-2025-001"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Nom du commercial
+              </label>
+              <input
+                {...register("nomCommercial")}
+                placeholder="Ex : Sophie Martin"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Numéro de BDC
+              </label>
+              <input
+                {...register("numeroBdc")}
+                placeholder="Ex : BDC-2025-042"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Année
+              </label>
+              <input
+                type="number"
+                {...register("annee")}
+                placeholder={String(new Date().getFullYear())}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>

@@ -285,6 +285,42 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
           <Text style={s.objetText}>{devis.objet}</Text>
         </View>
 
+        {/* ── Champs d'identification projet ────────────────────── */}
+        {(devis.nomProjet || devis.refDevis || devis.nomCommercial || devis.numeroBdc || devis.annee) && (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
+            {devis.nomProjet && (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Projet :</Text>
+                <Text style={s.objetText}>{devis.nomProjet}</Text>
+              </View>
+            )}
+            {devis.refDevis && (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Réf. devis :</Text>
+                <Text style={s.objetText}>{devis.refDevis}</Text>
+              </View>
+            )}
+            {devis.nomCommercial && (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Commercial :</Text>
+                <Text style={s.objetText}>{devis.nomCommercial}</Text>
+              </View>
+            )}
+            {devis.numeroBdc && (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <Text style={[s.objetLabel, { marginBottom: 0 }]}>BDC :</Text>
+                <Text style={s.objetText}>{devis.numeroBdc}</Text>
+              </View>
+            )}
+            {devis.annee && (
+              <View style={{ flexDirection: "row", gap: 4 }}>
+                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Année :</Text>
+                <Text style={s.objetText}>{devis.annee}</Text>
+              </View>
+            )}
+          </View>
+        )}
+
         {/* ── Description ───────────────────────────────────────── */}
         {devis.description && (
           <View style={s.descriptionBlock}>

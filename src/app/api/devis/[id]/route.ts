@@ -23,6 +23,11 @@ const SectionSchema = z.object({
 const UpdateDevisSchema = z.object({
   objet: z.string().min(1).optional(),
   description: z.string().optional(),
+  nomProjet: z.string().optional(),
+  refDevis: z.string().optional(),
+  nomCommercial: z.string().optional(),
+  numeroBdc: z.string().optional(),
+  annee: z.number().int().min(2000).max(2100).nullable().optional(),
   tauxCsComedien: z.number().min(0).max(1).optional(),
   tauxCsTech: z.number().min(0).max(1).optional(),
   tauxFg: z.number().min(0).max(1).optional(),
@@ -119,6 +124,11 @@ export async function PUT(
         data: {
           ...(input.objet && { objet: input.objet }),
           ...(input.description !== undefined && { description: input.description }),
+          ...(input.nomProjet !== undefined && { nomProjet: input.nomProjet }),
+          ...(input.refDevis !== undefined && { refDevis: input.refDevis }),
+          ...(input.nomCommercial !== undefined && { nomCommercial: input.nomCommercial }),
+          ...(input.numeroBdc !== undefined && { numeroBdc: input.numeroBdc }),
+          ...(input.annee !== undefined && { annee: input.annee }),
           ...(input.tauxCsComedien !== undefined && { tauxCsComedien: input.tauxCsComedien }),
           ...(input.tauxCsTech !== undefined && { tauxCsTech: input.tauxCsTech }),
           ...(input.tauxFg !== undefined && { tauxFg: input.tauxFg }),

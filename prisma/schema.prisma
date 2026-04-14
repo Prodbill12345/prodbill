@@ -211,6 +211,13 @@ model Devis {
   notes        String?
   pdfUrl       String?   // Vercel Blob URL
 
+  // Champs d'identification projet (libres, optionnels)
+  nomProjet      String?
+  refDevis       String? // Numéro de devis client (ex: DEV-2024-001)
+  nomCommercial  String?
+  numeroBdc      String? // Numéro de bon de commande
+  annee          Int?    // Année du projet
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdById String
