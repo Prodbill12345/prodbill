@@ -20,6 +20,7 @@ const LigneSchema = z.object({
   quantite: z.coerce.number().positive("Quantité > 0"),
   prixUnit: z.coerce.number().min(0, "Prix ≥ 0"),
   tauxIndexation: z.coerce.number().min(0).max(100).optional(),
+  nomComedien: z.string().optional(),
 });
 
 const SectionSchema = z.object({
@@ -72,6 +73,7 @@ interface DevisInitialData {
       quantite: number;
       prixUnit: number;
       tauxIndexation?: number;
+      nomComedien?: string | null;
     }[];
   }[];
 }
@@ -895,30 +897,39 @@ function SectionBlock({
                 className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center"
               >
                 {/* Libellé — avec checkbox agent si applicable */}
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {isSourceLine ? (
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {isSourceLine ? (
+                      <input
+                        type="checkbox"
+                        checked={selectedForAgent.has(field.id)}
+                        onChange={(e) =>
+                          setSelectedForAgent((prev) => {
+                            const next = new Set(prev);
+                            e.target.checked ? next.add(field.id) : next.delete(field.id);
+                            return next;
+                          })
+                        }
+                        className="w-3.5 h-3.5 shrink-0 cursor-pointer accent-amber-500"
+                        title="Inclure dans le calcul Agent Voix Off"
+                      />
+                    ) : (
+                      /* espace réservé pour aligner avec les lignes ayant une checkbox */
+                      agentEnabled && <span className="w-3.5 shrink-0" />
+                    )}
                     <input
-                      type="checkbox"
-                      checked={selectedForAgent.has(field.id)}
-                      onChange={(e) =>
-                        setSelectedForAgent((prev) => {
-                          const next = new Set(prev);
-                          e.target.checked ? next.add(field.id) : next.delete(field.id);
-                          return next;
-                        })
-                      }
-                      className="w-3.5 h-3.5 shrink-0 cursor-pointer accent-amber-500"
-                      title="Inclure dans le calcul Agent Voix Off"
+                      {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)}
+                      placeholder="Description de la prestation"
+                      className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                  ) : (
-                    /* espace réservé pour aligner avec les lignes ayant une checkbox */
-                    agentEnabled && <span className="w-3.5 shrink-0" />
+                  </div>
+                  {tagValue === "ARTISTE" && (
+                    <input
+                      {...register(`sections.${sectionIndex}.lignes.${li}.nomComedien`)}
+                      placeholder="Nom du comédien"
+                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs italic text-slate-500 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
+                    />
                   )}
-                  <input
-                    {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)}
-                    placeholder="Description de la prestation"
-                    className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
                 </div>
 
                 <Controller

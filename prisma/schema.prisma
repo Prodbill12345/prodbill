@@ -263,6 +263,7 @@ model DevisLigne {
   prixUnit       Float
   total          Float    // quantite × prixUnit (dénormalisé)
   tauxIndexation Float    @default(0) // pourcentage, ex: 2.0 pour 2%
+  nomComedien    String?  // Nom du comédien (ARTISTE uniquement, optionnel)
   ordre          Int
 
   @@index([sectionId])
