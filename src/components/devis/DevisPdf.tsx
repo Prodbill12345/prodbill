@@ -287,35 +287,47 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
 
         {/* ── Champs d'identification projet ────────────────────── */}
         {(devis.nomProjet || devis.refDevis || devis.nomCommercial || devis.numeroBdc || devis.annee) && (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 10 }}>
-            {devis.nomProjet && (
-              <View style={{ flexDirection: "row", gap: 4 }}>
-                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Projet :</Text>
-                <Text style={s.objetText}>{devis.nomProjet}</Text>
+          <View style={{ marginBottom: 14 }}>
+            {/* Ligne 1 : Projet | Réf. devis | Année */}
+            {(devis.nomProjet || devis.refDevis || devis.annee) && (
+              <View style={{ flexDirection: "row", gap: 6, marginBottom: 6 }}>
+                {devis.nomProjet ? (
+                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
+                    <Text style={s.partyLabel}>PROJET</Text>
+                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.nomProjet}</Text>
+                  </View>
+                ) : <View style={{ flex: 1 }} />}
+                {devis.refDevis ? (
+                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
+                    <Text style={s.partyLabel}>RÉF. DEVIS</Text>
+                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.refDevis}</Text>
+                  </View>
+                ) : <View style={{ flex: 1 }} />}
+                {devis.annee ? (
+                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
+                    <Text style={s.partyLabel}>ANNÉE</Text>
+                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.annee}</Text>
+                  </View>
+                ) : <View style={{ flex: 1 }} />}
               </View>
             )}
-            {devis.refDevis && (
-              <View style={{ flexDirection: "row", gap: 4 }}>
-                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Réf. devis :</Text>
-                <Text style={s.objetText}>{devis.refDevis}</Text>
-              </View>
-            )}
-            {devis.nomCommercial && (
-              <View style={{ flexDirection: "row", gap: 4 }}>
-                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Commercial :</Text>
-                <Text style={s.objetText}>{devis.nomCommercial}</Text>
-              </View>
-            )}
-            {devis.numeroBdc && (
-              <View style={{ flexDirection: "row", gap: 4 }}>
-                <Text style={[s.objetLabel, { marginBottom: 0 }]}>BDC :</Text>
-                <Text style={s.objetText}>{devis.numeroBdc}</Text>
-              </View>
-            )}
-            {devis.annee && (
-              <View style={{ flexDirection: "row", gap: 4 }}>
-                <Text style={[s.objetLabel, { marginBottom: 0 }]}>Année :</Text>
-                <Text style={s.objetText}>{devis.annee}</Text>
+            {/* Ligne 2 : Commercial | BDC */}
+            {(devis.nomCommercial || devis.numeroBdc) && (
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                {devis.nomCommercial ? (
+                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
+                    <Text style={s.partyLabel}>COMMERCIAL</Text>
+                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.nomCommercial}</Text>
+                  </View>
+                ) : <View style={{ flex: 1 }} />}
+                {devis.numeroBdc ? (
+                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
+                    <Text style={s.partyLabel}>N° BDC</Text>
+                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.numeroBdc}</Text>
+                  </View>
+                ) : <View style={{ flex: 1 }} />}
+                {/* 3e colonne vide pour maintenir l'alignement avec la ligne 1 */}
+                <View style={{ flex: 1 }} />
               </View>
             )}
           </View>
