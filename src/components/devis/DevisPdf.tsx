@@ -286,7 +286,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
         </View>
 
         {/* ── Champs d'identification projet ────────────────────── */}
-        {(devis.nomProjet || devis.refDevis || devis.nomCommercial || devis.numeroBdc || devis.annee) && (
+        {(devis.nomProjet || devis.refDevis || devis.annee) && (
           <View style={{ marginBottom: 14 }}>
             {/* Ligne 1 : Projet | Réf. devis | Année */}
             {(devis.nomProjet || devis.refDevis || devis.annee) && (
@@ -309,25 +309,6 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                     <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.annee}</Text>
                   </View>
                 ) : <View style={{ flex: 1 }} />}
-              </View>
-            )}
-            {/* Ligne 2 : Commercial | BDC */}
-            {(devis.nomCommercial || devis.numeroBdc) && (
-              <View style={{ flexDirection: "row", gap: 6 }}>
-                {devis.nomCommercial ? (
-                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
-                    <Text style={s.partyLabel}>COMMERCIAL</Text>
-                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.nomCommercial}</Text>
-                  </View>
-                ) : <View style={{ flex: 1 }} />}
-                {devis.numeroBdc ? (
-                  <View style={{ flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 8 }}>
-                    <Text style={s.partyLabel}>N° BDC</Text>
-                    <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{devis.numeroBdc}</Text>
-                  </View>
-                ) : <View style={{ flex: 1 }} />}
-                {/* 3e colonne vide pour maintenir l'alignement avec la ligne 1 */}
-                <View style={{ flex: 1 }} />
               </View>
             )}
           </View>

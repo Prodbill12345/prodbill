@@ -11,6 +11,7 @@ import {
   FACTURE_TYPE_LABELS,
 } from "@/types";
 import { FactureActions } from "@/components/factures/FactureActions";
+import { FactureBdcField } from "@/components/factures/FactureBdcField";
 
 const RELANCE_LABELS: Record<string, string> = {
   ENVOI: "Envoi facture",
@@ -145,6 +146,11 @@ export default async function FactureDetailPage({
                 )}
               </div>
             </div>
+            <FactureBdcField
+              factureId={facture.id}
+              initialValue={facture.numeroBdc}
+              isLocked={!!facture.emiseAt}
+            />
           </div>
 
           {/* Détail */}

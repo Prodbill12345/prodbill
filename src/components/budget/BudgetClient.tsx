@@ -25,6 +25,7 @@ interface BudgetLigne {
   clientId: string;
   client: ClientRef;
   libelle: string;
+  nomCommercial: string | null;
   montantPrevisionnel: number;
 }
 
@@ -150,6 +151,7 @@ export function BudgetClient({
   // ── Nouvelle ligne budget (formulaire inline) ──────────────────────────────
   const [newClientId, setNewClientId] = useState(clients[0]?.id ?? "");
   const [newLibelle, setNewLibelle] = useState("");
+  const [newCommercial, setNewCommercial] = useState("");
   const [newMontant, setNewMontant] = useState("");
   const [savingBudget, setSavingBudget] = useState(false);
 
@@ -174,11 +176,13 @@ export function BudgetClient({
         ...b.lignes.map((l) => ({
           clientId: l.clientId,
           libelle: l.libelle,
+          nomCommercial: l.nomCommercial,
           montantPrevisionnel: l.montantPrevisionnel,
         })),
         {
           clientId: newClientId,
           libelle: newLibelle.trim(),
+          nomCommercial: newCommercial.trim() || null,
           montantPrevisionnel: parseFloat(newMontant),
         },
       ];
@@ -191,6 +195,7 @@ export function BudgetClient({
       const { data } = await res.json();
       setBudget(data);
       setNewLibelle("");
+      setNewCommercial("");
       setNewMontant("");
     } finally {
       setSavingBudget(false);
@@ -206,6 +211,7 @@ export function BudgetClient({
         .map((l) => ({
           clientId: l.clientId,
           libelle: l.libelle,
+          nomCommercial: l.nomCommercial,
           montantPrevisionnel: l.montantPrevisionnel,
         }));
       const res = await fetch(`/api/budget/${budget.id}`, {
@@ -234,6 +240,26 @@ export function BudgetClient({
         prev.map((d) => (d.id === devisId ? { ...d, tauxPipe: tauxPipe } : d))
       );
     });
+  }
+
+  // ── Mise à jour commercial inline ─────────────────────────────────────────
+  async function handleUpdateCommercial(ligneId: string, value: string) {
+    if (!budget) return;
+    const lignes = budget.lignes.map((l) => ({
+      clientId: l.clientId,
+      libelle: l.libelle,
+      nomCommercial: l.id === ligneId ? (value.trim() || null) : l.nomCommercial,
+      montantPrevisionnel: l.montantPrevisionnel,
+    }));
+    const res = await fetch(`/api/budget/${budget.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lignes }),
+    });
+    if (res.ok) {
+      const { data } = await res.json();
+      setBudget(data);
+    }
   }
 
   // ── Calculs bénéfice net ───────────────────────────────────────────────────
@@ -335,6 +361,7 @@ export function BudgetClient({
               <tr className="border-b border-slate-100 bg-slate-50/60">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Libellé</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Commercial</th>
                 <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Prévisionnel</th>
                 <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">CA Réalisé</th>
                 <th className="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-40">% Atteinte</th>
@@ -344,7 +371,7 @@ export function BudgetClient({
             <tbody>
               {lignes.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-5 py-8 text-center text-sm text-slate-400">
                     Aucune ligne — ajoutez un objectif ci-dessous.
                   </td>
                 </tr>
@@ -356,6 +383,16 @@ export function BudgetClient({
                   <tr key={ligne.id} className="border-b border-slate-50 hover:bg-slate-50/40">
                     <td className="px-5 py-3.5 text-sm font-medium text-slate-700">{ligne.client.name}</td>
                     <td className="px-5 py-3.5 text-sm text-slate-600">{ligne.libelle}</td>
+                    <td className="px-2 py-2.5">
+                      <input
+                        type="text"
+                        defaultValue={ligne.nomCommercial ?? ""}
+                        onBlur={(e) => handleUpdateCommercial(ligne.id, e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                        placeholder="—"
+                        className="w-full px-2 py-1 text-sm text-slate-600 border-0 bg-transparent hover:bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-300 rounded-md min-w-[100px]"
+                      />
+                    </td>
                     <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(ligne.montantPrevisionnel)}</td>
                     <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-600">{fmtEur(ca)}</td>
                     <td className="px-5 py-3.5">
@@ -377,7 +414,7 @@ export function BudgetClient({
             {lignes.length > 0 && (
               <tfoot>
                 <tr className="bg-slate-50 border-t border-slate-200">
-                  <td colSpan={2} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Total</td>
+                  <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Total</td>
                   <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">{fmtEur(totalPrev)}</td>
                   <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">{fmtEur(totalRealise)}</td>
                   <td className="px-5 py-3">
@@ -412,6 +449,17 @@ export function BudgetClient({
                 value={newLibelle}
                 onChange={(e) => setNewLibelle(e.target.value)}
                 placeholder="Ex : Production spots TV"
+                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                onKeyDown={(e) => e.key === "Enter" && handleAddLigne()}
+              />
+            </div>
+            <div className="w-32">
+              <label className="block text-xs text-slate-500 mb-1">Commercial</label>
+              <input
+                type="text"
+                value={newCommercial}
+                onChange={(e) => setNewCommercial(e.target.value)}
+                placeholder="Ex : Sophie"
                 className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 onKeyDown={(e) => e.key === "Enter" && handleAddLigne()}
               />

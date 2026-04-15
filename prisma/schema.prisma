@@ -217,8 +217,6 @@ model Devis {
   // Champs d'identification projet (libres, optionnels)
   nomProjet      String?
   refDevis       String? // Numéro de devis client (ex: DEV-2024-001)
-  nomCommercial  String?
-  numeroBdc      String? // Numéro de bon de commande
   annee          Int?    // Année du projet
 
   // Suivi budgétaire
@@ -313,6 +311,9 @@ model Facture {
   conditionsPaiement String @default("")
   nomEmetteur        String @default("")
   adresseEmetteur    String @default("")
+
+  // Référence commande client
+  numeroBdc  String?
 
   // Stockage
   pdfUrl     String? // Vercel Blob
@@ -501,6 +502,7 @@ model BudgetLigne {
   clientId            String
   client              Client             @relation(fields: [clientId], references: [id])
   libelle             String
+  nomCommercial       String?
   montantPrevisionnel Float
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt

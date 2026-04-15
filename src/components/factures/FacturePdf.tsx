@@ -275,6 +275,16 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
           </View>
         )}
 
+        {/* ── N° BDC ────────────────────────────────────────────── */}
+        {facture.numeroBdc && (
+          <View style={{ marginBottom: 14 }}>
+            <View style={{ backgroundColor: "#f8fafc", borderRadius: 4, padding: 8, alignSelf: "flex-start", minWidth: 160 }}>
+              <Text style={s.partyLabel}>N° BDC</Text>
+              <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{facture.numeroBdc}</Text>
+            </View>
+          </View>
+        )}
+
         {/* ── Tableau de facturation ────────────────────────────── */}
         <View style={s.amountsBlock}>
           <View style={s.amountsTable}>

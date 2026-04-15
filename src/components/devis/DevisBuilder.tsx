@@ -35,8 +35,6 @@ const DevisFormSchema = z.object({
   description: z.string().optional(),
   nomProjet: z.string().optional(),
   refDevis: z.string().optional(),
-  nomCommercial: z.string().optional(),
-  numeroBdc: z.string().optional(),
   annee: z.coerce.number().int().min(2000).max(2100).optional(),
   tauxCsComedien: z.coerce.number().min(0).max(1),
   tauxCsTech: z.coerce.number().min(0).max(1),
@@ -56,8 +54,6 @@ interface DevisInitialData {
   description?: string | null;
   nomProjet?: string | null;
   refDevis?: string | null;
-  nomCommercial?: string | null;
-  numeroBdc?: string | null;
   annee?: number | null;
   tauxCsComedien: number;
   tauxCsTech: number;
@@ -131,8 +127,6 @@ export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initi
           description: initialData.description ?? undefined,
           nomProjet: initialData.nomProjet ?? undefined,
           refDevis: initialData.refDevis ?? undefined,
-          nomCommercial: initialData.nomCommercial ?? undefined,
-          numeroBdc: initialData.numeroBdc ?? undefined,
           annee: initialData.annee ?? undefined,
           tauxCsComedien: initialData.tauxCsComedien,
           tauxCsTech: initialData.tauxCsTech,
@@ -399,28 +393,6 @@ export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initi
               <input
                 {...register("refDevis")}
                 placeholder="Ex : DEV-2025-001"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Nom du commercial
-              </label>
-              <input
-                {...register("nomCommercial")}
-                placeholder="Ex : Sophie Martin"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Numéro de BDC
-              </label>
-              <input
-                {...register("numeroBdc")}
-                placeholder="Ex : BDC-2025-042"
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

@@ -5,6 +5,7 @@ import { z } from "zod";
 const LigneBudgetSchema = z.object({
   clientId: z.string().min(1),
   libelle: z.string().min(1),
+  nomCommercial: z.string().optional().nullable(),
   montantPrevisionnel: z.number().min(0),
 });
 
@@ -39,6 +40,7 @@ export async function PUT(
             create: lignes.map((l) => ({
               clientId: l.clientId,
               libelle: l.libelle,
+              nomCommercial: l.nomCommercial ?? null,
               montantPrevisionnel: l.montantPrevisionnel,
             })),
           },
