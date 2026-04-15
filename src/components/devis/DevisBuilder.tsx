@@ -131,7 +131,13 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
           dateValidite: initialData.dateValidite ?? undefined,
           notes: initialData.notes ?? undefined,
           remise: initialData.remise ?? undefined,
-          sections: initialData.sections,
+          sections: initialData.sections.map((s) => ({
+            ...s,
+            lignes: s.lignes.map((l) => ({
+              ...l,
+              nomComedien: l.nomComedien ?? undefined,
+            })),
+          })),
         }
       : {
           tauxCsComedien: defaultTaux.tauxCsComedien,

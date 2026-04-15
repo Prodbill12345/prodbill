@@ -104,6 +104,7 @@ model Company {
   auditLogs AuditLog[]
   templates DevisTemplate[]
   documents Document[]
+  budgets   BudgetPrevisionnel[]
 }
 
 // ─────────────────────────────────────────────
@@ -165,8 +166,9 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  devis    Devis[]
-  factures Facture[]
+  devis        Devis[]
+  factures     Facture[]
+  budgetLignes BudgetLigne[]
 
   @@index([companyId])
 }
@@ -217,6 +219,9 @@ model Devis {
   nomCommercial  String?
   numeroBdc      String? // Numéro de bon de commande
   annee          Int?    // Année du projet
+
+  // Suivi budgétaire
+  tauxPipe Int? // Probabilité de closing 0-100%
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -445,4 +450,35 @@ model DevisTemplate {
 
   @@index([companyId])
   @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// BUDGET PREVISIONNEL
+// ─────────────────────────────────────────────
+
+model BudgetPrevisionnel {
+  id        String        @id @default(cuid())
+  companyId String
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  annee     Int
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  lignes    BudgetLigne[]
+
+  @@unique([companyId, annee])
+  @@index([companyId])
+}
+
+model BudgetLigne {
+  id                  String             @id @default(cuid())
+  budgetId            String
+  budget              BudgetPrevisionnel @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  clientId            String
+  client              Client             @relation(fields: [clientId], references: [id])
+  libelle             String
+  montantPrevisionnel Float
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([budgetId])
 }
