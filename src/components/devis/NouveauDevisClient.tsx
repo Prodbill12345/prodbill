@@ -34,8 +34,11 @@ type DevisTemplate = {
   user: { name: string };
 };
 
+interface AgentRef { id: string; nom: string; prenom?: string | null; agence?: string | null; }
+
 interface NouveauDevisClientProps {
   clients: Client[];
+  agents: AgentRef[];
   defaultTaux: {
     tauxCsComedien: number;
     tauxCsTech: number;
@@ -45,7 +48,7 @@ interface NouveauDevisClientProps {
   templates: DevisTemplate[];
 }
 
-export function NouveauDevisClient({ clients, defaultTaux, templates }: NouveauDevisClientProps) {
+export function NouveauDevisClient({ clients, agents, defaultTaux, templates }: NouveauDevisClientProps) {
   const [showPicker, setShowPicker] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<DevisTemplate | null>(null);
 
@@ -177,6 +180,7 @@ export function NouveauDevisClient({ clients, defaultTaux, templates }: NouveauD
       <DevisBuilder
         key={activeTemplate?.id ?? "blank"}
         clients={clients}
+        agents={agents}
         defaultTaux={defaultTaux}
         initialData={initialData}
       />

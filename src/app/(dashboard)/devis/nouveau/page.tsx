@@ -16,7 +16,7 @@ export default async function NouveauDevisPage() {
 
   if (!user) redirect("/sign-in");
 
-  const [clients, templates] = await Promise.all([
+  const [clients, templates, agents] = await Promise.all([
     prisma.client.findMany({
       where: { companyId: user.companyId },
       orderBy: { name: "asc" },
@@ -28,6 +28,11 @@ export default async function NouveauDevisPage() {
       },
       include: { user: { select: { name: true } } },
       orderBy: [{ isShared: "desc" }, { createdAt: "desc" }],
+    }),
+    prisma.agent.findMany({
+      where: { companyId: user.companyId },
+      select: { id: true, nom: true, prenom: true, agence: true },
+      orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),
   ]);
 
@@ -64,6 +69,7 @@ export default async function NouveauDevisPage() {
       ) : (
         <NouveauDevisClient
           clients={clients}
+          agents={agents}
           defaultTaux={defaultTaux}
           templates={templates}
         />

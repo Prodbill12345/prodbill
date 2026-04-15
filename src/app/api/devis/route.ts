@@ -10,6 +10,7 @@ const LigneSchema = z.object({
   prixUnit: z.number().min(0),
   tauxIndexation: z.number().min(0).max(100).default(0),
   nomComedien: z.string().optional(),
+  agentId: z.string().optional(),
   ordre: z.number().int(),
 });
 
@@ -114,6 +115,7 @@ export async function POST(req: Request) {
                 total: ligne.quantite * ligne.prixUnit,
                 tauxIndexation: ligne.tauxIndexation ?? 0,
                 nomComedien: ligne.nomComedien ?? null,
+                agentId: ligne.agentId ?? null,
                 ordre: ligne.ordre,
               })),
             },

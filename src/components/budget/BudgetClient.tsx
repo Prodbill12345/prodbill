@@ -10,6 +10,7 @@ import {
   Target,
   DollarSign,
   Loader2,
+  Mic2,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -33,12 +34,21 @@ interface Budget {
   lignes: BudgetLigne[];
 }
 
+interface AgentSuivi {
+  id: string;
+  nom: string;
+  prenom: string | null;
+  agence: string | null;
+  tauxCommission: number;
+}
+
 interface DevisLigne {
   tag: string;
   quantite: number;
   prixUnit: number;
   total: number;
   tauxIndexation: number;
+  agentId: string | null;
 }
 
 interface DevisSection {
@@ -64,6 +74,7 @@ interface BudgetClientProps {
   caParClient: Record<string, number>;
   devis: Devis[];
   clients: ClientRef[];
+  agents: AgentSuivi[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -129,6 +140,7 @@ export function BudgetClient({
   caParClient,
   devis: initialDevis,
   clients,
+  agents,
 }: BudgetClientProps) {
   const [budget, setBudget] = useState<Budget | null>(initialBudget);
   const [devis, setDevis] = useState<Devis[]>(initialDevis);
@@ -262,6 +274,23 @@ export function BudgetClient({
     (s, d) => s + (d.totalHt * (d.tauxPipe ?? 0)) / 100,
     0
   );
+
+  // ── Suivi par agent ────────────────────────────────────────────────────────
+  const agentStats = agents.map((agent) => {
+    const lignesAgent = devis.flatMap((d) =>
+      d.sections.flatMap((s) =>
+        s.lignes.filter((l) => l.agentId === agent.id)
+      )
+    );
+    const montantHt = lignesAgent.reduce((s, l) => s + l.quantite * l.prixUnit, 0);
+    const nbDevis = new Set(
+      devis
+        .filter((d) => d.sections.some((s) => s.lignes.some((l) => l.agentId === agent.id)))
+        .map((d) => d.id)
+    ).size;
+    const commission = (montantHt * agent.tauxCommission) / 100;
+    return { agent, nbDevis, montantHt, commission };
+  }).filter((row) => row.montantHt > 0 || row.nbDevis > 0);
 
   // ── Budget totaux ──────────────────────────────────────────────────────────
   const lignes = budget?.lignes ?? [];
@@ -609,6 +638,76 @@ export function BudgetClient({
           </table>
         </div>
       </div>
+
+      {/* ──────────────────────────────────────────────────────────────────────
+          Section D — Suivi par agent
+      ────────────────────────────────────────────────────────────────────── */}
+      {agents.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+              <Mic2 className="w-4 h-4 text-rose-500" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-slate-900">Suivi par agent</h2>
+              <p className="text-xs text-slate-400">Montant des lignes associées et commission estimée</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/60">
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Agent</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Agence</th>
+                  <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Nb devis</th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant HT total</th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Taux</th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Commission estimée</th>
+                </tr>
+              </thead>
+              <tbody>
+                {agentStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">
+                      Aucun agent associé à des lignes de devis
+                    </td>
+                  </tr>
+                ) : (
+                  agentStats.map(({ agent, nbDevis, montantHt, commission }) => (
+                    <tr key={agent.id} className="border-b border-slate-50 hover:bg-slate-50/40">
+                      <td className="px-5 py-3.5 text-sm font-medium text-slate-800">
+                        {agent.prenom ? `${agent.prenom} ${agent.nom}` : agent.nom}
+                      </td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500">
+                        {agent.agence ?? <span className="text-slate-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-sm text-center tabular-nums text-slate-600">{nbDevis}</td>
+                      <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(montantHt)}</td>
+                      <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-500">{agent.tauxCommission}%</td>
+                      <td className="px-5 py-3.5 text-sm text-right tabular-nums font-semibold text-rose-600">{fmtEur(commission)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {agentStats.length > 0 && (
+                <tfoot>
+                  <tr className="bg-slate-50 border-t border-slate-200">
+                    <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Total</td>
+                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">
+                      {fmtEur(agentStats.reduce((s, r) => s + r.montantHt, 0))}
+                    </td>
+                    <td />
+                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-rose-700">
+                      {fmtEur(agentStats.reduce((s, r) => s + r.commission, 0))}
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

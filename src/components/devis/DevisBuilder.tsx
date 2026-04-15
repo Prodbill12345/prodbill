@@ -21,6 +21,7 @@ const LigneSchema = z.object({
   prixUnit: z.coerce.number().min(0, "Prix ≥ 0"),
   tauxIndexation: z.coerce.number().min(0).max(100).optional(),
   nomComedien: z.string().optional(),
+  agentId: z.string().optional(),
 });
 
 const SectionSchema = z.object({
@@ -74,12 +75,21 @@ interface DevisInitialData {
       prixUnit: number;
       tauxIndexation?: number;
       nomComedien?: string | null;
+      agentId?: string | null;
     }[];
   }[];
 }
 
+interface AgentRef {
+  id: string;
+  nom: string;
+  prenom?: string | null;
+  agence?: string | null;
+}
+
 interface DevisBuilderProps {
   clients: Client[];
+  agents?: AgentRef[];
   defaultTaux: {
     tauxCsComedien: number;
     tauxCsTech: number;
@@ -91,7 +101,7 @@ interface DevisBuilderProps {
   initialData?: DevisInitialData;
 }
 
-export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: DevisBuilderProps) {
+export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initialData }: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -136,6 +146,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
             lignes: s.lignes.map((l) => ({
               ...l,
               nomComedien: l.nomComedien ?? undefined,
+              agentId: l.agentId ?? undefined,
             })),
           })),
         }
@@ -478,6 +489,7 @@ export function DevisBuilder({ clients, defaultTaux, devisId, initialData }: Dev
               onRemove={() => removeSection(si)}
               canRemove={sectionFields.length > 1}
               watchedLignes={watchedValues.sections?.[si]?.lignes ?? []}
+              agents={agents}
             />
           ))}
 
@@ -670,6 +682,7 @@ interface SectionBlockProps {
   onRemove: () => void;
   canRemove: boolean;
   watchedLignes: Partial<z.infer<typeof LigneSchema>>[];
+  agents: AgentRef[];
 }
 
 function SectionBlock({
@@ -683,6 +696,7 @@ function SectionBlock({
   onRemove,
   canRemove,
   watchedLignes,
+  agents,
 }: SectionBlockProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -935,6 +949,19 @@ function SectionBlock({
                       placeholder="Nom du comédien"
                       className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs italic text-slate-500 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
                     />
+                  )}
+                  {tagValue === "ARTISTE" && agents.length > 0 && (
+                    <select
+                      {...register(`sections.${sectionIndex}.lignes.${li}.agentId`)}
+                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
+                    >
+                      <option value="">Associer un agent (optionnel)</option>
+                      {agents.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.prenom ? `${a.prenom} ${a.nom}` : a.nom}{a.agence ? ` — ${a.agence}` : ""}
+                        </option>
+                      ))}
+                    </select>
                   )}
                 </div>
 

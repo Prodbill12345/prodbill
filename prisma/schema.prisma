@@ -105,6 +105,7 @@ model Company {
   templates DevisTemplate[]
   documents Document[]
   budgets   BudgetPrevisionnel[]
+  agents    Agent[]
 }
 
 // ─────────────────────────────────────────────
@@ -269,6 +270,8 @@ model DevisLigne {
   total          Float    // quantite × prixUnit (dénormalisé)
   tauxIndexation Float    @default(0) // pourcentage, ex: 2.0 pour 2%
   nomComedien    String?  // Nom du comédien (ARTISTE uniquement, optionnel)
+  agentId        String?  // Agent associé (ARTISTE uniquement, interne)
+  agent          Agent?   @relation(fields: [agentId], references: [id])
   ordre          Int
 
   @@index([sectionId])
@@ -450,6 +453,28 @@ model DevisTemplate {
 
   @@index([companyId])
   @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// AGENT VOIX OFF
+// ─────────────────────────────────────────────
+
+model Agent {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom            String
+  prenom         String?
+  email          String?
+  telephone      String?
+  agence         String?  // Nom de l'agence
+  tauxCommission Float    @default(10) // En %
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  lignes DevisLigne[]
+
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────

@@ -37,10 +37,17 @@ export default async function ModifierDevisPage({
     redirect(`/devis/${id}`);
   }
 
-  const clients = await prisma.client.findMany({
-    where: { companyId: user.companyId },
-    orderBy: { name: "asc" },
-  });
+  const [clients, agents] = await Promise.all([
+    prisma.client.findMany({
+      where: { companyId: user.companyId },
+      orderBy: { name: "asc" },
+    }),
+    prisma.agent.findMany({
+      where: { companyId: user.companyId },
+      select: { id: true, nom: true, prenom: true, agence: true },
+      orderBy: [{ agence: "asc" }, { nom: "asc" }],
+    }),
+  ]);
 
   const defaultTaux = {
     tauxCsComedien: user.company.defaultTauxCsComedien,
@@ -69,6 +76,8 @@ export default async function ModifierDevisPage({
         tag: l.tag as "ARTISTE" | "TECHNICIEN_HCS" | "STUDIO" | "MUSIQUE" | "AGENT",
         quantite: l.quantite,
         prixUnit: l.prixUnit,
+        nomComedien: l.nomComedien,
+        agentId: l.agentId,
         tauxIndexation: l.tauxIndexation ?? 0,
       })),
     })),
@@ -91,6 +100,7 @@ export default async function ModifierDevisPage({
 
       <DevisBuilder
         clients={clients}
+        agents={agents}
         defaultTaux={defaultTaux}
         devisId={id}
         initialData={initialData}

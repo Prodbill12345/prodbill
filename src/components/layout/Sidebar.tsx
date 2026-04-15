@@ -16,6 +16,7 @@ import {
   UserPlus,
   Zap,
   BarChart3,
+  Mic2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +62,13 @@ const navItems: NavItem[] = [
       label: "Nouveau client",
       icon: UserPlus,
     },
+  },
+  {
+    href: "/agents",
+    label: "Agents",
+    icon: Mic2,
+    iconColor: "text-rose-400",
+    iconBg: "bg-rose-500/10",
   },
   {
     href: "/budget",

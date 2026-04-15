@@ -47,7 +47,7 @@ export async function GET(req: Request) {
     const annee = parseInt(url.searchParams.get("annee") ?? String(new Date().getFullYear()), 10);
 
     // ── Données ─────────────────────────────────────────────────────────────
-    const [budget, devis, factures] = await Promise.all([
+    const [budget, devis, factures, agents] = await Promise.all([
       prisma.budgetPrevisionnel.findUnique({
         where: { companyId_annee: { companyId: user.companyId, annee } },
         include: {
@@ -72,6 +72,11 @@ export async function GET(req: Request) {
           },
         },
         select: { clientId: true, totalHt: true },
+      }),
+      prisma.agent.findMany({
+        where: { companyId: user.companyId },
+        select: { id: true, nom: true, prenom: true, agence: true, tauxCommission: true },
+        orderBy: [{ agence: "asc" }, { nom: "asc" }],
       }),
     ]);
 
@@ -161,6 +166,41 @@ export async function GET(req: Request) {
       row.getCell(11).numFmt = "0.0%";
     }
     autoWidth(sh3);
+
+    // ── Onglet 4 : Agents ────────────────────────────────────────────────────
+    const sh4 = wb.addWorksheet("Agents");
+    addHeader(sh4, ["Agent", "Agence", "Taux commission", "Nb devis", "Montant HT total", "Commission estimée"]);
+    const allLignesByAgent: Record<string, { montantHt: number; devisIds: Set<string> }> = {};
+    for (const d of devis) {
+      for (const s of d.sections) {
+        for (const l of s.lignes) {
+          if (!l.agentId) continue;
+          if (!allLignesByAgent[l.agentId]) {
+            allLignesByAgent[l.agentId] = { montantHt: 0, devisIds: new Set() };
+          }
+          allLignesByAgent[l.agentId].montantHt += l.quantite * l.prixUnit;
+          allLignesByAgent[l.agentId].devisIds.add(d.id);
+        }
+      }
+    }
+    for (const agent of agents) {
+      const stats = allLignesByAgent[agent.id];
+      const montantHt = stats?.montantHt ?? 0;
+      const nbDevis = stats?.devisIds.size ?? 0;
+      const commission = (montantHt * agent.tauxCommission) / 100;
+      const row = sh4.addRow([
+        agent.prenom ? `${agent.prenom} ${agent.nom}` : agent.nom,
+        agent.agence ?? "",
+        agent.tauxCommission / 100,
+        nbDevis,
+        montantHt,
+        commission,
+      ]);
+      row.getCell(3).numFmt = "0%";
+      row.getCell(5).numFmt = CURRENCY_FMT;
+      row.getCell(6).numFmt = CURRENCY_FMT;
+    }
+    autoWidth(sh4);
 
     // ── Réponse ──────────────────────────────────────────────────────────────
     const buf = await wb.xlsx.writeBuffer();
