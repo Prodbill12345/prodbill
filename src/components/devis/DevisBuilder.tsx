@@ -20,7 +20,7 @@ const LigneSchema = z.object({
   quantite: z.coerce.number().positive("Quantité > 0"),
   prixUnit: z.coerce.number().min(0, "Prix ≥ 0"),
   tauxIndexation: z.coerce.number().min(0).max(100).optional(),
-  nomComedien: z.string().optional(),
+  comedienId: z.string().optional(),
   agentId: z.string().optional(),
 });
 
@@ -70,7 +70,7 @@ interface DevisInitialData {
       quantite: number;
       prixUnit: number;
       tauxIndexation?: number;
-      nomComedien?: string | null;
+      comedienId?: string | null;
       agentId?: string | null;
     }[];
   }[];
@@ -83,9 +83,16 @@ interface AgentRef {
   agence?: string | null;
 }
 
+interface ComedienRef {
+  id: string;
+  prenom: string;
+  nom: string;
+}
+
 interface DevisBuilderProps {
   clients: Client[];
   agents?: AgentRef[];
+  comediens?: ComedienRef[];
   defaultTaux: {
     tauxCsComedien: number;
     tauxCsTech: number;
@@ -97,7 +104,7 @@ interface DevisBuilderProps {
   initialData?: DevisInitialData;
 }
 
-export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initialData }: DevisBuilderProps) {
+export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux, devisId, initialData }: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -139,7 +146,7 @@ export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initi
             ...s,
             lignes: s.lignes.map((l) => ({
               ...l,
-              nomComedien: l.nomComedien ?? undefined,
+              comedienId: l.comedienId ?? undefined,
               agentId: l.agentId ?? undefined,
             })),
           })),
@@ -462,6 +469,7 @@ export function DevisBuilder({ clients, agents = [], defaultTaux, devisId, initi
               canRemove={sectionFields.length > 1}
               watchedLignes={watchedValues.sections?.[si]?.lignes ?? []}
               agents={agents}
+              comediens={comediens}
             />
           ))}
 
@@ -655,6 +663,7 @@ interface SectionBlockProps {
   canRemove: boolean;
   watchedLignes: Partial<z.infer<typeof LigneSchema>>[];
   agents: AgentRef[];
+  comediens: ComedienRef[];
 }
 
 function SectionBlock({
@@ -669,6 +678,7 @@ function SectionBlock({
   canRemove,
   watchedLignes,
   agents,
+  comediens,
 }: SectionBlockProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -915,12 +925,18 @@ function SectionBlock({
                       className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  {tagValue === "ARTISTE" && (
-                    <input
-                      {...register(`sections.${sectionIndex}.lignes.${li}.nomComedien`)}
-                      placeholder="Nom du comédien"
-                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs italic text-slate-500 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
-                    />
+                  {tagValue === "ARTISTE" && comediens.length > 0 && (
+                    <select
+                      {...register(`sections.${sectionIndex}.lignes.${li}.comedienId`)}
+                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
+                    >
+                      <option value="">Comédien (optionnel)</option>
+                      {comediens.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.prenom} {c.nom}
+                        </option>
+                      ))}
+                    </select>
                   )}
                   {tagValue === "ARTISTE" && agents.length > 0 && (
                     <select

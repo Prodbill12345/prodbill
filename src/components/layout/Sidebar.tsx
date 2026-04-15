@@ -17,6 +17,7 @@ import {
   Zap,
   BarChart3,
   Mic2,
+  Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,13 @@ const navItems: NavItem[] = [
       label: "Nouveau client",
       icon: UserPlus,
     },
+  },
+  {
+    href: "/comediens",
+    label: "Comédiens",
+    icon: Smile,
+    iconColor: "text-pink-400",
+    iconBg: "bg-pink-500/10",
   },
   {
     href: "/agents",

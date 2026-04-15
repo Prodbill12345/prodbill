@@ -96,16 +96,17 @@ model Company {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  users     User[]
-  clients   Client[]
-  devis     Devis[]
-  factures  Facture[]
-  counters  Counter[]
-  auditLogs AuditLog[]
-  templates DevisTemplate[]
-  documents Document[]
-  budgets   BudgetPrevisionnel[]
-  agents    Agent[]
+  users      User[]
+  clients    Client[]
+  devis      Devis[]
+  factures   Facture[]
+  counters   Counter[]
+  auditLogs  AuditLog[]
+  templates  DevisTemplate[]
+  documents  Document[]
+  budgets    BudgetPrevisionnel[]
+  agents     Agent[]
+  comediens  Comedien[]
 }
 
 // ─────────────────────────────────────────────
@@ -266,9 +267,10 @@ model DevisLigne {
   quantite       Float    @default(1)
   prixUnit       Float
   total          Float    // quantite × prixUnit (dénormalisé)
-  tauxIndexation Float    @default(0) // pourcentage, ex: 2.0 pour 2%
-  nomComedien    String?  // Nom du comédien (ARTISTE uniquement, optionnel)
-  agentId        String?  // Agent associé (ARTISTE uniquement, interne)
+  tauxIndexation Float      @default(0) // pourcentage, ex: 2.0 pour 2%
+  comedienId     String?  // Comédien associé (ARTISTE uniquement, interne)
+  comedien       Comedien? @relation(fields: [comedienId], references: [id])
+  agentId        String?  // Agent voix-off direct (ARTISTE uniquement, interne)
   agent          Agent?   @relation(fields: [agentId], references: [id])
   ordre          Int
 
@@ -457,6 +459,27 @@ model DevisTemplate {
 }
 
 // ─────────────────────────────────────────────
+// COMEDIEN
+// ─────────────────────────────────────────────
+
+model Comedien {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  prenom    String
+  nom       String
+  agentId   String?
+  agent     Agent?   @relation(fields: [agentId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lignes DevisLigne[]
+
+  @@index([companyId])
+  @@index([agentId])
+}
+
+// ─────────────────────────────────────────────
 // AGENT VOIX OFF
 // ─────────────────────────────────────────────
 
@@ -473,7 +496,8 @@ model Agent {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  lignes DevisLigne[]
+  lignes    DevisLigne[]
+  comediens Comedien[]
 
   @@index([companyId])
 }

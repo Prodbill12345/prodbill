@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Plus,
   Trash2,
@@ -50,6 +50,14 @@ interface DevisLigne {
   total: number;
   tauxIndexation: number;
   agentId: string | null;
+  comedienId: string | null;
+}
+
+interface ComedienRef {
+  id: string;
+  prenom: string;
+  nom: string;
+  agentId: string | null;
 }
 
 interface DevisSection {
@@ -76,6 +84,7 @@ interface BudgetClientProps {
   devis: Devis[];
   clients: ClientRef[];
   agents: AgentSuivi[];
+  comediens: ComedienRef[];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -142,6 +151,7 @@ export function BudgetClient({
   devis: initialDevis,
   clients,
   agents,
+  comediens,
 }: BudgetClientProps) {
   const [budget, setBudget] = useState<Budget | null>(initialBudget);
   const [devis, setDevis] = useState<Devis[]>(initialDevis);
@@ -315,7 +325,27 @@ export function BudgetClient({
         .map((d) => d.id)
     ).size;
     const commission = (montantHt * agent.tauxCommission) / 100;
-    return { agent, nbDevis, montantHt, commission };
+
+    // Per-comedien breakdown for this agent
+    const comedienStats = comediens
+      .filter((c) => c.agentId === agent.id)
+      .map((c) => {
+        const lignesC = devis.flatMap((d) =>
+          d.sections.flatMap((s) =>
+            s.lignes.filter((l) => l.comedienId === c.id)
+          )
+        );
+        const montant = lignesC.reduce((s, l) => s + l.quantite * l.prixUnit, 0);
+        const nb = new Set(
+          devis
+            .filter((d) => d.sections.some((s) => s.lignes.some((l) => l.comedienId === c.id)))
+            .map((d) => d.id)
+        ).size;
+        return { comedien: c, montant, nb };
+      })
+      .filter((r) => r.montant > 0 || r.nb > 0);
+
+    return { agent, nbDevis, montantHt, commission, comedienStats };
   }).filter((row) => row.montantHt > 0 || row.nbDevis > 0);
 
   // ── Budget totaux ──────────────────────────────────────────────────────────
@@ -722,19 +752,33 @@ export function BudgetClient({
                     </td>
                   </tr>
                 ) : (
-                  agentStats.map(({ agent, nbDevis, montantHt, commission }) => (
-                    <tr key={agent.id} className="border-b border-slate-50 hover:bg-slate-50/40">
-                      <td className="px-5 py-3.5 text-sm font-medium text-slate-800">
-                        {agent.prenom ? `${agent.prenom} ${agent.nom}` : agent.nom}
-                      </td>
-                      <td className="px-5 py-3.5 text-sm text-slate-500">
-                        {agent.agence ?? <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="px-5 py-3.5 text-sm text-center tabular-nums text-slate-600">{nbDevis}</td>
-                      <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(montantHt)}</td>
-                      <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-500">{agent.tauxCommission}%</td>
-                      <td className="px-5 py-3.5 text-sm text-right tabular-nums font-semibold text-rose-600">{fmtEur(commission)}</td>
-                    </tr>
+                  agentStats.map(({ agent, nbDevis, montantHt, commission, comedienStats }) => (
+                    <React.Fragment key={agent.id}>
+                      <tr className="border-b border-slate-50 hover:bg-slate-50/40">
+                        <td className="px-5 py-3.5 text-sm font-medium text-slate-800">
+                          {agent.prenom ? `${agent.prenom} ${agent.nom}` : agent.nom}
+                        </td>
+                        <td className="px-5 py-3.5 text-sm text-slate-500">
+                          {agent.agence ?? <span className="text-slate-300">—</span>}
+                        </td>
+                        <td className="px-5 py-3.5 text-sm text-center tabular-nums text-slate-600">{nbDevis}</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(montantHt)}</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-500">{agent.tauxCommission}%</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-semibold text-rose-600">{fmtEur(commission)}</td>
+                      </tr>
+                      {comedienStats.map(({ comedien, montant, nb }) => (
+                        <tr key={`${agent.id}-${comedien.id}`} className="border-b border-slate-50 bg-slate-50/30">
+                          <td className="pl-10 pr-5 py-2 text-xs text-slate-500 flex items-center gap-1.5">
+                            <span className="text-slate-300">↳</span>
+                            {comedien.prenom} {comedien.nom}
+                          </td>
+                          <td />
+                          <td className="px-5 py-2 text-xs text-center tabular-nums text-slate-400">{nb}</td>
+                          <td className="px-5 py-2 text-xs text-right tabular-nums text-slate-500">{fmtEur(montant)}</td>
+                          <td colSpan={2} />
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))
                 )}
               </tbody>

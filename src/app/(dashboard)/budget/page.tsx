@@ -15,7 +15,7 @@ export default async function BudgetPage() {
 
   const annee = new Date().getFullYear();
 
-  const [budget, devis, factures, clients, agents] = await Promise.all([
+  const [budget, devis, factures, clients, agents, comediens] = await Promise.all([
     prisma.budgetPrevisionnel.findUnique({
       where: { companyId_annee: { companyId: user.companyId, annee } },
       include: {
@@ -56,6 +56,11 @@ export default async function BudgetPage() {
       select: { id: true, nom: true, prenom: true, agence: true, tauxCommission: true },
       orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),
+    prisma.comedien.findMany({
+      where: { companyId: user.companyId },
+      select: { id: true, prenom: true, nom: true, agentId: true },
+      orderBy: [{ nom: "asc" }, { prenom: "asc" }],
+    }),
   ]);
 
   // CA réalisé par client
@@ -72,6 +77,7 @@ export default async function BudgetPage() {
       devis={devis}
       clients={clients}
       agents={agents}
+      comediens={comediens}
     />
   );
 }
