@@ -300,9 +300,10 @@ model Facture {
   totalTtc Float
 
   // Dates
-  dateEmission DateTime?
-  dateEcheance DateTime?
-  datePaiement DateTime?
+  dateEmission   DateTime?
+  dateEcheance   DateTime?
+  datePaiement   DateTime?
+  dateReglement  DateTime?
 
   // Mentions légales L441-9 (snapshot au moment de l'émission)
   siretEmetteur      String @default("")

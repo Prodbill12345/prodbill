@@ -238,6 +238,11 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                 Échéance : {fmtDate(facture.dateEcheance)}
               </Text>
             )}
+            {facture.dateReglement && (
+              <Text style={s.docDate}>
+                Date de règlement : {fmtDate(facture.dateReglement)}
+              </Text>
+            )}
           </View>
         </View>
 

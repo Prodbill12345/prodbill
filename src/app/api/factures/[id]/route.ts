@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const UpdateFactureSchema = z.object({
   numeroBdc: z.string().optional().nullable(),
+  dateReglement: z.string().nullable().optional(), // "YYYY-MM-DD"
 });
 
 export async function PUT(
@@ -18,15 +19,22 @@ export async function PUT(
       where: { id, companyId: user.companyId },
     });
     if (!existing) return Response.json({ error: "Facture introuvable" }, { status: 404 });
-    if (existing.emiseAt) return Response.json({ error: "Facture immuable après émission" }, { status: 403 });
 
     const body = await req.json();
     const input = UpdateFactureSchema.parse(body);
+
+    // numeroBdc : uniquement avant émission
+    if (existing.emiseAt && input.numeroBdc !== undefined) {
+      return Response.json({ error: "Facture immuable après émission" }, { status: 403 });
+    }
 
     const facture = await prisma.facture.update({
       where: { id },
       data: {
         ...(input.numeroBdc !== undefined && { numeroBdc: input.numeroBdc }),
+        ...(input.dateReglement !== undefined && {
+          dateReglement: input.dateReglement ? new Date(input.dateReglement) : null,
+        }),
       },
     });
 

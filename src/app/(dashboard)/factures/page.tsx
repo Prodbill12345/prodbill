@@ -104,6 +104,9 @@ export default async function FacturesPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   Échéance
                 </th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Date règlement
+                </th>
                 <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   Total TTC
                 </th>
@@ -157,6 +160,9 @@ export default async function FacturesPage() {
                       }`}
                     >
                       {formatDate(f.dateEcheance)}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-400">
+                      {f.dateReglement ? formatDate(f.dateReglement) : <span className="text-slate-200">—</span>}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <p className="text-sm font-semibold text-slate-900 tabular-nums">
