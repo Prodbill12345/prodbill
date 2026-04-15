@@ -257,6 +257,9 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
             {devis.dateValidite && (
               <Text style={s.docDate}>Valide jusqu&apos;au {fmtDate(devis.dateValidite)}</Text>
             )}
+            {devis.dateSeance && (
+              <Text style={s.docDate}>Date de la séance : {fmtDate(devis.dateSeance)}</Text>
+            )}
           </View>
         </View>
 

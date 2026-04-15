@@ -72,6 +72,9 @@ export default async function ModifierDevisPage({
     dateValidite: devis.dateValidite
       ? devis.dateValidite.toISOString().slice(0, 10)
       : null,
+    dateSeance: devis.dateSeance
+      ? devis.dateSeance.toISOString().slice(0, 10)
+      : null,
     notes: devis.notes,
     remise: devis.remise ?? 0,
     sections: devis.sections.map((s) => ({

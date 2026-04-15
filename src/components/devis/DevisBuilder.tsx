@@ -41,6 +41,7 @@ const DevisFormSchema = z.object({
   tauxFg: z.coerce.number().min(0).max(1),
   tauxMarge: z.coerce.number().min(0).max(1),
   dateValidite: z.string().optional(),
+  dateSeance: z.string().optional(),
   notes: z.string().optional(),
   remise: z.coerce.number().min(0).optional(),
   sections: z.array(SectionSchema).min(1, "Au moins une section"),
@@ -60,6 +61,7 @@ interface DevisInitialData {
   tauxFg: number;
   tauxMarge: number;
   dateValidite?: string | null;
+  dateSeance?: string | null;
   notes?: string | null;
   remise?: number | null;
   sections: {
@@ -140,6 +142,7 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
           tauxFg: initialData.tauxFg,
           tauxMarge: initialData.tauxMarge,
           dateValidite: initialData.dateValidite ?? undefined,
+          dateSeance: initialData.dateSeance ?? undefined,
           notes: initialData.notes ?? undefined,
           remise: initialData.remise ?? undefined,
           sections: initialData.sections.map((s) => ({
@@ -351,6 +354,17 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
               <input
                 type="date"
                 {...register("dateValidite")}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Date de la séance
+              </label>
+              <input
+                type="date"
+                {...register("dateSeance")}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

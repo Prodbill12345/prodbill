@@ -212,6 +212,7 @@ model Devis {
 
   dateEmission DateTime?
   dateValidite DateTime?
+  dateSeance   DateTime?
   notes        String?
   pdfUrl       String?   // Vercel Blob URL
 
