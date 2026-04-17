@@ -367,7 +367,7 @@ export function BudgetClient({
           className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-lg text-sm font-medium text-white hover:bg-slate-800 transition-colors"
         >
           <Download className="w-4 h-4" />
-          Exporter Excel
+          Exporter tout
         </a>
       </div>
 
