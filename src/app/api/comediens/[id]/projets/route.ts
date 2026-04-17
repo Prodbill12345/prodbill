@@ -28,6 +28,7 @@ export async function GET(
         tag: true,
         quantite: true,
         prixUnit: true,
+        paiementComedien: true,
         section: {
           select: {
             devis: {
@@ -56,7 +57,7 @@ export async function GET(
       statut: string;
       dateSeance: Date | null;
       client: { id: string; name: string };
-      lignes: { id: string; libelle: string; tag: string; montantHt: number }[];
+      lignes: { id: string; libelle: string; tag: string; montantHt: number; paiementComedien: boolean }[];
     }>();
 
     for (const ligne of lignes) {
@@ -83,6 +84,7 @@ export async function GET(
         libelle: ligne.libelle,
         tag: ligne.tag,
         montantHt,
+        paiementComedien: ligne.paiementComedien,
       });
     }
 

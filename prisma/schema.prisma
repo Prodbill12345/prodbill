@@ -273,6 +273,7 @@ model DevisLigne {
   comedien       Comedien? @relation(fields: [comedienId], references: [id])
   agentId        String?  // Agent voix-off direct (ARTISTE uniquement, interne)
   agent          Agent?   @relation(fields: [agentId], references: [id])
+  paiementComedien Boolean @default(false) // statut paiement interne, jamais dans PDF
   ordre          Int
 
   @@index([sectionId])

@@ -33,6 +33,7 @@ interface ProjetLigne {
   libelle: string;
   tag: string;
   montantHt: number;
+  paiementComedien: boolean;
 }
 
 interface Projet {
@@ -177,6 +178,36 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
 
   const totalMontant = drawer?.projets.reduce((s, p) => s + p.montantTotalHt, 0) ?? 0;
 
+  async function togglePaiement(devisId: string, lignes: ProjetLigne[]) {
+    // Si toutes les lignes sont payées → on bascule à false, sinon → true
+    const allPaid = lignes.every((l) => l.paiementComedien);
+    const newState = !allPaid;
+
+    // Optimistic update
+    setDrawer((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        projets: prev.projets.map((p) =>
+          p.devisId === devisId
+            ? { ...p, lignes: p.lignes.map((l) => ({ ...l, paiementComedien: newState })) }
+            : p
+        ),
+      };
+    });
+
+    // Appels API en parallèle pour toutes les lignes du projet
+    await Promise.all(
+      lignes.map((l) =>
+        fetch(`/api/comediens/lignes/${l.id}/paiement`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paiementComedien: newState }),
+        })
+      )
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-8 py-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -318,6 +349,7 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
                       <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date séance</th>
                       <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
                       <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant HT</th>
+                      <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Paiement</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -351,6 +383,18 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
                         <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">
                           {fmtEur(p.montantTotalHt)}
                         </td>
+                        <td className="px-5 py-3.5 text-center">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); togglePaiement(p.devisId, p.lignes); }}
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+                              p.lignes.every((l) => l.paiementComedien)
+                                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                : "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                            }`}
+                          >
+                            {p.lignes.every((l) => l.paiementComedien) ? "Payé" : "Non payé"}
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -362,6 +406,7 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
                       <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">
                         {fmtEur(totalMontant)}
                       </td>
+                      <td />
                     </tr>
                   </tfoot>
                 </table>
