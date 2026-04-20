@@ -50,6 +50,13 @@ const STATUT_DEVIS: Record<string, string> = {
   REFUSE: "Refusé",
   EXPIRE: "Expiré",
 };
+const TAG_LIGNE: Record<string, string> = {
+  ARTISTE: "Artiste",
+  TECHNICIEN_HCS: "Technicien HCS",
+  STUDIO: "Studio",
+  MUSIQUE: "Musique",
+  AGENT: "Agent",
+};
 const TYPE_FACTURE: Record<string, string> = {
   ACOMPTE: "Acompte",
   SOLDE: "Solde",
@@ -87,7 +94,17 @@ export async function GET(req: Request) {
         where: { companyId: user.companyId },
         include: {
           client: { select: { id: true, name: true } },
-          sections: { include: { lignes: true }, orderBy: { ordre: "asc" } },
+          sections: {
+            include: {
+              lignes: {
+                include: {
+                  comedien: { select: { id: true, prenom: true, nom: true } },
+                },
+                orderBy: { ordre: "asc" },
+              },
+            },
+            orderBy: { ordre: "asc" },
+          },
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -126,11 +143,90 @@ export async function GET(req: Request) {
     wb.created = new Date();
 
     // ════════════════════════════════════════════════════════════════════════
-    // Onglet 1 — Devis
+    // Onglet 1 — Lignes Devis (une ligne par ligne de devis)
     // ════════════════════════════════════════════════════════════════════════
-    const shDevis = wb.addWorksheet("Devis");
+    const shLignesDevis = wb.addWorksheet("Lignes Devis");
+    addHeader(shLignesDevis, [
+      "N° Devis", "Date", "Nom projet", "Date séance", "Statut", "Client",
+      "Section", "Libellé", "Comédien", "Tag", "Qté", "P.U. HT", "Total ligne HT",
+      "Indexation %", "Montant indexation", "Agent voix-off", "% PIPE",
+    ]);
+
+    for (const d of devis) {
+      for (const section of d.sections) {
+        for (const ligne of section.lignes) {
+          const montantIndexation =
+            Math.round(ligne.quantite * ligne.prixUnit * ((ligne.tauxIndexation ?? 0) / 100) * 100) / 100;
+          const comedienNom = ligne.comedien
+            ? `${ligne.comedien.prenom} ${ligne.comedien.nom}`
+            : "";
+          const agentVoixOff = ligne.agentId ? "Oui" : "Non";
+
+          const row = shLignesDevis.addRow([
+            d.numero ?? "Brouillon",
+            fmtDate(d.dateEmission ?? d.createdAt),
+            d.nomProjet ?? "",
+            fmtDate(d.dateSeance),
+            STATUT_DEVIS[d.statut] ?? d.statut,
+            d.client.name,
+            section.titre,
+            ligne.libelle,
+            comedienNom,
+            TAG_LIGNE[ligne.tag] ?? ligne.tag,
+            ligne.quantite,
+            ligne.prixUnit,
+            ligne.quantite * ligne.prixUnit,
+            (ligne.tauxIndexation ?? 0) / 100,
+            montantIndexation,
+            agentVoixOff,
+            (d.tauxPipe ?? 0) / 100,
+          ]);
+
+          row.getCell(12).numFmt = NUM_FMT; // P.U. HT
+          row.getCell(13).numFmt = NUM_FMT; // Total ligne HT
+          row.getCell(14).numFmt = PCT_FMT; // Indexation %
+          row.getCell(15).numFmt = NUM_FMT; // Montant indexation
+          row.getCell(17).numFmt = PCT_FMT; // % PIPE
+        }
+      }
+    }
+    autoWidth(shLignesDevis);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // Onglet 2 — Lignes Factures (une ligne par facture)
+    // ════════════════════════════════════════════════════════════════════════
+    const shLignesFactures = wb.addWorksheet("Lignes Factures");
+    addHeader(shLignesFactures, [
+      "N° Facture", "Date", "Type", "Statut", "Client", "N° BDC", "Date règlement",
+      "Section", "Libellé", "Tag", "Qté", "P.U. HT", "Total ligne HT",
+    ]);
+
+    for (const f of factures) {
+      const row = shLignesFactures.addRow([
+        f.numero,
+        fmtDate(f.dateEmission),
+        TYPE_FACTURE[f.type] ?? f.type,
+        STATUT_FACTURE[f.statut] ?? f.statut,
+        f.client.name,
+        f.numeroBdc ?? "",
+        fmtDate(f.dateReglement),
+        "", // Section — non disponible sans modèle FactureLigne
+        "", // Libellé
+        "", // Tag
+        "", // Qté
+        "", // P.U. HT
+        f.totalHt,
+      ]);
+      row.getCell(13).numFmt = NUM_FMT; // Total ligne HT
+    }
+    autoWidth(shLignesFactures);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // Onglet 3 — Totaux Devis (une ligne par devis)
+    // ════════════════════════════════════════════════════════════════════════
+    const shDevis = wb.addWorksheet("Totaux Devis");
     addHeader(shDevis, [
-      "N° Devis", "Date", "Client", "Nom projet", "Date séance", "Statut", "% PIPE",
+      "N° Devis", "Date", "Client", "Nom projet", "Statut", "% PIPE",
       "Sous-total HT", "CS Artistes", "CS Tech", "Frais généraux", "Marge",
       "Indexation artiste", "Indexation musique", "Agent voix-off",
       "Total HT", "TVA", "Total TTC",
@@ -153,7 +249,6 @@ export async function GET(req: Request) {
         fmtDate(d.dateEmission ?? d.createdAt),
         d.client.name,
         d.nomProjet ?? "",
-        fmtDate(d.dateSeance),
         STATUT_DEVIS[d.statut] ?? d.statut,
         (d.tauxPipe ?? 0) / 100,
         d.sousTotal,
@@ -168,18 +263,18 @@ export async function GET(req: Request) {
         d.tva,
         d.totalTtc,
       ]);
-      row.getCell(7).numFmt = PCT_FMT;
-      for (let c = 8; c <= 18; c++) row.getCell(c).numFmt = NUM_FMT;
+      row.getCell(6).numFmt = PCT_FMT;
+      for (let c = 7; c <= 17; c++) row.getCell(c).numFmt = NUM_FMT;
     }
     autoWidth(shDevis);
 
     // ════════════════════════════════════════════════════════════════════════
-    // Onglet 2 — Factures
+    // Onglet 4 — Totaux Factures (une ligne par facture)
     // ════════════════════════════════════════════════════════════════════════
-    const shFactures = wb.addWorksheet("Factures");
+    const shFactures = wb.addWorksheet("Totaux Factures");
     addHeader(shFactures, [
-      "N° Facture", "Date émission", "Client", "N° BDC", "Type",
-      "Statut paiement", "Date règlement", "Montant HT", "TVA", "Montant TTC",
+      "N° Facture", "Date", "Client", "N° BDC", "Type",
+      "Statut", "Date règlement", "Total HT", "TVA", "Total TTC",
     ]);
 
     for (const f of factures) {
@@ -200,7 +295,7 @@ export async function GET(req: Request) {
     autoWidth(shFactures);
 
     // ════════════════════════════════════════════════════════════════════════
-    // Onglet 3 — Budget prévisionnel
+    // Onglet 5 — Budget prévisionnel
     // ════════════════════════════════════════════════════════════════════════
     const shBudget = wb.addWorksheet("Budget prévisionnel");
     addHeader(shBudget, [
@@ -238,7 +333,7 @@ export async function GET(req: Request) {
     autoWidth(shBudget);
 
     // ════════════════════════════════════════════════════════════════════════
-    // Onglet 4 — Pipe
+    // Onglet 6 — Pipe
     // ════════════════════════════════════════════════════════════════════════
     const shPipe = wb.addWorksheet("Pipe");
     addHeader(shPipe, ["N° Devis", "Client", "Objet", "Statut", "Montant HT", "% PIPE", "Montant pondéré"]);
@@ -265,14 +360,13 @@ export async function GET(req: Request) {
     autoWidth(shPipe);
 
     // ════════════════════════════════════════════════════════════════════════
-    // Onglet 5 — Agents
+    // Onglet 7 — Agents
     // ════════════════════════════════════════════════════════════════════════
     const shAgents = wb.addWorksheet("Agents");
     addHeader(shAgents, [
       "Agent", "Agence", "Comédiens associés", "Nb devis", "Montant HT total", "Commission estimée",
     ]);
 
-    // Indexer les lignes par agentId
     type AgentStats = { montantHt: number; devisIds: Set<string> };
     const lignesByAgent: Record<string, AgentStats> = {};
     for (const d of devis) {
