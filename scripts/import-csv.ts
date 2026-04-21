@@ -103,9 +103,21 @@ const COL = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function parseFrNumber(s?: string): number {
-  if (!s || s.trim() === "" || s.trim() === "-") return 0;
-  return parseFloat(s.replace(/\s/g, "").replace(",", ".")) || 0;
+function parseAmount(s?: string): number {
+  if (!s) return 0;
+  const cleaned = s
+    .replace(/\s/g, "")   // espaces (y compris insécables)
+    .replace(/_/g, "")    // underscores séparateurs de milliers
+    .replace(/[€Û]/g, "") // symboles parasites dus à l'encodage
+    .replace(",", ".");   // virgule décimale → point
+  if (cleaned === "" || cleaned === "-") return 0;
+  return parseFloat(cleaned) || 0;
+}
+
+function cleanNumero(s?: string): string {
+  if (!s) return "";
+  // Conserve lettres, chiffres, tirets et espaces — retire tout le reste (Ê, Û, etc.)
+  return s.replace(/[^a-zA-Z0-9\- ]/g, "").trim();
 }
 
 function parseFrDate(s?: string): Date | null {
@@ -285,9 +297,9 @@ async function main() {
     const agence      = c(COL.AGENCE);
     const societe     = c(COL.SOCIETE);
     const annonceur   = c(COL.ANNONCEUR);
-    const noDevis     = c(COL.NO_DEVIS);
-    const noFacture   = c(COL.NO_FACTURE);
-    const noDevisLie  = c(COL.NO_DEVIS_LIE);
+    const noDevis     = cleanNumero(c(COL.NO_DEVIS));
+    const noFacture   = cleanNumero(c(COL.NO_FACTURE));
+    const noDevisLie  = cleanNumero(c(COL.NO_DEVIS_LIE));
     const statutPaie  = c(COL.STATUT_PAIEMENT);
     const dateRegl    = c(COL.DATE_REGLEMENT);
     const comedienNom = c(COL.COMEDIEN);
@@ -296,9 +308,9 @@ async function main() {
 
     // Montants : lus depuis la fin de la ligne
     const n = cols.length;
-    const totalHt  = parseFrNumber(cols[n - 4]);
-    const tva      = parseFrNumber(cols[n - 3]);
-    const totalTtc = parseFrNumber(cols[n - 2]);
+    const totalHt  = parseAmount(cols[n - 4]);
+    const tva      = parseAmount(cols[n - 3]);
+    const totalTtc = parseAmount(cols[n - 2]);
 
     // Client = Agence (index 1) — skip uniquement si vide
     const clientNom = agence;
@@ -315,32 +327,47 @@ async function main() {
       let devisId: string | null = null;
 
       if (noDevis && noDevis.toUpperCase() !== "ANNUL") {
-        const existingDevis = devisNumeroToId.get(noDevis);
-        if (existingDevis) {
-          devisId = existingDevis;
+        // Devis.numero n'a pas de contrainte @unique → findFirst + create/update
+        const cachedDevisId = devisNumeroToId.get(noDevis);
+        if (cachedDevisId) {
+          devisId = cachedDevisId;
         } else {
-          const devis = await prisma.devis.create({
-            data: {
-              companyId: company.id,
-              clientId,
-              createdById: adminUser.id,
-              numero: noDevis,
-              objet: annonceur || agence || "Import CSV",
-              statut: mapDevisStatut(statutPaie),
-              annee,
-              dateSeance: parseFrDate(dateSeance1),
-              tauxCsComedien: company.defaultTauxCsComedien,
-              tauxCsTech: company.defaultTauxCsTech,
-              tauxFg: company.defaultTauxFg,
-              tauxMarge: company.defaultTauxMarge,
-              sousTotal: totalHt,
-              totalHt,
-              totalApresRemise: totalHt,
-              tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
-              totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
-            },
+          const devisData = {
+            companyId: company.id,
+            clientId,
+            createdById: adminUser.id,
+            numero: noDevis,
+            objet: annonceur || agence || "Import CSV",
+            statut: mapDevisStatut(statutPaie),
+            annee,
+            dateSeance: parseFrDate(dateSeance1),
+            tauxCsComedien: company.defaultTauxCsComedien,
+            tauxCsTech: company.defaultTauxCsTech,
+            tauxFg: company.defaultTauxFg,
+            tauxMarge: company.defaultTauxMarge,
+            sousTotal: totalHt,
+            totalHt,
+            totalApresRemise: totalHt,
+            tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
+            totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
+          };
+          const existingInDb = await prisma.devis.findFirst({
+            where: { companyId: company.id, numero: noDevis },
             select: { id: true },
           });
+          let devis: { id: string };
+          if (existingInDb) {
+            devis = await prisma.devis.update({
+              where: { id: existingInDb.id },
+              data: devisData,
+              select: { id: true },
+            });
+          } else {
+            devis = await prisma.devis.create({
+              data: devisData,
+              select: { id: true },
+            });
+          }
           devisId = devis.id;
           devisNumeroToId.set(noDevis, devisId);
         }
@@ -398,30 +425,33 @@ async function main() {
         const factTva = tva || Math.round(totalHt * 0.2 * 100) / 100;
         const factTtc = totalTtc || Math.round(totalHt * 1.2 * 100) / 100;
 
-        await prisma.facture.create({
-          data: {
-            companyId: company.id,
-            clientId,
-            devisId: factureDevisId,
-            createdById: adminUser.id,
-            numero: noFacture,
-            type: mapFactureType(noFacture),
-            statut: mapFactureStatut(statutPaie),
-            totalHt,
-            tva: factTva,
-            totalTtc: factTtc,
-            dateEmission: parseFrDate(c(COL.DATE)),
-            dateReglement: parseFrDate(dateRegl),
-            numeroBdc: null,
-            siretEmetteur: "",
-            tvaIntraEmetteur: "",
-            ibanEmetteur: "",
-            bicEmetteur: "",
-            nomBanqueEmetteur: "",
-            conditionsPaiement: "",
-            nomEmetteur: "",
-            adresseEmetteur: "",
-          },
+        // Facture.numero est @unique → upsert standard
+        const factureData = {
+          companyId: company.id,
+          clientId,
+          devisId: factureDevisId,
+          createdById: adminUser.id,
+          type: mapFactureType(noFacture),
+          statut: mapFactureStatut(statutPaie),
+          totalHt,
+          tva: factTva,
+          totalTtc: factTtc,
+          dateEmission: parseFrDate(c(COL.DATE)),
+          dateReglement: parseFrDate(dateRegl),
+          numeroBdc: null,
+          siretEmetteur: "",
+          tvaIntraEmetteur: "",
+          ibanEmetteur: "",
+          bicEmetteur: "",
+          nomBanqueEmetteur: "",
+          conditionsPaiement: "",
+          nomEmetteur: "",
+          adresseEmetteur: "",
+        };
+        await prisma.facture.upsert({
+          where: { numero: noFacture },
+          create: { numero: noFacture, ...factureData },
+          update: factureData,
         });
       }
 
