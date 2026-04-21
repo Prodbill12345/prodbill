@@ -106,10 +106,9 @@ const COL = {
 function parseAmount(s?: string): number {
   if (!s) return 0;
   const cleaned = s
-    .replace(/\s/g, "")   // espaces (y compris insécables)
-    .replace(/_/g, "")    // underscores séparateurs de milliers
-    .replace(/[€Û]/g, "") // symboles parasites dus à l'encodage
-    .replace(",", ".");   // virgule décimale → point
+    .replace(/[\s\t]/g, "")          // espaces et tabs
+    .replace(/[^0-9,\-]/g, "")       // garde uniquement chiffres, virgule, tiret
+    .replace(",", ".");               // virgule décimale → point
   if (cleaned === "" || cleaned === "-") return 0;
   return parseFloat(cleaned) || 0;
 }
@@ -120,11 +119,17 @@ function cleanNumero(s?: string): string {
   return s.replace(/[^a-zA-Z0-9\- ]/g, "").trim();
 }
 
-function parseFrDate(s?: string): Date | null {
-  if (!s || s.trim() === "") return null;
-  const [dd, mm, yyyy] = s.trim().split(/[/\-\.]/);
-  if (!dd || !mm || !yyyy) return null;
-  const d = new Date(`${yyyy.length === 2 ? "20" + yyyy : yyyy}-${mm}-${dd}T00:00:00.000Z`);
+function parseDate(s?: string): Date | null {
+  if (!s) return null;
+  const str = s.trim();
+  if (str === "" || str === "?") return null;
+  const parts = str.split("/");
+  if (parts.length !== 3) return null;
+  const jour = parseInt(parts[0], 10);
+  const mois = parseInt(parts[1], 10);
+  const annee = parseInt(parts[2], 10);
+  if (isNaN(jour) || isNaN(mois) || isNaN(annee)) return null;
+  const d = new Date(annee, mois - 1, jour);
   return isNaN(d.getTime()) ? null : d;
 }
 
@@ -340,7 +345,7 @@ async function main() {
             objet: annonceur || agence || "Import CSV",
             statut: mapDevisStatut(statutPaie),
             annee,
-            dateSeance: parseFrDate(dateSeance1),
+            dateSeance: parseDate(dateSeance1),
             tauxCsComedien: company.defaultTauxCsComedien,
             tauxCsTech: company.defaultTauxCsTech,
             tauxFg: company.defaultTauxFg,
@@ -436,8 +441,8 @@ async function main() {
           totalHt,
           tva: factTva,
           totalTtc: factTtc,
-          dateEmission: parseFrDate(c(COL.DATE)),
-          dateReglement: parseFrDate(dateRegl),
+          dateEmission: parseDate(c(COL.DATE)),
+          dateReglement: parseDate(dateRegl),
           numeroBdc: null,
           siretEmetteur: "",
           tvaIntraEmetteur: "",
