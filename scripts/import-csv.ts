@@ -302,20 +302,26 @@ async function main() {
     const agence      = c(COL.AGENCE);
     const societe     = c(COL.SOCIETE);
     const annonceur   = c(COL.ANNONCEUR);
-    const noDevis     = cleanNumero(c(COL.NO_DEVIS));
-    const noFacture   = cleanNumero(c(COL.NO_FACTURE));
-    const noDevisLie  = cleanNumero(c(COL.NO_DEVIS_LIE));
-    const statutPaie  = c(COL.STATUT_PAIEMENT);
-    const dateRegl    = c(COL.DATE_REGLEMENT);
+    const noDevis       = cleanNumero(c(COL.NO_DEVIS));
+    const noFacture     = cleanNumero(c(COL.NO_FACTURE));
+    const noDevisLie    = cleanNumero(c(COL.NO_DEVIS_LIE));
+    const statutDevisTxt = c(COL.NO_FACTURE); // cols[5] : "DEVIS SIGN", "ANNUL", etc.
+    const estFacture    = c(COL.FACTURE_01) === "1"; // cols[3] : "1" = devis facturé
+    const statutPaie    = c(COL.STATUT_PAIEMENT);
+    const dateRegl      = c(COL.DATE_REGLEMENT);
     const comedienNom = c(COL.COMEDIEN);
     const dateSeance1 = c(COL.DATE_SEANCE1);
     const annee       = parseInt(c(COL.ANNEE)) || new Date().getFullYear();
 
-    // Montants : lus depuis la fin de la ligne
-    const n = cols.length;
-    const totalHt  = parseAmount(cols[n - 4]);
-    const tva      = parseAmount(cols[n - 3]);
-    const totalTtc = parseAmount(cols[n - 2]);
+    // Montants : lus depuis les 4 dernières valeurs non vides
+    // (les colonnes intermédiaires vides font varier les indices absolus)
+    const nonEmpty = cols.filter((v) => {
+      const t = v.trim();
+      return t !== "" && !/^-\s*$/.test(t);
+    });
+    const totalHt  = parseAmount(nonEmpty[nonEmpty.length - 4]);
+    const tva      = parseAmount(nonEmpty[nonEmpty.length - 3]);
+    const totalTtc = parseAmount(nonEmpty[nonEmpty.length - 2]);
 
     // Client = Agence (index 1) — skip uniquement si vide
     const clientNom = agence;
@@ -343,8 +349,9 @@ async function main() {
             createdById: adminUser.id,
             numero: noDevis,
             objet: annonceur || agence || "Import CSV",
-            statut: mapDevisStatut(statutPaie),
+            statut: estFacture ? "ACCEPTE" : mapDevisStatut(statutDevisTxt),
             annee,
+            dateEmission: parseDate(c(COL.DATE)),
             dateSeance: parseDate(dateSeance1),
             tauxCsComedien: company.defaultTauxCsComedien,
             tauxCsTech: company.defaultTauxCsTech,
@@ -412,7 +419,9 @@ async function main() {
       }
 
       // ── Facture ────────────────────────────────────────────────────────
-      if (noFacture && noFacture.toUpperCase() !== "ANNUL" && noFacture.trim() !== "") {
+      // cols[5] peut contenir un statut texte ("DEVIS SIGN", "ANNUL") ou un vrai numéro
+      const isRealFactureNumero = noFacture && /\d/.test(noFacture) && noFacture.toUpperCase() !== "ANNUL";
+      if (isRealFactureNumero) {
         // Résolution du devis lié : N°DevisLié en priorité, puis N°Devis
         let factureDevisId = devisId;
         if (noDevisLie && noDevisLie !== noDevis) {
