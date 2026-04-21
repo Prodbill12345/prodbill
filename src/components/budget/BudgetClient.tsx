@@ -156,7 +156,13 @@ export function BudgetClient({
   const [budget, setBudget] = useState<Budget | null>(initialBudget);
   const [devis, setDevis] = useState<Devis[]>(initialDevis);
   const [pipeFilter, setPipeFilter] = useState<string>("tous");
+  const [pipeAnneeFilter, setPipeAnneeFilter] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Années distinctes présentes dans les devis
+  const anneesDisponibles = Array.from(
+    new Set(devis.map((d) => d.annee).filter((a): a is number => a !== null))
+  ).sort();
 
   // ── Nouvelle ligne budget (formulaire inline) ──────────────────────────────
   const [newClientId, setNewClientId] = useState(clients[0]?.id ?? "");
@@ -303,8 +309,9 @@ export function BudgetClient({
 
   // ── Pipe — filtrage et totaux ──────────────────────────────────────────────
   const devisFiltres = devis.filter((d) => {
-    if (pipeFilter === "tous") return true;
-    return d.statut === pipeFilter;
+    if (pipeFilter !== "tous" && d.statut !== pipeFilter) return false;
+    if (pipeAnneeFilter !== null && d.annee !== pipeAnneeFilter) return false;
+    return true;
   });
   const totalPondere = devisFiltres.reduce(
     (s, d) => s + (d.totalHt * (d.tauxPipe ?? 0)) / 100,
@@ -536,21 +543,50 @@ export function BudgetClient({
               <p className="text-xs text-slate-400">Probabilité de closing par devis</p>
             </div>
           </div>
-          {/* Filtre statut */}
-          <div className="flex gap-1">
-            {["tous", "BROUILLON", "ENVOYE", "ACCEPTE"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setPipeFilter(s)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                  pipeFilter === s
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-500 hover:bg-slate-100"
-                }`}
-              >
-                {s === "tous" ? "Tous" : STATUT_LABELS[s]}
-              </button>
-            ))}
+          {/* Filtres statut + année */}
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1">
+              {["tous", "BROUILLON", "ENVOYE", "ACCEPTE"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setPipeFilter(s)}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                    pipeFilter === s
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-500 hover:bg-slate-100"
+                  }`}
+                >
+                  {s === "tous" ? "Tous" : STATUT_LABELS[s]}
+                </button>
+              ))}
+            </div>
+            {anneesDisponibles.length > 0 && (
+              <div className="flex gap-1 border-l border-slate-200 pl-3">
+                <button
+                  onClick={() => setPipeAnneeFilter(null)}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                    pipeAnneeFilter === null
+                      ? "bg-slate-700 text-white"
+                      : "text-slate-500 hover:bg-slate-100"
+                  }`}
+                >
+                  Toutes
+                </button>
+                {anneesDisponibles.map((a) => (
+                  <button
+                    key={a}
+                    onClick={() => setPipeAnneeFilter(a)}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      pipeAnneeFilter === a
+                        ? "bg-slate-700 text-white"
+                        : "text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

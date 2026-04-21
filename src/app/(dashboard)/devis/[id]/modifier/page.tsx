@@ -32,11 +32,6 @@ export default async function ModifierDevisPage({
 
   if (!devis) notFound();
 
-  // Seuls BROUILLON et ENVOYE sont modifiables
-  if (devis.statut !== "BROUILLON" && devis.statut !== "ENVOYE") {
-    redirect(`/devis/${id}`);
-  }
-
   const [clients, agents, comediens] = await Promise.all([
     prisma.client.findMany({
       where: { companyId: user.companyId },
@@ -65,6 +60,7 @@ export default async function ModifierDevisPage({
     clientId: devis.clientId,
     objet: devis.objet,
     description: devis.description,
+    annee: devis.annee,
     tauxCsComedien: devis.tauxCsComedien,
     tauxCsTech: devis.tauxCsTech,
     tauxFg: devis.tauxFg,

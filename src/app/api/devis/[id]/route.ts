@@ -88,13 +88,6 @@ export async function PUT(
       return Response.json({ error: "Devis introuvable" }, { status: 404 });
     }
 
-    if (existing.statut === "ACCEPTE" || existing.statut === "REFUSE") {
-      return Response.json(
-        { error: "Ce devis ne peut plus être modifié" },
-        { status: 403 }
-      );
-    }
-
     const body = await req.json();
     const input = UpdateDevisSchema.parse(body);
 

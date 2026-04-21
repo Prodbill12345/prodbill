@@ -69,6 +69,9 @@ export default async function DevisPage() {
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   Objet
                 </th>
+                <th className="text-center px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Année
+                </th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   Date
                 </th>
@@ -100,6 +103,9 @@ export default async function DevisPage() {
                   </td>
                   <td className="px-5 py-4 text-sm text-slate-500 max-w-xs truncate">
                     {d.objet}
+                  </td>
+                  <td className="px-5 py-4 text-sm text-slate-400 text-center tabular-nums">
+                    {d.annee ?? <span className="text-slate-300">—</span>}
                   </td>
                   <td className="px-5 py-4 text-sm text-slate-400">
                     {formatDate(d.updatedAt)}
