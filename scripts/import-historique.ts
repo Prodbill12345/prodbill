@@ -75,6 +75,11 @@ interface DevisExtrait {
   tauxPipe?: number;
 }
 
+interface LignesExtrait {
+  dateSeance: string | null;
+  sections: SectionExtrait[];
+}
+
 interface FactureExtrait {
   numero: string;
   date?: string;
@@ -186,6 +191,33 @@ Règles pour le champ "tag" :
 - "AGENT" : commission agent, frais d'agence
 
 Statuts valides : BROUILLON, ENVOYE, ACCEPTE, REFUSE, EXPIRE
+
+Texte du PDF :
+`;
+
+const LIGNES_PROMPT = `Extrais uniquement les lignes détaillées de ce devis français.
+Réponds avec ce JSON exact :
+{
+  "dateSeance": "JJ/MM/AAAA ou null",
+  "sections": [
+    {
+      "nom": "VOIX OFF",
+      "lignes": [
+        { "libelle": "Comédien | prestation", "tag": "ARTISTE", "quantite": 1, "prixUnit": 400 }
+      ]
+    }
+  ]
+}
+
+Règles pour le champ "tag" :
+- "ARTISTE" : comédien, acteur, voix, narrateur, artiste, droits artistiques, nom de personne
+- "TECHNICIEN_HCS" : technicien, ingénieur son, DA, réalisateur, chef de projet, directeur artistique, monteur, mixeur
+- "STUDIO" : location studio, salle, cabine, régie, forfait studio
+- "MUSIQUE" : musique, droits musicaux, licence musicale
+- "AGENT" : commission agent, frais d'agence
+
+Inclure le nom du comédien dans le libellé si présent (ex: "Jean Dupont – voix off").
+dateSeance : date de la séance d'enregistrement si présente dans le document, sinon null.
 
 Texte du PDF :
 `;
@@ -342,15 +374,75 @@ async function importDevis(
     return { fichier: fileName, type: "devis", statut: "erreur", message: `JSON invalide : ${e}\n${raw.slice(0, 200)}` };
   }
 
-  // Skip si numéro déjà en base
+  // Enrichissement si déjà en base : extraire les lignes et remplacer
   if (data.numero) {
     const existing = await prisma.devis.findFirst({
       where: { companyId, numero: data.numero },
       select: { id: true },
     });
     if (existing) {
-      log("⏭ ", `Skip devis ${data.numero} (déjà en base)`);
-      return { fichier: fileName, type: "devis", statut: "skip", numero: data.numero, client: data.client.nom, message: "Numéro déjà en base" };
+      let rawLignes: string;
+      try {
+        rawLignes = await callClaude(LIGNES_PROMPT, pdfText);
+      } catch (e) {
+        return { fichier: fileName, type: "devis", statut: "erreur", message: `Claude API (lignes) : ${e}` };
+      }
+
+      let lignesData: LignesExtrait;
+      try {
+        lignesData = parseJson<LignesExtrait>(rawLignes);
+      } catch (e) {
+        return { fichier: fileName, type: "devis", statut: "erreur", message: `JSON lignes invalide : ${e}\n${rawLignes.slice(0, 200)}` };
+      }
+
+      if (DRY_RUN) {
+        const nbLignes = lignesData.sections.reduce((s, sec) => s + sec.lignes.length, 0);
+        log("🔍", `  [DRY-RUN] Enrichissement devis ${data.numero} — ${lignesData.sections.length} sections, ${nbLignes} lignes`);
+        return { fichier: fileName, type: "devis", statut: "importe", numero: data.numero, client: data.client.nom, message: "dry-run enrichissement" };
+      }
+
+      // Supprimer les sections existantes (cascade → lignes)
+      await prisma.devisSection.deleteMany({ where: { devisId: existing.id } });
+
+      const allLignes = lignesData.sections.flatMap((s) => s.lignes);
+      const totaux = calculerTotaux(allLignes, taux);
+
+      await prisma.devis.update({
+        where: { id: existing.id },
+        data: {
+          dateSeance: parseFrDate(lignesData.dateSeance ?? undefined),
+          sousTotal: totaux.sousTotal,
+          csComedien: totaux.csComedien,
+          csTechniciens: totaux.csTechniciens,
+          baseMarge: totaux.baseMarge,
+          fraisGeneraux: totaux.fraisGeneraux,
+          marge: totaux.marge,
+          totalHt: totaux.totalHt,
+          tva: totaux.tva,
+          totalTtc: totaux.totalTtc,
+          totalApresRemise: totaux.totalHt,
+          sections: {
+            create: lignesData.sections.map((section, sIdx) => ({
+              titre: section.nom,
+              ordre: sIdx,
+              lignes: {
+                create: section.lignes.map((ligne, lIdx) => ({
+                  libelle: ligne.libelle,
+                  tag: normalizeTag(ligne.tag),
+                  quantite: ligne.quantite,
+                  prixUnit: ligne.prixUnit,
+                  total: round2(ligne.quantite * ligne.prixUnit),
+                  tauxIndexation: 0,
+                  ordre: lIdx,
+                })),
+              },
+            })),
+          },
+        },
+      });
+
+      log("✅", `Enrichi  devis ${data.numero} — ${data.client.nom} (${allLignes.length} lignes)`);
+      return { fichier: fileName, type: "devis", statut: "importe", numero: data.numero, client: data.client.nom, message: "enrichi" };
     }
   }
 
