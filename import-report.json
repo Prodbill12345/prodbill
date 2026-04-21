@@ -1,1925 +1,2461 @@
 {
-  "date": "2026-04-20T16:09:29.341Z",
-  "dryRun": true,
+  "date": "2026-04-21T12:43:10.192Z",
+  "dryRun": false,
   "resume": {
-    "imported": 0,
-    "skipped": 0,
-    "errors": 319
+    "imported": 316,
+    "skipped": 2,
+    "errors": 1
   },
   "details": [
     {
       "fichier": "D25722 (2026) - ARTEFACT - TotalEnergies - 2 Spots webradio - Rec + Mix + SD ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK2u3o2BGMHQcVoxkfj\"}"
+      "statut": "importe",
+      "numero": "25722",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D25722 (2026) - ARTEFACT - TotalEnergies - 2 Spots webradio - Rec + Mix + SD✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK2wsxBi7wLE9rGQJqZ\"}"
+      "statut": "importe",
+      "numero": "25722",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D25732 (2026) ✔◉ - CHANGE - Curly - 1 Film 15s + 1 Cut - Rec + Mix + SD + Musique + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK2yWgZ7wdHwZgy44L8\"}"
+      "statut": "importe",
+      "numero": "25732",
+      "client": "CHANGE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26001 ✘ - 1to1 - Film Fiction _Body of Glass_ - Enregistrement Post synchro - 1 journée ✘✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK2zopSepmyKQRyoqNf\"}"
+      "statut": "importe",
+      "numero": "26001",
+      "client": "1TO1",
+      "message": "enrichi"
     },
     {
       "fichier": "D26002 - CHANGE - Louvre Hôtels Group - 2 Films 20 sec - Rec + Mix + Musique + SD - TV et WEB - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK31heCgbxvceshmq73\"}"
+      "statut": "importe",
+      "numero": "26002",
+      "client": "Louvre Hôtels Group",
+      "message": "enrichi"
     },
     {
       "fichier": "D26003 - CHANGE - Louvre Hôtels Group - 4 Films + 4 Cuts - Rec + Mix + Musique + SD - WEB Salons Events RP - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK32pcPqWij8ks7NpCS\"}"
+      "statut": "importe",
+      "numero": "26003",
+      "client": "Louvre Hôtels Group",
+      "message": "enrichi"
     },
     {
       "fichier": "D26003 - CHANGE - Louvre Hôtels Group - 5 Films + 4 Cuts - Rec + Mix + Musique + SD - TV + WEB Salons Events RP- 1 an + Additif Musique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK33dj9WB9E4TuixuNX\"}"
+      "statut": "importe",
+      "numero": "26003",
+      "client": "Louvre Hôtels Group (CHANGE)",
+      "message": "enrichi"
     },
     {
       "fichier": "D26004 ✔◉ - ARTEFACT - Atlantic - Musique de librairie Caleson + Additif mixage - Film _ALFEA M_ ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK352KinGEwiiPZvq76\"}"
+      "statut": "importe",
+      "numero": "26004",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26005 ✔◉ - MALMÖ PRODUCTIONS - Women_s Game - Enregistrement Voix OFF ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK35zMpbhWncwJk6uUD\"}"
+      "statut": "importe",
+      "numero": "26004",
+      "client": "MALMÖ PRODUCTIONS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26006 ✔◉ - WNP - Panzani - 1 Film 15s et 10s _Créatives_ + tag _Pesto Rouge_ - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK36rxBG3u9b2WWk3g5\"}"
+      "statut": "importe",
+      "numero": "26006",
+      "client": "Panzani",
+      "message": "enrichi"
     },
     {
       "fichier": "D26007 ✔◉ - NOVEMBRE - Lidl CVC - Radio Locale - 10 spots et 8 cuts - 2 Villes - 06_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK37sxqbYbDHjzUdXL1\"}"
+      "statut": "importe",
+      "numero": "26007",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26008 ✔◉ - NOVEMBRE - Lidl CVC - 2 Spots + 1 cut - Radio Nationale - 06_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK38jZeVS2DHz7ND4Pa\"}"
+      "statut": "importe",
+      "numero": "26008",
+      "client": "LIDL / Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26009 ✔◉ - ELMA PRODUCTIONS - 1 Film 2 min - CNAM 80 ans de la Sécurité Sociale - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK39uG9rgpGBQzrHJ9j\"}"
+      "statut": "importe",
+      "numero": "26009",
+      "client": "ELMA PRODUCTIONS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26010 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 06_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3ArZJ7oMm8H51fCNx\"}"
+      "statut": "importe",
+      "numero": "26010",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26011 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 08_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3C1m15vUKZC4KDLHf\"}"
+      "statut": "importe",
+      "numero": "26011",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26012 ✔◉ - NOVEMBRE - Lidl CVC - 3 Spots - Radio Nationale - 08_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3CuqTs5fs2pFA9EWQ\"}"
+      "statut": "importe",
+      "numero": "26012",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26013 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 3Films et 2 Cuts NON-FOOD - 08_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3Dz5E6Wa98F78i8DJ\"}"
+      "statut": "importe",
+      "numero": "26013",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26014 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 12_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3FjFNdm4kSbrqwm2b\"}"
+      "statut": "importe",
+      "numero": "26014",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26015 - OGILVY - Additif 2 films animatics _La Laitière débarque_ et _Vermeer_La Laitière à l’écoute_ - 1 comédien + Recherches musicales ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3GdZyJ3o9uvtVinsD\"}"
+      "statut": "importe",
+      "numero": "26015",
+      "client": "OGILVY",
+      "message": "enrichi"
     },
     {
       "fichier": "D26016 ✔◉ - HONDA - Q4 gamme - 1 Spot Radio 20s  - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3HXtff3LAC4oxPD8C\"}"
+      "statut": "importe",
+      "numero": "26016",
+      "client": "Honda",
+      "message": "enrichi"
     },
     {
       "fichier": "D26017 - WNP - Bubendorff - 2 Films 15s - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3JZQoePGxZ59aRyki\"}"
+      "statut": "importe",
+      "numero": "26017",
+      "client": "WNP",
+      "message": "enrichi"
     },
     {
       "fichier": "D26018 ✔◉ - WNP - Bubendorff - Reconduction Droits A3 - Signature Sonore ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3KQWCaYJ7TKzCfWMK\"}"
+      "statut": "importe",
+      "numero": "26018",
+      "client": "WNP",
+      "message": "enrichi"
     },
     {
       "fichier": "D26019 - MCCANN - L_Oreal _Revitalift Laser Jar Reno _ - Clean + Mix + Sound Design ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3Lj8jtu6T4bgCgXSP\"}"
+      "statut": "importe",
+      "numero": "26019",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26020 - MCCANN - L_Oreal _Revitalift Laser Duo et tag Vampire Screen  _ - Clean + Mix + Sound Design ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3N1XPTKJ2XDukr8Ze\"}"
+      "statut": "importe",
+      "numero": "26020",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26021 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 13_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3Qd32ZquCoXa4qkfe\"}"
+      "statut": "importe",
+      "numero": "26021",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26022 ✔◉ - NOVEMBRE - Lidl CVC - 4 Spots - Radio Nationale - 13_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3SZ7wqDa9rPTr57Ng\"}"
+      "statut": "importe",
+      "numero": "26022",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26023 ✔◉ - NOVEMBRE - Lidl CVC - Radio Locale - 10 spots et 8 cuts - 2 Villes - 13_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3Ts19qyQ6ZnPgQwQB\"}"
+      "statut": "importe",
+      "numero": "26023",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26024 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 16_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3VeQfXY6bp2jFaJCE\"}"
+      "statut": "importe",
+      "numero": "26024",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26025 ✔◉ - NOVEMBRE - Lidl CVC - 2 Spots - Radio Nationale - 16_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3WYyWeXF4fRfMzHnb\"}"
+      "statut": "importe",
+      "numero": "26025",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26026 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 2 Films et 1 Cut NON-FOOD - 16_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3XSojmMS63bdYRJwX\"}"
+      "statut": "importe",
+      "numero": "26026",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26027 - CHANGE - Louvre Hôtels Group - Composition Musique Originale  inspiré du titre « The Look » de Metronomy ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3YGuyNPTFkCmd9ciU\"}"
+      "statut": "importe",
+      "numero": "26027",
+      "client": "Louvre Hôtels Group",
+      "message": "enrichi"
     },
     {
       "fichier": "D26028 - WNP - Islos - 1 Film 10s - Rec + Mix et Reconduction Musique A4 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3Z9zjE8TDhaYu9LaN\"}"
+      "statut": "importe",
+      "numero": "26028",
+      "client": "WNP",
+      "message": "enrichi"
     },
     {
       "fichier": "D26029 ✔◉ -  La Croix Rouge - 2 Films et 1 teaser - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3aS99n6nSDZ7SmKNG\"}"
+      "statut": "importe",
+      "numero": "26029",
+      "client": "BAVARDAGES PRODUCTION",
+      "message": "enrichi"
     },
     {
       "fichier": "D26030 - EVEREST - Nos Régions ont du Talent - 2 Films et 2 cuts - TV et Web - Rec et Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3ciojoWthSgP92kue\"}"
+      "statut": "importe",
+      "numero": "26030",
+      "client": "NRT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26031 ✘ - OBSESSION - Loris Giuliano - 1 Film 45min - Clean et Mixage ✘✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3dp3TwRpuRqx7Kszb\"}"
+      "statut": "importe",
+      "numero": "26031",
+      "client": "OBSSESSION",
+      "message": "enrichi"
     },
     {
       "fichier": "D26032 - MCCANN - L_Oreal _Extraordinary Oil _ - Enregistrement + Clean + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3eu2Wgy2icStahh1c\"}"
+      "statut": "importe",
+      "numero": "26032",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26033 - MCCANN - L_Oreal _Hairglotion_ - Enregistrement + Clean + Mix + Sound Design ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3fs4fKU7W4eAYQMJn\"}"
+      "statut": "importe",
+      "numero": "26033",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26034 ✱ - L_OREAL - Droits Musique Business Card (JPA) - A5 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3hDvMiQDQZkkPAgY2\"}"
+      "statut": "importe",
+      "numero": "26034",
+      "client": "L'OREAL",
+      "message": "enrichi"
     },
     {
       "fichier": "D26035 - Sens Interdit Production - Piscine Barbecue - Mixage 5.1 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3i2YTvskDxEqUEE63\"}"
+      "statut": "importe",
+      "numero": "26035",
+      "client": "Sens Interdit Productions",
+      "message": "enrichi"
     },
     {
       "fichier": "D26036 - MCCANN - L_Oreal - Composition Musique Originale - Hors Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3j6nL4DFbDEi95cPx\"}"
+      "statut": "importe",
+      "numero": "26036",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26037 ✔◉ - MARDI8 - Enregistrement Lambert Wilson 3h ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3kKD1yBwfyBfxVZk6\"}"
+      "statut": "importe",
+      "numero": "26037",
+      "client": "MARDI8",
+      "message": "enrichi"
     },
     {
       "fichier": "D26038 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 20_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3mkH5Jf1jogM1ReSo\"}"
+      "statut": "importe",
+      "numero": "26038",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26039 ✔◉ - NOVEMBRE - Lidl CVC - 3 Spots - Radio Nationale - 20_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3nmoBdM8cJcRTYPdi\"}"
+      "statut": "importe",
+      "numero": "26039",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26040 ✔◉ - NOVEMBRE - Lidl CVC - Radio Locale - 10 spots et 8 cuts - 2 Villes - 20_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3ouG22XEVZ2z7vxK9\"}"
+      "statut": "importe",
+      "numero": "26040",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26041 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 1 Film et 1 Cut NON-FOOD - 20_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3pyVwKj7MSN8PVKa2\"}"
+      "statut": "importe",
+      "numero": "26041",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26042 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 22_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3rCB5mxYi5Ax9Lcxw\"}"
+      "statut": "importe",
+      "numero": "26042",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26043 ✔◉ - NOVEMBRE - Lidl CVC - 2 Spots et 1 Cut - Radio Nationale - 22_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3sY3MovZfSx4mpWuh\"}"
+      "statut": "importe",
+      "numero": "26043",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26044 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 2 Films et 1 Cut NON-FOOD - 22_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3uAGbMpUFQZBjhi8p\"}"
+      "statut": "importe",
+      "numero": "26044",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26045 ✱◉ - EVEREST - Hugo Boss - 1 Tag 5 sec - Renouvellent A2 Droits - GERMAN ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3vbqUErQG49mtbFMJ\"}"
+      "statut": "importe",
+      "numero": "26045",
+      "client": "Annonceur : Hugo Boss",
+      "message": "enrichi"
     },
     {
       "fichier": "D26046 ✱◉ - COYOTE - 1 Film A3 - Droits - Web 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3wm34wc4JbKYWs9ki\"}"
+      "statut": "importe",
+      "numero": "25046",
+      "client": "COYOTE SYSTEM",
+      "message": "enrichi"
     },
     {
       "fichier": "D26048 ✱◉ - CHANGE - France Parrainages - Recondution A4 + 2 Fims 30s TV et WEB ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3xqHM4WvTWBXguuc3\"}"
+      "statut": "importe",
+      "numero": "25048",
+      "client": "France Parrainages",
+      "message": "enrichi"
     },
     {
       "fichier": "D26049 ✔◉ - HONDA - Q4 gamme - Additif Musique de Librairie Caleson - Radio ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK3yyyuoCKRMp3ZykWE\"}"
+      "statut": "importe",
+      "numero": "26049",
+      "client": "Honda",
+      "message": "enrichi"
     },
     {
       "fichier": "D26050 ✘ - OKO - Carac - 3 Films - TV et WEB - 3 VO - Rec + Mix ✘✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK42aWCprFEB3vx3NCp\"}"
+      "statut": "importe",
+      "numero": "26050",
+      "client": "OKO",
+      "message": "enrichi"
     },
     {
       "fichier": "D26051 ✘ - Court Métrage _The Voice of the bird Cagarro_ 7min - Co Production - Montage + Mix Cinéma ✘✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK443JvBCiB1FBt4Cuc\"}"
+      "statut": "importe",
+      "numero": "26051",
+      "client": "Eva Muller",
+      "message": "enrichi"
     },
     {
       "fichier": "D26052 - LACTALIS - YAOS PP2 - Remontage+Mix 20s, 15s Suisse.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK44tfTzt5N31P7n3j3\"}"
+      "statut": "importe",
+      "numero": "26052",
+      "client": "LACTALIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26053 ✔◉ - EVEREST - KIA - 1 Spot Radio Nationale STONIC - Janvier 2026 - REC MIX Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK45oUn5YxTcJkJAChs\"}"
+      "statut": "importe",
+      "numero": "26053",
+      "client": "Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26054 ✔◉ - NOVEMBRE - Lidl CVC - 1 Film Disney Plus- Hors droits 29_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK46g4evw93b4NvkT8y\"}"
+      "statut": "importe",
+      "numero": "26054",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26055 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 27_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK47p2YhUw2M1zaepeG\"}"
+      "statut": "importe",
+      "numero": "26055",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26056 ✔◉ - NOVEMBRE - Lidl CVC - 2 Spots et 1 Cut - Radio Nationale - 27_01_2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK48p43U3t37AEDcKeA\"}"
+      "statut": "importe",
+      "numero": "26056",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26057 ✔◉ - NOVEMBRE - Lidl CVC - Radio Locale - 20 spots et 16 cuts - 4 Villes - 27_01_2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4AVFrQDZudVGe5wgF\"}"
+      "statut": "importe",
+      "numero": "26057",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26058 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 29_01_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4BznxPa7ZommwBz6n\"}"
+      "statut": "importe",
+      "numero": "26058",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26059 ✔◉ - NOVEMBRE - Lidl CVC - 3 Spots et 1 Cut - Radio Nationale - 29_01_2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4CxbK5AwAyriGpz2t\"}"
+      "statut": "importe",
+      "numero": "26059",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26060 ✔◉ - EVEREST - COTY Muller - 1 TAG 5s - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4DoCGvjr4avEHwRoL\"}"
+      "statut": "importe",
+      "numero": "26060",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26061 - BACKBONE - BANQUE - 1 Film 2 min - SD Musique - Interne RS - 1 VO - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4EeHxYVk9QQMnmsf6\"}"
+      "statut": "importe",
+      "numero": "26061",
+      "client": "BACKBONE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26062 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 2 Films et 1 Cut NON-FOOD - 29_01_2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4GUfzWTSfGGGDyetz\"}"
+      "statut": "importe",
+      "numero": "26062",
+      "client": "LIDL / Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26063 - OGILVY - La Laitière - 1 Film 10s _Mousse Belge_ - Rec + Mix + SD + Renouvellement Musique _Princesse Choco_ - Belgique 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4HKGzY9bLLZ2NdCps\"}"
+      "statut": "importe",
+      "numero": "26063",
+      "client": "OGILVY",
+      "message": "enrichi"
     },
     {
       "fichier": "D26064 ✱◉ - WNP - AMV - Renouvellement Droits VO - 2 Films _La Blague_ et _Pigeon_ + 1 BB +  5 story + 1 Film Performance ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4JjMfPBdzq5PrXSeq\"}"
+      "statut": "importe",
+      "numero": "26064",
+      "client": "AMV",
+      "message": "enrichi"
     },
     {
       "fichier": "D26065 ✱◉ - WNP - AMV - Droits VO Campagne 2026 - 3 Films  _Passe Passe_ _Mariage_ et _Manif_ ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4LQZeD1Q4jPxFYJ1K\"}"
+      "statut": "importe",
+      "numero": "26065",
+      "client": "AMV",
+      "message": "enrichi"
     },
     {
       "fichier": "D26066 ✘ - La Croix Rouge - Droits 1 Films et 1 teaser - 10 ans ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4Mur9PzVg47MjsZ6e\"}"
+      "statut": "importe",
+      "numero": "26066",
+      "client": "BAVARDAGES PRODUCTION",
+      "message": "enrichi"
     },
     {
       "fichier": "D26067 ✱◉ - WNP - AMV - Renouvelement A2 - Musique de stock pour jingle - TV Web Radio et Attente téléphonique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4PEipdWnHjRsdmqVN\"}"
+      "statut": "importe",
+      "numero": "26067",
+      "client": "AMV",
+      "message": "enrichi"
     },
     {
       "fichier": "D26069 ✔◉ - KILIAN PARIS -  1 Film _Brand Video_ - Enregistrement +  Mixage ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4Q8nuRsV48s9UVv92\"}"
+      "statut": "importe",
+      "numero": "26069",
+      "client": "Kilian Paris",
+      "message": "enrichi"
     },
     {
       "fichier": "D26070 ✔◉ - EVEREST - KIA - 3 Spots Radios Locales - Janvier 2026 - MIX Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4RVQSkphC1o5WuEMp\"}"
+      "statut": "importe",
+      "numero": "26053",
+      "client": "Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26071 - PATTE BLANCE - Transportez-vous bien - 3 Spots Radio - Rec + Mix + Musique + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4SSx15WWfFAAuKLsu\"}"
+      "statut": "importe",
+      "numero": "26071",
+      "client": "PATTE BLANCHE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26072 ✔◉ - LA MAISON NOIRE - Hermès - 6 Films x 3min -  PAP FEMMES - FORMATION - Automne-Hiver 26 - REC + Clean ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4TFKfuBgfcRZrCxuh\"}"
+      "statut": "importe",
+      "numero": "26072",
+      "client": "LA MAISON NOIRE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26073 - MENUXL - Meilleurs Taux - 1 Films 30s - Rec + Mix 5.1 + Droits Cinéma Musique et VO - 2 semaines ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4U6B9sXvgzJLpJitf\"}"
+      "statut": "importe",
+      "numero": "26073",
+      "client": "Meilleurs Taux",
+      "message": "enrichi"
     },
     {
       "fichier": "D26074 - MENUXL - Meilleurs Taux - 1 Films 30s - Mix 5.1 + Droits Cinéma Musique et VO - 2 semaines ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4V2jFQvwskSmgG7xU\"}"
+      "statut": "importe",
+      "numero": "26074",
+      "client": "Meilleurs Taux",
+      "message": "enrichi"
     },
     {
       "fichier": "D26075 - TIJUANA x WNP - Les 2 Vaches -  2 Films maquettes test et finalisation 1 Film et 1 cut - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4WEARjYSJjQG31M2a\"}"
+      "statut": "importe",
+      "numero": "25075",
+      "client": "Les 2 Vaches",
+      "message": "enrichi"
     },
     {
       "fichier": "D26076 - TIJUANA x WNP - Les 2 Vaches - Composition Musique Originale ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4XAiAc6DL167VHobv\"}"
+      "statut": "importe",
+      "numero": "256076",
+      "client": "Les 2 Vaches"
     },
     {
       "fichier": "D26077 ✱✔ - CoSpirit Groupe - Skyn - 2 Films 15s + 2 Films avec 2 TAG - Renouvellement A2 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4YP8p4fZ6TZWDnC6G\"}"
+      "statut": "importe",
+      "numero": "26077",
+      "client": "CoSpirit Media",
+      "message": "enrichi"
     },
     {
       "fichier": "D26078 - OGILVY - La Laitière - Additif 1 Film 10s _Mousse Belge_ - Montage Musique - Belgique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4Zfn39ocXGRATc7ck\"}"
+      "statut": "importe",
+      "numero": "26078",
+      "client": "OGILVY",
+      "message": "enrichi"
     },
     {
       "fichier": "D26079 ✔◉ - ARTEFACT - S3NS - 1 BB 8s - Rec + Mix - 1 VO ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4ainE2EWNGfEmCBEo\"}"
+      "statut": "importe",
+      "numero": "26079",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26080 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 03_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4c3QGPtuVUsS63ZNc\"}"
+      "statut": "importe",
+      "numero": "26080",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26081 ✔◉ - NOVEMBRE - Lidl CVC - 4 Spots - Radio Nationale - 03_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4d4RVhQmnf6rmt5a5\"}"
+      "statut": "importe",
+      "numero": "26081",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26082 ✔◉ - NOVEMBRE - Lidl CVC - Radio Locale - 20 spots et 16 cuts - 4 Villes - 03_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4duH3UR7y3yRi5hB6\"}"
+      "statut": "importe",
+      "numero": "26082",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26083 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 05_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4ewXzsR1BKYgJnEXw\"}"
+      "statut": "importe",
+      "numero": "26083",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26084 ✔◉ - NOVEMBRE - Lidl CVC - 4 Spots - Radio Nationale - 05_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4fupVj1hyRHC9yBPS\"}"
+      "statut": "importe",
+      "numero": "26084",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26085 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 3 Films NON-FOOD - 05_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4gigzDitWG5184iYc\"}"
+      "statut": "importe",
+      "numero": "26085",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26086 ✔◉ - NOVEMBRE - Lidl CVC - Spot RS NON-FOOD - 5 Films - 05_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4hb2g3djLzzBKji91\"}"
+      "statut": "importe",
+      "numero": "26086",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26087 ✔◉ - NOVEMBRE - LIDL - Silvercrest - 2 VO - Rec + Clean+Droits de diff ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4iQ9XSSvdeQzQxbGw\"}"
+      "statut": "importe",
+      "numero": "26083",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26088 ✔◉ - COLOMAFILMS - Pom Bistro - 1h Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4jNvy82qFRV1Abf9q\"}"
+      "statut": "importe",
+      "numero": "26088",
+      "client": "COLOMAFILMS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26089 ✱◉ - K-LINE - Reconduction Musique de Galt Macdermot _ Let the Sunshine In_ + Nego - Droits France - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4k5bsuQWdoLAHpFTA\"}"
+      "statut": "importe",
+      "numero": "26089",
+      "client": "K LINE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26090 ✔◉ - EVEREST - COTY Galeria et YBPN - 2 TAG 5s - Rec + Clean ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4m29wYywfyjisDZZr\"}"
+      "statut": "importe",
+      "numero": "26090",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26091 ✱  - WNP - Marie - Reconduction A2 - 1 Film Burger ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4mskHW2jeSWbbGUrG\"}"
+      "statut": "importe",
+      "numero": "26091",
+      "client": "Marie",
+      "message": "enrichi"
     },
     {
       "fichier": "D26092 ✔ - HOMERUN - TGV Lyria - 1 BB 8s - Rec + Mix + SD - 1 VO - France et Suisse 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4njqoJ2zfeN7nctMR\"}"
+      "statut": "importe",
+      "numero": "26092",
+      "client": "TGV Lyria",
+      "message": "enrichi"
     },
     {
       "fichier": "D26093 ✘ - LACTALIS - YAOS PP2 - Droits additif 20s Suisse ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4oroqVtuhoZnmMGpz\"}"
+      "statut": "importe",
+      "numero": "26093",
+      "client": "YAOS / LACTALIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26094 ✔◉ - ELCO SAS - EDPFM - Test et Intégration Voix IA Annick Menardo + Mixage ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4pZELHdTdLphpc9BM\"}"
+      "statut": "importe",
+      "numero": "26094",
+      "client": "ELCO SAS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26095 ✔◉ - GRINTA - LIDL CVC - S10 - Prestations et Studio - Casting 4 comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4qQ5YBYkQbZC3TdmY\"}"
+      "statut": "importe",
+      "numero": "26095",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26096 ✔◉ - GRINTA - LIDL CVC - S10 - 11 Films 11 cuts VOL et 5 Spots Radio - Droits de diffusion - 4 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4rMseWJ7RArgPhYGs\"}"
+      "statut": "importe",
+      "numero": "26096",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26097 - CHANGE - Louvre Hôtels Group - 1 Film 1 min - Rec + Mix + SD + Droits Interne et WEB ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4sQ8fGBAD92jFjjmQ\"}"
+      "statut": "importe",
+      "numero": "26097",
+      "client": "Louvre Hôtel Groupe",
+      "message": "enrichi"
     },
     {
       "fichier": "D26098 - CHANGE - Louvre Hôtels Group - 1 Film 1 min - Rec + Mix + SD + Droits Interne ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4tc4RDTYRrdHdd1pA\"}"
+      "statut": "importe",
+      "numero": "26097",
+      "client": "CHANGE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26099 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 10_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4uQRrcHafKQ5Mkn2t\"}"
+      "statut": "importe",
+      "numero": "26099",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26100 ✔◉ - NOVEMBRE - Lidl CVC - 3 Spots - Radio Nationale - 10_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4vaczsqUAG2B2D6gW\"}"
+      "statut": "importe",
+      "numero": "26100",
+      "client": "LIDL",
+      "message": "enrichi"
     },
     {
       "fichier": "D26101 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 12_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4wPz47P3Z6r9MwQ2o\"}"
+      "statut": "importe",
+      "numero": "26101",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26102 ✔◉ - NOVEMBRE - Lidl CVC - 4 Spots - Radio Nationale - 12_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4xH4r1wAiGaRbG2we\"}"
+      "statut": "importe",
+      "numero": "26102",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26103 ✔◉ - NOVEMBRE - Lidl CVC - Spots VOL - 2 Films NON-FOOD - 12_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4yENELweYDk6Bo7WZ\"}"
+      "statut": "importe",
+      "numero": "26103",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26104 ✔◉ - NOVEMBRE - Lidl CVC - Spot RS NON-FOOD - 1 Film - 12_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK4zFddqFDzjiqmpxY4\"}"
+      "statut": "importe",
+      "numero": "26104",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26105 - ARTEFACT - TotalEnergies - Dédit Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK51Bh63ze7ZdMCUu89\"}"
+      "statut": "importe",
+      "numero": "26105",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26106 ✱◉ - K LINE - Reconduction Droits VO - 1 Film +1 cut + 1 BB + 4 cuts A4 et A5 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5252F46JoAbi8mcJY\"}"
+      "statut": "importe",
+      "numero": "26106",
+      "client": "K LINE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26107 ✔◉ - OGILVY - La Laitière _Truly_ - Renouvellement A3 Musique _Syncope Orchestra_ - Espagne - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK53KgVXX7MkuSLoZ54\"}"
+      "statut": "importe",
+      "numero": "26107",
+      "client": "OGILVY WORLDWIDE, S.A.",
+      "message": "enrichi"
     },
     {
       "fichier": "D26108 ✔◉ - EVEREST - Shiseido - 1 Film 30s et 1 cut de 15s - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK54GjEoXjCw5uHn5nG\"}"
+      "statut": "importe",
+      "numero": "26108",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26109 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 17_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK55Z8F6WdFPkjoTb2w\"}"
+      "statut": "importe",
+      "numero": "26109",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26110 ✔◉ - NOVEMBRE - Lidl CVC - 3 Spots - Radio Nationale - 17_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK56USMLK2jLMWNUe9U\"}"
+      "statut": "importe",
+      "numero": "26110",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26111 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 19_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK57Jo8xyx2sQc51ju6\"}"
+      "statut": "importe",
+      "numero": "26111",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "D26112 ✔◉ - NOVEMBRE - Lidl CVC - 2 Spots - Radio Nationale - 19_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK58CsLFfXqchqPP5HV\"}"
+      "statut": "importe",
+      "numero": "26112",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "D26113 ✘ - TAG HEUER - Modification 1 Film - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK598gEvwwB7vxJKEig\"}"
+      "statut": "importe",
+      "numero": "26113",
+      "client": "TAG HEUER",
+      "message": "enrichi"
     },
     {
       "fichier": "D26114 - NOUVEAU MONDE - Ricoré - Case Study - Composition Musique -  Nouvelle Musique Originale - 1 axe ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5BiTDxAqZCrqH9qDJ\"}"
+      "statut": "importe",
+      "numero": "26114",
+      "client": "Ricoré",
+      "message": "enrichi"
     },
     {
       "fichier": "D26115 - NOUVEAU MONDE - Ricoré - Case Study - Composition Musique -  Nouvelle Musique de Librairie et Arrgement ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5Cao6v654SYWDHCUF\"}"
+      "statut": "importe",
+      "numero": "26115",
+      "client": "Ricoré",
+      "message": "enrichi"
     },
     {
       "fichier": "D26116 ✔◉ - NOVEMBRE - Lidl CVC - Prestation séance du 25_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5DXMCbZgtNQHoXuoX\"}"
+      "statut": "importe",
+      "numero": "26116",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26117 ✔◉ - NOVEMBRE - Lidl CVC - Spot VOL - 1 Film NON-FOOD - 25_02_2026 ✤☆.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5Ec5r74XuqpMhFY8i\"}"
+      "statut": "importe",
+      "numero": "26117",
+      "client": "Novembre Communication",
+      "message": "enrichi"
     },
     {
       "fichier": "D26118 - 1TO1 - Sarenza - 2 Films 30s - SD + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5FVArpSGrfrp55Ro4\"}"
+      "statut": "importe",
+      "numero": "26118",
+      "client": "Sarenza",
+      "message": "enrichi"
     },
     {
       "fichier": "D26119 - KILIAN PARIS -  Additif 1 Film _Brand Video_ - Additif Sound Design ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5GMWRpbvokScmsiUY\"}"
+      "statut": "importe",
+      "numero": "26119",
+      "client": "ELCO SAS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26120 ✱◉ - K-LINE - Reconduction Droits de réorchestration _Toujours plus de lumière_ + Nego - Droits France - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5H4B2NHpGkdRJ7x8g\"}"
+      "statut": "importe",
+      "numero": "26120",
+      "client": "K Line",
+      "message": "enrichi"
     },
     {
       "fichier": "D26121 ✱◉ - K-LINE - Droits Radio A1 - Musique de Galt Macdermot _ Let the Sunshine In_ + Nego - France - 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5Hi7kwifVrvXKTJXL\"}"
+      "statut": "importe",
+      "numero": "26121",
+      "client": "K Line",
+      "message": "enrichi"
     },
     {
       "fichier": "D26122 - ARTEFACT - TotalEnergies - 2 Spots radio et webradio _Puzzle_ et _ Club Concours_ - Rec + Mix + SD ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5K1VzSFfvTTLfg9tk\"}"
+      "statut": "importe",
+      "numero": "26122",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26123 ✔◉ - NOUVELLES ECOUTES - 2h dE REC ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5Kwowfe97oAxFeosJ\"}"
+      "statut": "importe",
+      "numero": "26123",
+      "client": "Nouvelles Ecoutes",
+      "message": "enrichi"
     },
     {
       "fichier": "D26123 ✘ - 1TO1 - BOLT - 1 Film 60s + 15 Films 30s et 15 cuts - Mix Stéréo et Mix Cinéma 5.1 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5LkB7oDfaTRtAV7My\"}"
+      "statut": "importe",
+      "numero": "26123",
+      "client": "BOLT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26124 ✘ - 1TO1 - BOLT - 1 Film 60s + 15 Films 30s - Mix Stéréo et Mix Cinéma 5.1 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5MrADeJEVqHXHM8i6\"}"
+      "statut": "importe",
+      "numero": "26124",
+      "client": "BOLT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26127 - ARTEFACT - TotalEnergies - 2 BB _Wash Billboards_- Rec + Clean ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5NiFVnwwSKFFfr5Lb\"}"
+      "statut": "importe",
+      "numero": "26127",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26128 ✔◉ - KONBINI - BONJOUR QUEBEC - 1 Film 2 min - Rec + Clean + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5PshFZSCcwgT58vPH\"}"
+      "statut": "importe",
+      "numero": "26128",
+      "client": "Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26129 - KRAFT - Identite Sonore - Adaptation Musique _Smile it_s Kraft_ ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5QjY4Uv5TnmWS4KRz\"}"
+      "statut": "importe",
+      "numero": "26129",
+      "client": "LS DISTRIBUTEURS ASSOCIES",
+      "message": "enrichi"
     },
     {
       "fichier": "D26130 - HUNGRY AND FOOLISH - Aesio Identité Sonore A9 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5S1gWTTXTxbmZE4AH\"}"
+      "statut": "importe",
+      "numero": "26130",
+      "client": "Aesio",
+      "message": "enrichi"
     },
     {
       "fichier": "D26131 - KONBINI - Darty - 3 Films - Rec + Clean + Droits - 1 Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5SzUCMgNwA5U7k9Vs\"}"
+      "statut": "importe",
+      "numero": "26131",
+      "client": "Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26133 ✔◉ - EVEREST - KIA - Prestations - Fevrier 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5UFdFUSWoVo3mMTXe\"}"
+      "statut": "importe",
+      "numero": "26133",
+      "client": "Sylvain Obriot",
+      "message": "enrichi"
     },
     {
       "fichier": "D26134 - WNP - Islos - Renouvellelent Droits - 1 Film 10s - Reconduction VO et Musique A4 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5V9wbCe3tUsFV5QGn\"}"
+      "statut": "importe",
+      "numero": "26134",
+      "client": "WNP",
+      "message": "enrichi"
     },
     {
       "fichier": "D26134 ✔◉ - EVEREST - KIA - REC et MIX - Fevrier 2026.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5WUKUV54WmY2Ss4Xy\"}"
+      "statut": "importe",
+      "numero": "26134",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26135 ✔◉ - WNP - Bubendorff - Additif Droits Web 2 Films 15s ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5XNQ1SRA7v4ewYK8K\"}"
+      "statut": "importe",
+      "numero": "26135",
+      "client": "Bubendorff",
+      "message": "enrichi"
     },
     {
       "fichier": "D26136 ✔◉ - GRINTA - HEETCH GLEETCH404 - 1 Film - Rec + Mix + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5YWrQ13dLB2cksuVa\"}"
+      "statut": "importe",
+      "numero": "26136",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26137 - KONBINI - Darty - 3 Films - Rec + Clean + Droits - 2 Comédiens - 3 Films + 1 Générique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5ZXNccKqxcEESWv27\"}"
+      "statut": "importe",
+      "numero": "26137",
+      "client": "Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26137 - KONBINI - Darty - 3 Films - Rec + Clean + Droits - 2 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5aiZNSTuFSBt8XpFr\"}"
+      "statut": "importe",
+      "numero": "26137",
+      "client": "Darty X Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26138 - KONBINI - Darty - 1 Film - Mixage 5.1 + Droits - 2 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5cwkiMcvCXa5H2M8m\"}"
+      "statut": "importe",
+      "numero": "26138",
+      "client": "Darty X Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26139 ✔◉ - GRINTA - LIDL CVC - S11 - Prestations et Studio - Casting 2 comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5e2Va4JufS3rkA6CS\"}"
+      "statut": "importe",
+      "numero": "26139",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26140 ✔◉ - GRINTA - LIDL CVC - S11 - 7 Films 7 cuts VOL et 6 Spots Radio - Droits de diffusion - 2 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5fBSqjFBBs87NXRnf\"}"
+      "statut": "importe",
+      "numero": "26140",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26141 ✔◉ - GRINTA - LIDL CVC - S12 - Prestations et Studio - Casting 2 comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5gR7THEo4k4KidhZw\"}"
+      "statut": "importe",
+      "numero": "26141",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26142 ✔◉ - GRINTA - LIDL CVC - S12 - 7 Films 7 cuts VOL et 5 Spots Radio - Droits de diffusion - 1Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5hY5XrQThh6rm3mdp\"}"
+      "statut": "importe",
+      "numero": "26142",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26142 ✔◉ - GRINTA - LIDL CVC - S12 - 7 Films 7 cuts VOL et 6 Spots Radio - Droits de diffusion - 1Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5iLxAkDZXSF4zCxsk\"}"
+      "statut": "importe",
+      "numero": "26142",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26143 ✔ - NONNA - MenuXL - Netflix - 1 Film  45s _Peaky Blinders x Ousmane Dembele_ - SD + Mixage ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5jyBXznB5NoPvjA6U\"}"
+      "statut": "importe",
+      "numero": "26143",
+      "client": "Netflix",
+      "message": "enrichi"
     },
     {
       "fichier": "D26144 ✔◉ - EVEREST - KIA - DROITS - Fevrier 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5mHJpXbGxs5oYGo4K\"}"
+      "statut": "importe",
+      "numero": "26144",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26145 - MCCANN - L_Oreal INFAILLIBLE Routine 2026 - Triple Bid -  Clean + SD + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5ofvjECSyt4AsBRdp\"}"
+      "statut": "importe",
+      "numero": "25145",
+      "client": "MC CANN-ERICKSON PARIS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26146 ✘ - TAG HEUER - Renouvellemnt A2 2 Films et Modification 1 Film - diffusion Social Media _ Digital - Monde 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5pgSvT2YjJocb9xfs\"}"
+      "statut": "importe",
+      "numero": "26146",
+      "client": "TAG HEUER",
+      "message": "enrichi"
     },
     {
       "fichier": "D26147 - CHANGE - Louvre Hôtels Group - Additif Composition Musique Originale - Nouvel Axe ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5qouqvhF93gEkqayt\"}"
+      "statut": "importe",
+      "numero": "26147",
+      "client": "Louvre Hôtels Group",
+      "message": "enrichi"
     },
     {
       "fichier": "D26150 ✔◉ - OCURENS - TAG HEUER - 1 Film 1 min 1 CUT et A2 - Rec + Mix - Droits WEB Social Media _ Digital - Monde 2 ans ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5sEysXpp3bTXM3KAz\"}"
+      "statut": "importe",
+      "numero": "26150",
+      "client": "OCURENS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26151 ✔◉ - EVEREST - Sephora - 1 Film 19s - Rec + Mix - Hors droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5tdKqWcTwnVNSoMpN\"}"
+      "statut": "importe",
+      "numero": "26151",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26153 - KONBINI - Darty - 3 Films - Rec + Clean + Droits - 1 Comédien VO + 1 Doubleur voix connue - 3 Films + 1 Générique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5uYtR6JqSRzMtFs2W\"}"
+      "statut": "importe",
+      "numero": "26153",
+      "client": "Konbini",
+      "message": "enrichi"
     },
     {
       "fichier": "D26154 ✘ - OCURENS - TAG HEUER - 1 Film 1 min - Rec + Mix - Droits WEB Social Media _ Digital - Monde 1 an ✘.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5vRyb4MfoUa7uMzkt\"}"
+      "statut": "importe",
+      "numero": "26154",
+      "client": "OCURENS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26155 ✔ - GRINTA - LIDL CVC - S13 - Prestations et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5wQGGwKpQMHnScuv9\"}"
+      "statut": "importe",
+      "numero": "26155",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26156 ✔ - GRINTA - LIDL CVC - S13 - 8 Films 8 cuts VOL et 6 Spots Radio - Droits de diffusion - 3 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5xXUvouHrSooeuV7c\"}"
+      "statut": "importe",
+      "numero": "26156",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26157 ✔◉ - WNP - Maison Nicolas - Composition Musique Originale et ID Sonore - Droits 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK5z8yDDKT7hfdTHk6e\"}"
+      "statut": "importe",
+      "numero": "26157",
+      "client": "Maison Nicolas",
+      "message": "enrichi"
     },
     {
       "fichier": "D26158 ✔ - ELMA PRODUCTIONS - 1 Film 16 min - Documentaire Congo - Rec et Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK61kD4k5UaTA5yX8uu\"}"
+      "statut": "importe",
+      "numero": "26158",
+      "client": "ELMA PRODUCTIONS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26159 ✔◉ - WNP - Maison Nicolas - Signature Voix - Droits 6 mois ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK63FVeort3R1Retb8S\"}"
+      "statut": "importe",
+      "numero": "25159",
+      "client": "WNP",
+      "message": "enrichi"
     },
     {
       "fichier": "D26160 ✘ - JULIEN ROCHER -  Montebello - 1 Film Digital VOL - Rec + Mix et SD ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK655dHnuWx45mCR8UR\"}"
+      "statut": "importe",
+      "numero": "26160",
+      "client": "Montebello",
+      "message": "enrichi"
     },
     {
       "fichier": "D26161 ✔◉ - ARTEFACT - Coyote - 1 Film 1min 10 et 2 Packshots WEB - Rec + Mix + Renouvellement 2 Musique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK66B7QSDWBd55i9yw9\"}"
+      "statut": "importe",
+      "numero": "26161",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26162 ✔◉ - WNP - Maison Nicolas - Prestation Crystal Bachet ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK66sH8jccWzUx4E6pr\"}"
+      "statut": "importe",
+      "numero": "26162",
+      "client": "Maison Nicolas",
+      "message": "enrichi"
     },
     {
       "fichier": "D26163 ✔ - GRINTA - LIDL CVC - S14 - Prestations et Studio - Casting 3 comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK687gkvQZyXjMt5jiU\"}"
+      "statut": "importe",
+      "numero": "26163",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26164 ✔ - GRINTA - LIDL CVC - S14 - 7 Films 7 cuts VOL et 6 Spots Radio - Droits de diffusion - 5 Comédiens ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK69LracCZutCTAKoFN\"}"
+      "statut": "importe",
+      "numero": "26164",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26165 ✔◉ - WNP - Bubendorff - Signature Sonore - Droits Web A1 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6AMsx7u4hnVuTiHL9\"}"
+      "statut": "importe",
+      "numero": "26165",
+      "client": "Bubendorff",
+      "message": "enrichi"
     },
     {
       "fichier": "D26166 - MOOD FILMS - Documentaire _Gagner sa vie_ - 52 min - Mixage Cinéma 5.1 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6BDDu3HoJqmPd8TjX\"}"
+      "statut": "importe",
+      "numero": "26166",
+      "client": "MOOD FILMS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26167 ✔◉ - ARTEFACT - Coyote Ocon - 1 Film 30s et 2 cuts 15s WEB - Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6CbZmmF5Vhfy5poUA\"}"
+      "statut": "importe",
+      "numero": "26167",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "D26168 - AGENCE BELLE - Gifi - 8 Films - Rec + Mix et SD - Droits TV et Web ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6DbLjXqzwdgZ9BTXn\"}"
+      "statut": "importe",
+      "numero": "26168",
+      "client": "AGENCE BELLE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26169 - BIRTH - Volvo - Film testimonials pour Cannes - Studio ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6ErFbxSkzmAD8S5LS\"}"
+      "statut": "importe",
+      "numero": "26169",
+      "client": "BIRTH",
+      "message": "enrichi"
     },
     {
       "fichier": "D26170 - BIRTH - Volvo - 1 Film testimonial - Droits Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6FnJkbV1oKNb9gN1k\"}"
+      "statut": "importe",
+      "numero": "26170",
+      "client": "BIRTH",
+      "message": "enrichi"
     },
     {
       "fichier": "D26171 - CHANGE - d_ARTIGNY - 1 TAG TV VOL et 1 Film 6s VOL - Rec + Mix + SD + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6Gg8g5AQvUSeL2t5i\"}"
+      "statut": "importe",
+      "numero": "26171",
+      "client": "d'Artigny",
+      "message": "enrichi"
     },
     {
       "fichier": "D26172 - CHANGE - d_ARTIGNY - 1 CUT et 1 TAG TV VOL et 1 Film 6s VOL - Rec + Mix + SD + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6Hh9mtfk6aqYKouCg\"}"
+      "statut": "importe",
+      "numero": "26172",
+      "client": "d'Artigny",
+      "message": "enrichi"
     },
     {
       "fichier": "D26173 - ARTEFACT - TotalEnergies - 2 Spots radio et webradio _Wash Lavage Auto_ - Rec + Mix + SD ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6KHQGvwSi6Aw6EuQj\"}"
+      "statut": "importe",
+      "numero": "26122",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26174.1 ✔ - GRINTA - LIDL VOL - 26_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6LDhyVsCsHcVMLD7J\"}"
+      "statut": "importe",
+      "numero": "26174.1",
+      "client": "GRINTA"
     },
     {
       "fichier": "D26174.2 ✔ - GRINTA - LIDL RADIO - 26_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6MB12vYgQSFsRmNi6\"}"
+      "statut": "importe",
+      "numero": "26174.2",
+      "client": "GRINTA"
     },
     {
       "fichier": "D26174.3 ✔ - GRINTA - LIDL RADIO LOC - 26_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6NzPg6L94qaUZyPyB\"}"
+      "statut": "importe",
+      "numero": "26174.3",
+      "client": "GRINTA"
     },
     {
       "fichier": "D26174.4 ✔ - GRINTA - LIDL RADIO LOC - S15 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6Q8rGRuGUpv94tLzc\"}"
+      "statut": "importe",
+      "numero": "26174.4",
+      "client": "GRINTA"
     },
     {
       "fichier": "D26175 ✔ - GRINTA - LIDL RADIO - 26_03_2026 - Droits de diffusion - 1 Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6QzCLeK7u3eJ8KaAH\"}"
+      "statut": "importe",
+      "numero": "26175",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26176 - LA MAISON NOIRE - LA PRAIRIE - 1 film 30s, 3x15s, 4x6s - Rec Mix Droits MONDE 3 ANS ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6S1DWeYuqcaYcKEMh\"}"
+      "statut": "importe",
+      "numero": "26176",
+      "client": "LA MAISON NOIRE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26179 ✔◉ - EVEREST - DAVIDOFF - 1 tag - Droits Renouvellement A2 - GERMAN ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6T2j6AjjyBRBLZ4xg\"}"
+      "statut": "importe",
+      "numero": "25179",
+      "client": "Mélanie Neel",
+      "message": "enrichi"
     },
     {
       "fichier": "D26180 ✔◉ - EVEREST - KIA - Prestations - Mars 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6UF9zPaq1UWU13cUq\"}"
+      "statut": "importe",
+      "numero": "26180",
+      "client": "Sylvain Obriot / Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26181 ✔◉ - EVEREST - KIA - REC et MIX - Mars 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6V7zU1KQgumhQrHrq\"}"
+      "statut": "importe",
+      "numero": "26181",
+      "client": "EVEREST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26182 ✔◉ - EVEREST - KIA - DROITS EV2 TV et WEB - Mars 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6VxqqJ2V5QKEQcUNe\"}"
+      "statut": "importe",
+      "numero": "26182",
+      "client": "Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26183 ✔◉ - EVEREST - KIA - DROITS PV5 RADIO - Mars 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6Wzr6TG56pDud6e6K\"}"
+      "statut": "importe",
+      "numero": "26183",
+      "client": "Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26184 ✔◉ - EVEREST - KIA - DROITS PV5 TV - Mars 2026 ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6YBJ41Ut52kicJp2F\"}"
+      "statut": "importe",
+      "numero": "26182",
+      "client": "Kia",
+      "message": "enrichi"
     },
     {
       "fichier": "D26185 - LA MAISON NOIRE - LA PRAIRIE - 1 film 30s, 3x15s, 4x6s - Rec Mix Droits MONDE 1 AN ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6ZiowqBP97LyWKAhZ\"}"
+      "statut": "importe",
+      "numero": "26185",
+      "client": "La Prairie",
+      "message": "enrichi"
     },
     {
       "fichier": "D26186 ✘ - GRINTA - LIDL CVC - Prestations et Studio - Casting Anna ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6bfeBA7ZoxPC6h89b\"}"
+      "statut": "importe",
+      "numero": "26186",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26187 ✘ - GRINTA - LIDL CVC - 5 Films 5 cuts VOL et 5 Spots Radio - Droits de diffusion - Anna ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6cZiZXpJiFEJ5L9gh\"}"
+      "statut": "importe",
+      "numero": "26096",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26188 ✔ - GRINTA - LIDL CVC Test - Prestation - Casting Anna ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6dWm7BfWv3U22u2fP\"}"
+      "statut": "importe",
+      "numero": "26186",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26189 ✘ - ARTEFACT - Coyote - 1 spot radio - offres Mai - Eric D - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6eY2iuNbYiXbYAARg\"}"
+      "statut": "importe",
+      "numero": "26189",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26190 ✔◉ - ARTEFACT - Coyote - 2 spots radio - offres Mai - Eric D - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6fqRBCbekaA4fR3Kk\"}"
+      "statut": "importe",
+      "numero": "26190",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26191 ✘ - GRINTA - HEETCH GLEETCH404 - VO US- 1 Film Interne - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6gmUEd21Sb9yjyCkh\"}"
+      "statut": "importe",
+      "numero": "26191",
+      "client": "HEETCH / GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26192 - GRINTA - LIDL CVC - Projection budgetaire estimative 2026 - Prestations et Studio - 165 Radio et 165 VOL ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6i66RmJM8TT3GQvSY\"}"
+      "statut": "importe",
+      "numero": "26192",
+      "client": "LIDL",
+      "message": "enrichi"
     },
     {
       "fichier": "D26193 ✔ - GRINTA - LIDL  - 1 Film 1min - Casting 3 comédiens - Web France 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6iyBFCZexhtQGxuBz\"}"
+      "statut": "importe",
+      "numero": "26193",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26194 - PHENOMENE _ WMH - Maybelline - 1 Film de 55 min - montage son, musique et sound design ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6jzh45pPt6wA3UP4u\"}"
+      "statut": "importe",
+      "numero": "26194",
+      "client": "Maybelline",
+      "message": "enrichi"
     },
     {
       "fichier": "D26195 ✔ - RAYMONDE - Perle de Lait - 2 Animatiques - Casting 1 VO  ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6mA9SuPbJXwHzA5Yc\"}"
+      "statut": "importe",
+      "numero": "26195",
+      "client": "RAYMONDE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26196 ✘ - RAYMONDE - Perle de Lait - 2 Animatiques - VO IA ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6nEdoNvqVcBNvcDR9\"}"
+      "statut": "importe",
+      "numero": "26195",
+      "client": "RAYMONDE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26197 - NOTCHUP - Priméale - 1 BB Asperge - Reconduction A6  Musique 1 an ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6pfEhKKbZ5W6keDyW\"}"
+      "statut": "importe",
+      "numero": "26197",
+      "client": "Priméale",
+      "message": "enrichi"
     },
     {
       "fichier": "D26198 - NOTCHUP - Priméale - 1 BB Asperge - Reconduction A6 et A7  Musique 2 ans ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6qaoQHyeN6DamabVH\"}"
+      "statut": "importe",
+      "numero": "26198",
+      "client": "Priméale",
+      "message": "enrichi"
     },
     {
       "fichier": "D26199 - NOTCHUP - Priméale - 1 BB Asperge - Reconduction A6, A7 et A8 Musique 3 ans ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6sho2ZNooj6vmDPHr\"}"
+      "statut": "importe",
+      "numero": "26199",
+      "client": "Priméale",
+      "message": "enrichi"
     },
     {
       "fichier": "D26200 - KRAFT - Identite Sonore - Adaptation Musique version française ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6uaADEuyhP8Fr11uW\"}"
+      "statut": "importe",
+      "numero": "26200",
+      "client": "LS DISTRIBUTEURS ASSOCIES",
+      "message": "enrichi"
     },
     {
       "fichier": "D26201 ✘ - ARTEFACT - Coyote - 2 Packshots WEB - Rec + Mix + Renouvellement 2 Musique ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6vaBWPxVGKKPzxr4W\"}"
+      "statut": "importe",
+      "numero": "26201",
+      "client": "ARTEFACT",
+      "message": "enrichi"
     },
     {
       "fichier": "D26202 ✘ - ARTEFACT - Coyote - 1 Film 1min10s WEB - Rec + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6wU1fH1vbR4faZA1H\"}"
+      "statut": "importe",
+      "numero": "261202",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "D26203 - EVEREST - Clarins - 2 Films - Rec + Mix - Hors droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6xQZf9J9QPR3VGSpc\"}"
+      "statut": "importe",
+      "numero": "26203",
+      "client": "CLARINS",
+      "message": "enrichi"
     },
     {
       "fichier": "D26204 - BIRTH - Volvo - Film Tesimonials version US - Rec + Mix + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6yPqx5NYEjxs41VrD\"}"
+      "statut": "importe",
+      "numero": "26204",
+      "client": "Romain Gingembre",
+      "message": "enrichi"
     },
     {
       "fichier": "D26204 - TIJUANA - Aigle - 5 Films 8s _Footwear_ - SD + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK6zBEGjiQ6kPUCyaaW\"}"
+      "statut": "importe",
+      "numero": "26148",
+      "client": "Aigle",
+      "message": "enrichi"
     },
     {
       "fichier": "D26205 ✘ - BOLD HOUSE - Babolat - 1 Film 30s - Mix TV + Droits TV ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK712KxDLMqPq9jEXsW\"}"
+      "statut": "importe",
+      "numero": "26205",
+      "client": "Babolat",
+      "message": "enrichi"
     },
     {
       "fichier": "D26206 - LA MAISON NOIRE - LA PRAIRIE - 1 film 30s, 3x15s, 4x6s - Rec Mix Droits MONDE 3 ANS sans PRESTA ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7255oHv6AWSGENcHL\"}"
+      "statut": "importe",
+      "numero": "26206",
+      "client": "La Prairie",
+      "message": "enrichi"
     },
     {
       "fichier": "D26208 - RECMOTE STUDIO - 2 heures d_enregistrement ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7385XMjCb7B69Xkap\"}"
+      "statut": "importe",
+      "numero": "26208",
+      "client": "RECMOTE STUDIO",
+      "message": "enrichi"
     },
     {
       "fichier": "D26209 - KOEZIO – FORT BOYARD ADVENTURES - 2 heures d_enregistrement ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK74C5MvuHLxiFNW2kB\"}"
+      "statut": "importe",
+      "numero": "26209",
+      "client": "KOEZIO",
+      "message": "enrichi"
     },
     {
       "fichier": "D26209 - KOEZIO – FORT BOYARD ADVENTURES - 2 heures d_enregistrement.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK74rWXXTCHyqyweLVX\"}"
+      "statut": "importe",
+      "numero": "26209",
+      "client": "KOEZIO",
+      "message": "enrichi"
     },
     {
       "fichier": "D26210 -  LGM&CO - Renouvellement A3 CNIEL - 1 Film TV + 1 spot radio ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK75iMKDyxmkwxrM4dz\"}"
+      "statut": "importe",
+      "numero": "26210",
+      "client": "CNIEL",
+      "message": "enrichi"
     },
     {
       "fichier": "D26211 - CHANGE - VICO - 1 film 2 MIN - Rec & Mix HORS DROITS ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK76ZhZRwB8oYGdyiwm\"}"
+      "statut": "importe",
+      "numero": "26211",
+      "client": "CHANGE",
+      "message": "enrichi"
     },
     {
       "fichier": "D26212 - SOLINEST - Fever Tree - 4 Films et 4 cuts _Ginger Beer_ et _Tonic_ - Rec + Mix + Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK77QJhAL2RcjTb9mER\"}"
+      "statut": "importe",
+      "numero": "26212",
+      "client": "SOLINEST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26213 - 1TO1 - CITROËN - 4 Films + 6 cuts - Montage Son + SD + Mix ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK78MrS8sBbRZLFBM57\"}"
+      "statut": "importe",
+      "numero": "26213",
+      "client": "CITROËN",
+      "message": "enrichi"
     },
     {
       "fichier": "D26214 - SOLINEST - Fever Tree - 4 Films et 4 cuts _Ginger Beer_ et _Tonic_ - Rec + Mix + Droits - France, Suisse et Belgique 2 ans ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK79NNmkrSLTcwetifn\"}"
+      "statut": "importe",
+      "numero": "26214",
+      "client": "SOLINEST",
+      "message": "enrichi"
     },
     {
       "fichier": "D26215 ✔ - GRINTA - LIDL VOL - 31_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7AjE5mxgDz62TMes7\"}"
+      "statut": "importe",
+      "numero": "26215",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26216 ✔ - GRINTA - LIDL RADIO - 31_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7BtgTqxnBZcRB6igh\"}"
+      "statut": "importe",
+      "numero": "26216",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26217 ✔ - GRINTA - LIDL RADIO LOC - 31_03_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7RtJUhnmKRbJGBpQ8\"}"
+      "statut": "importe",
+      "numero": "26217",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26218 ✔ - GRINTA - LIDL VOL - 02_04_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7Smt2WvAvwbMczNeA\"}"
+      "statut": "importe",
+      "numero": "26218",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26219 ✔ - GRINTA - LIDL RADIO - 02_04_2026 - Prestation et Studio - Casting 1 comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7TeiXL7N5RtGpWxNf\"}"
+      "statut": "importe",
+      "numero": "26219",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26220 ✔ - GRINTA - LIDL RADIO - 02_04_2026 - Droits de diffusion - 1 Comédien ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7UwMc3QDCjnwq2Ubm\"}"
+      "statut": "importe",
+      "numero": "26220",
+      "client": "GRINTA",
+      "message": "enrichi"
     },
     {
       "fichier": "D26225 - GRINTA - LIDL RADIO - 2 Spots - Droits - Casting Anna ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7W73k8A7R5UaocrfH\"}"
+      "statut": "importe",
+      "numero": "26225",
+      "client": "LIDL",
+      "message": "enrichi"
     },
     {
       "fichier": "D26226 - EVEREST - SEPHORA - 2 Films - Rec et Mix - Hors Droits ✤.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7X75f2LupfBrSYLY3\"}"
+      "statut": "importe",
+      "numero": "26226",
+      "client": "Sephora",
+      "message": "enrichi"
     },
     {
       "fichier": "D26230 - WNP - Islos - 1 Film 10s - Droits et Reconduction Musique A4.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7YMypEzSVGovy3y23\"}"
+      "statut": "importe",
+      "numero": "26230",
+      "client": "ISLOS"
     },
     {
       "fichier": "D26231 - LACTALIS - Yaos - 2 Films 10s _Magro_ + 2 Tag _High Protein_ + 2 Bumper 6s _High Protein_ version FR et ALL - Rec + Mix - Suisse 1 an.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7ZQEtT5VFC3TGZUvV\"}"
+      "statut": "importe",
+      "numero": "26231",
+      "client": "Lactalis"
     },
     {
       "fichier": "D26232 - LACTALIS - Yaos _Magro_ -  Dédit Comédienne Nurit H.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7afPZzNaPLmWdpKNg\"}"
+      "statut": "importe",
+      "numero": "26232",
+      "client": "Lactalis"
     },
     {
       "fichier": "D26233 - SOLINEST - Fever Tree - 4 Films et 4 cuts _Ginger Beer_ et _Tonic_ - Rec + Mix + Droits - France.pdf",
       "type": "devis",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7beRafYHJsTNdPWFG\"}"
+      "statut": "importe",
+      "numero": "26212",
+      "client": "SOLINEST",
+      "message": "enrichi"
     },
     {
       "fichier": "148472_Relevé de compte_673.pdf",
       "type": "facture",
       "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7cQZujyocHKxNzBwS\"}"
+      "message": "JSON invalide : SyntaxError: Unexpected token 'C', \"Ce documen\"... is not valid JSON\nCe document n'est pas une facture française standard mais un **relevé de compte SACEM** (répartition de droits d'auteur). Il ne contient pas les données nécessaires pour remplir le JSON demandé (numér"
     },
     {
       "fichier": "F26001 (FAE) - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 31_12_2025 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7dpu1J7eL4cMZLrU5\"}"
+      "statut": "importe",
+      "numero": "26001",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26002 (FAE) - CHANGE - ART & FENETRES - 4 Tags + 1 BB in&out - Rec + Mix + SD - TV et WEB ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7eZntiiis7AyUNcbS\"}"
+      "statut": "importe",
+      "numero": "26002",
+      "client": "CHANGE"
     },
     {
       "fichier": "F26003 ✔ - EVEREST - Sephora - Achat Musique _Holt_ de _Mů_ - Campagne _Tint Story_ - 2 films 15s et 4 cut 10 et 6s - Negociation + Droits ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7frgS4emTYBM1bofv\"}"
+      "statut": "importe",
+      "numero": "26003",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26004 (FAE 11706e HT (14047,20e TTC)) - NOVEMBRE - LIDL - Silvercrest - 2 VO - Rec + Clean + Droits France et Belgique_.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7in3b6KJ8qrzFvDZn\"}"
+      "statut": "importe",
+      "numero": "26004",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26005_SACEM_JANVIER 26 ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7kLZFnBvbwXwjm63m\"}"
+      "statut": "importe",
+      "numero": "673",
+      "client": "SARL CALESON"
     },
     {
       "fichier": "F26006 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 06_01_26 et 08_01_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7nU3w5kz4SRg7URAb\"}"
+      "statut": "importe",
+      "numero": "26006",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26007 ✔ - OKO - Carac - 1 Spot Radio - 1 VO - Rec + Mix ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7opAGhtz3Aagovwm3\"}"
+      "statut": "importe",
+      "numero": "26007",
+      "client": "OKO / CARAC"
     },
     {
       "fichier": "F26008 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 13_01_26 et 16_01_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7qrCLD63A6Tea7BZ1\"}"
+      "statut": "importe",
+      "numero": "26008",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26009 - MALMÖ PRODUCTIONS - Women_s Game - Enregistrement Voix OFF ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7spWziZfcqssLmtG7\"}"
+      "statut": "importe",
+      "numero": "26009",
+      "client": "MALMÖ PRODUCTIONS"
     },
     {
       "fichier": "F26010 ✔ - L_OREAL - Droits Musique Business Card (JPA) - A5 ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7v3DTJvHvHxhx4YYX\"}"
+      "statut": "importe",
+      "numero": "26010",
+      "client": "GROUPE L'OREAL Comptabilité BEST - MCD501 - L'OREAL SA - Ets Corporate"
     },
     {
       "fichier": "F26011 ✔ - EVEREST - Hugo Boss - 1 Tag 5 sec - Renouvellent Droits - GERMAN ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7wW2Ha7qGk6bBEusf\"}"
+      "statut": "importe",
+      "numero": "26011",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26012 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 20_01_26 et 22_01_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7yBE76E4xhRsatifh\"}"
+      "statut": "importe",
+      "numero": "26012",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26013 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 27_01_26 et 29_01_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK7zoTTcmBhLK3dn8zY\"}"
+      "statut": "importe",
+      "numero": "26013",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26014 ✔ - CHANGE - Curly - 1 Film 15s + 1 Cut - Rec + Mix + SD + Musique + Droits ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK81WNeGE1XbF1LwtBV\"}"
+      "statut": "importe",
+      "numero": "26014",
+      "client": "CHANGE"
     },
     {
       "fichier": "F26015 ✔ - EVEREST - KIA - 1 Spot Radio Nationale STONIC - Janvier 2026 - REC MIX Droits ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK82Uv38SRYnSxWqSPM\"}"
+      "statut": "importe",
+      "numero": "26015",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26016 ✔ - EVEREST - KIA - 3 Spots Radios Locales - Janvier 2026 - MIX Droits ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK83NVYj8eH9S59RGEp\"}"
+      "statut": "importe",
+      "numero": "26016",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26019 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 03_02_26 et 05_02_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK85WjBJT6yVEaNEbHd\"}"
+      "statut": "importe",
+      "numero": "26019",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26020 ✔ - EVEREST - COTY Muller - 1 TAG 5s - Rec + Mix ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK87SZjZa8W7izrp4wy\"}"
+      "statut": "importe",
+      "numero": "26020",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26021 (FAE) ✔ - CHANGE - Louvre Hotels Kyriad et Campanile - 2 Spots Radio - Rec + Mix + SD ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK88dzqNuKnbr6546BD\"}"
+      "statut": "importe",
+      "numero": "26021",
+      "client": "CHANGE"
     },
     {
       "fichier": "F26022 ✔ - ARTEFACT - Atlantic - Musique de librairie Caleson + Additif mixage - Film _ALFEA M_ ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK89YZy6jPhJYWbuf81\"}"
+      "statut": "importe",
+      "numero": "26022",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "F26023 - LA MAISON NOIRE - Hermès - 6 Films x 3min -  PAP FEMMES - FORMATION - Automne-Hiver 26 - REC + Clean ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8AS9M82miXwtC3wSP\"}"
+      "statut": "importe",
+      "numero": "26023",
+      "client": "LA MAISON NOIRE"
     },
     {
       "fichier": "F26024 ✔ - CoSpirit Groupe - Skyn - 2 Films 15s + 2 Films avec 2 TAG - Renouvellement A2 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8BPhJ2PU7EZbWNjwM\"}"
+      "statut": "importe",
+      "numero": "26024",
+      "client": "CoSpirit Media"
     },
     {
       "fichier": "F26025 - EVEREST - COTY Galeria et YBPN - 2 TAG 5s - Rec + Clean ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8DVwbcxETACRa3wm8\"}"
+      "statut": "importe",
+      "numero": "26025",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26026 ✔ - ARTEFACT - S3NS - 1 BB 8s - Rec + Mix - 1 VO ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8ESkTP9HjmeX8eznb\"}"
+      "statut": "importe",
+      "numero": "26026",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "F26027 - COLOMAFILMS - Pom Bistro - 1h Mix ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8Fo76PHBdvnRGEc1B\"}"
+      "statut": "importe",
+      "numero": "26027",
+      "client": "COLOMAFILMS"
     },
     {
       "fichier": "F26028 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 10_02_26 et 12_02_26 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8HcFP7wXABKRVxscG\"}"
+      "statut": "importe",
+      "numero": "26028",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26029 - NOVEMBRE - Lidl CVC - Prestation séance du 12_01_2026 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8JcX8466RpkYjAAp7\"}"
+      "statut": "importe",
+      "numero": "26029",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26030 - OGILVY - 2 films animatics _La Laitière débarque_ et _Vermeer_La Laitière à l’écoute_ - Rec + Mix - 3 comédiens ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8LFFJdenB3kE8roAd\"}"
+      "statut": "importe",
+      "numero": "2603",
+      "client": "OGILVY"
     },
     {
       "fichier": "F26031 (FAE) - WNP - Media Perf - 1 Film 1min -  Rec + Clean ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8MTRae4rKpM6F1EEM\"}"
+      "statut": "importe",
+      "numero": "26031",
+      "client": "WNP COMMUNICATION"
     },
     {
       "fichier": "F26032 - OGILVY - La Laitière _Truly_ - Renouvellement A3 Musique _Syncope Orchestra_ - Espagne - 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8NiahmT6kRkrrUapP\"}"
+      "statut": "importe",
+      "numero": "26032",
+      "client": "Ogilvyone Worldwide"
     },
     {
       "fichier": "F26033 ✔ - 148472_Décompte TVA de droits d’auteur_674.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8PL3QXipsiZMumdt4\"}"
+      "statut": "importe",
+      "numero": "521026",
+      "client": "SARL CALESON"
     },
     {
       "fichier": "F26034 - NOUVELLES ECOUTES - 2h dE REC.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8RiA7PG5uhJoGVqin\"}"
+      "statut": "importe",
+      "numero": "26034",
+      "client": "Nouvelles Ecoutes"
     },
     {
       "fichier": "F26035 ✔ - GRINTA - LIDL CVC - S10 - Prestations et Studio - Casting 4 comédiens ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8TTqLXMdq7QcbTt4U\"}"
+      "statut": "importe",
+      "numero": "26035",
+      "client": "GRINTA"
     },
     {
       "fichier": "F26036 - GRINTA - LIDL CVC - S10 - 11 Films 11 cuts VOL et 5 Spots Radio - Droits de diffusion - 4 Comédiens ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8UtQTnYwJwCTdMwKW\"}"
+      "statut": "importe",
+      "numero": "26036",
+      "client": "LIDL / GRINTA"
     },
     {
       "fichier": "F26037 - EVEREST - KIA - Prestations - Fevrier 2026.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8W3rbd7SyZm4kEH2y\"}"
+      "statut": "importe",
+      "numero": "26037",
+      "client": "EVEREST - Annonceur : Kia (Att : Sylvain Obriot)"
     },
     {
       "fichier": "F26038 - EVEREST - KIA - REC et MIX - Fevrier 2026.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8XF3EdXpNCq3zsbKU\"}"
+      "statut": "importe",
+      "numero": "26038",
+      "client": "EVEREST - Att : Sylvain Obriot"
     },
     {
       "fichier": "F26039 - EVEREST - KIA - DROITS - Fevrier 2026.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8Y3fBkB6KH6hgVwh6\"}"
+      "statut": "importe",
+      "numero": "26039",
+      "client": "EVEREST - Att : Sylvain Obriot"
     },
     {
       "fichier": "F26040 ✔ - COYOTE - 1 Film A3 - Droits - Web 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8ZLYXAPZNQQjYLrpv\"}"
+      "statut": "importe",
+      "numero": "26040",
+      "client": "COYOTE SYSTEM"
     },
     {
       "fichier": "F26041 ✔ - HONDA - Q4 gamme - 1 Spot Radio 20s  - Rec + Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8anrevHkPVxFY7VuP\"}"
+      "statut": "importe",
+      "numero": "26041",
+      "client": "Honda Motor Europe Succursale France"
     },
     {
       "fichier": "F26042 - CHANGE - France Parrainages - Recondution A4 + 2 Fims 30s TV et WEB.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8c3Wu372Dd1oTDYDc\"}"
+      "statut": "importe",
+      "numero": "26042",
+      "client": "France Parrainages / CHANGE"
     },
     {
       "fichier": "F26043 - GRINTA - HEETCH GLEETCH404 - 1 Film - Rec + Mix + Droits 6 mois ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8d2YjkA75yh7Pu9RG\"}"
+      "statut": "importe",
+      "numero": "26043",
+      "client": "GRINTA SAS"
     },
     {
       "fichier": "F26044 - WNP - AMV - Renouvellement Droits VO - 2 Films _La Blague_ et _Pigeon_ + 1 BB +  5 story.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8eDVEPZAhBepwt4jo\"}"
+      "statut": "importe",
+      "numero": "26044",
+      "client": "WNP"
     },
     {
       "fichier": "F26045 - WNP - AMV - Droits VO Campagne 2026 - 3 Films  _Passe Passe_ _Mariage_ et _Manif_.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8fHyVuvX5bwBbFwgf\"}"
+      "statut": "importe",
+      "numero": "26045",
+      "client": "WNP"
     },
     {
       "fichier": "F26046 - WNP - AMV - Renouvelement A2 - Musique de stock pour jingle - TV Web Radio et Attente téléphonique.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8gRCQfXJVRsYLqgzy\"}"
+      "statut": "importe",
+      "numero": "26046",
+      "client": "WNP"
     },
     {
       "fichier": "F26047 ✔ - ELMA PRODUCTIONS - 1 Film 2 min - CNAM 80 ans de la Sécurité Sociale - Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8hRDsDWzJ8pi4vJY1\"}"
+      "statut": "importe",
+      "numero": "26047",
+      "client": "ELMA PRODUCTIONS"
     },
     {
       "fichier": "F26048 ✔ - EVEREST - Sephora - 1 Film 19s - Rec + Mix - Hors droits.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8ijbUM2CKZv8449nt\"}"
+      "statut": "importe",
+      "numero": "26048",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26049 - HONDA - Q4 gamme - Additif Musique de Librairie Caleson - Radio 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8kWkfFX4QUQiAXDZT\"}"
+      "statut": "importe",
+      "numero": "26049",
+      "client": "Honda"
     },
     {
       "fichier": "F26050 - EVEREST - Shiseido - 1 Film 30s et 1 cut de 15s - Rec + Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8mYWtNY7W14me5iFd\"}"
+      "statut": "importe",
+      "numero": "26050",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26051 ✔ - K-LINE - Reconduction Musique de Galt Macdermot _ Let the Sunshine In_ + Nego - Droits France - 1 an.numbers.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8noAtexjm7EELWtKZ\"}"
+      "statut": "importe",
+      "numero": "26051",
+      "client": "K-Line"
     },
     {
       "fichier": "F26052 ✔ - K LINE - Reconduction Droits VO - 1 Film +1 cut + 1 BB + 4 cuts A4 et A5.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8onxM94mz2TX5LAYn\"}"
+      "statut": "importe",
+      "numero": "26052",
+      "client": "K LINE"
     },
     {
       "fichier": "F26053 - K-LINE - Reconduction Droits de réorchestration _Toujours plus de lumière_ + Nego - Droits France - 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8q1sXUmFNKtiSmjX4\"}"
+      "statut": "importe",
+      "numero": "26053",
+      "client": "K Line"
     },
     {
       "fichier": "F26054 ✔ - K-LINE - Droits Radio A1 - Musique de Galt Macdermot _ Let the Sunshine In_ + Nego - France - 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8r48Lw5miA1oVUHCB\"}"
+      "statut": "importe",
+      "numero": "26054",
+      "client": "K Line"
     },
     {
       "fichier": "F26055 - WNP - Panzani - 1 Film 15s et 10s _Créatives_ + tag _Pesto Rouge_ - Rec + Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8sddZa1rzVYeR2ErD\"}"
+      "statut": "importe",
+      "numero": "26055",
+      "client": "WNP"
     },
     {
       "fichier": "F26056 ✔ -  La Croix Rouge - 2 Films et 1 teaser - Rec + Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK8taBjsXRy9nVdtrcy\"}"
+      "statut": "importe",
+      "numero": "26056",
+      "client": "BAVARDAGES PRODUCTION"
     },
     {
       "fichier": "F26057 - ELCO SAS - EDPFM - Test Intégration Voix IA Annick Menardo+ Mixage.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK96M7XrzwECJWKDYYC\"}"
+      "statut": "importe",
+      "numero": "26057",
+      "client": "CANDEX FRANCE LDT (SASu)"
     },
     {
       "fichier": "F26058 - KILIAN PARIS -  1 Film _Brand Video_ - Enregistrement +  Mixage.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK97zaqsVJ8hJr4RxqN\"}"
+      "statut": "importe",
+      "numero": "26058",
+      "client": "CANDEX FRANCE LDT (SASu)"
     },
     {
       "fichier": "F26059 - GRINTA - LIDL CVC - S11 - Prestations et Studio - Casting 2 comédiens ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK99e3mZAZKbwvR29K2\"}"
+      "statut": "importe",
+      "numero": "26059",
+      "client": "GRINTA"
     },
     {
       "fichier": "F26060 - GRINTA - LIDL CVC - S11 - 7 Films 7 cuts VOL et 6 Spots Radio - Droits de diffusion - 2 Comédiens.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9Ah4E2trwvAR81JkJ\"}"
+      "statut": "importe",
+      "numero": "26060",
+      "client": "GRINTA"
     },
     {
       "fichier": "F26061 - GRINTA - LIDL CVC - S12 - 7 Films 7 cuts VOL et 6 Spots Radio - Droits de diffusion - 1Comédien.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9BdrXtwQiLiHX1Yfx\"}"
+      "statut": "importe",
+      "numero": "26061",
+      "client": "LIDL"
     },
     {
       "fichier": "F26062 - GRINTA - LIDL CVC - S12 - Prestations et Studio - Casting 2 comédiens.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9Cjakdvg9rf5HpTRZ\"}"
+      "statut": "importe",
+      "numero": "26062",
+      "client": "GRINTA"
     },
     {
       "fichier": "F26063 - NOVEMBRE - LIDL - Silvercrest - 2 VO - Rec + Clean+Droits de diff.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9EgR2Lpkkkbxp9vV1\"}"
+      "statut": "importe",
+      "numero": "26063",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26064 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 24_02_2026.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9G3X3uWvdxCPtAdN4\"}"
+      "statut": "importe",
+      "numero": "26064",
+      "client": "Novembre Communication"
     },
     {
       "fichier": "F26065 - NONNA & MENUXL - Riyadh Air - 1 Film 60 _ Cabin Crew_ - Rec + Mix + SD - Stade et Web - 1 Comédien ES.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9HuPZUJataCS5LFM6\"}"
+      "statut": "importe",
+      "numero": "26065",
+      "client": "Riyadh Air"
     },
     {
       "fichier": "F26067 - WNP - Maison Nicolas - Signature Voix - Droits 6 mois.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9Jx943PgBnxS8cjAX\"}"
+      "statut": "importe",
+      "numero": "26067",
+      "client": "WNP WHATS NEXT PARTNERS"
     },
     {
       "fichier": "F26068 - MARDI8 - Enregistrement Lambert Wilson 3h.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9LApC4dUFVb1FgLND\"}"
+      "statut": "importe",
+      "numero": "26068",
+      "client": "MARDI8"
     },
     {
       "fichier": "F26069 - EVEREST - DAVIDOFF - 1 tag - Droits Renouvellement A2 - GERMAN.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9MEodKN76WBmjncDC\"}"
+      "statut": "importe",
+      "numero": "26069",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26070 - LACTALIS - I love Kefir - 2 Films 15s et 6s - Rec + Mix + SD - Belgique 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9NPWojQJd111EmyUF\"}"
+      "statut": "importe",
+      "numero": "26070",
+      "client": "Lactalis Nestlé Produits Frais S.A"
     },
     {
       "fichier": "F26071 - WNP - Bubendorff - Remontage 2 Films 15s - REC + SD - TV.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9PWjD46qLVXm8ySQ9\"}"
+      "statut": "importe",
+      "numero": "26071",
+      "client": "WNP"
     },
     {
       "fichier": "F26072 - WNP - Bubendorff - Reconduction Droits A3 - Signature Sonore.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9R2m6SPkPxvcAkywC\"}"
+      "statut": "importe",
+      "numero": "26072",
+      "client": "WNP"
     },
     {
       "fichier": "F26073 - WNP - Bubendorff - Additif Droits Web 2 Films 15s.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9S2HdGfhkEbJDuie6\"}"
+      "statut": "importe",
+      "numero": "26073",
+      "client": "WNP"
     },
     {
       "fichier": "F26074 - WNP - Bubendorff - Signature Sonore - Droits Web A1.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9TGCiMcjcGNxrZk32\"}"
+      "statut": "importe",
+      "numero": "26074",
+      "client": "WNP"
     },
     {
       "fichier": "F26075 - EVEREST - KIA - Prestations - Mars 2026 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9UWcSwgsCQZjzZEwL\"}"
+      "statut": "importe",
+      "numero": "26075",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26076 - EVEREST - KIA - REC et MIX - Mars 2026 ☑︎.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9VnkdEnBNULN2xNQU\"}"
+      "statut": "importe",
+      "numero": "26076",
+      "client": "EVEREST"
     },
     {
       "fichier": "F26077 - EVEREST - KIA - DROITS EV2 TV et WEB - Mars 2026 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9WjK4EBPbuV3mmpJZ\"}"
+      "statut": "importe",
+      "numero": "26077",
+      "client": "Kia"
     },
     {
       "fichier": "F26078 - EVEREST - KIA - DROITS PV5 RADIO - Mars 2026 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9XoJmedAUMMfHp8wB\"}"
+      "statut": "importe",
+      "numero": "26078",
+      "client": "Kia"
     },
     {
       "fichier": "F26079 - EVEREST - KIA - DROITS PV5 TV - Mars 2026 ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9Ykc2dccHXDyXRRoC\"}"
+      "statut": "importe",
+      "numero": "26079",
+      "client": "Kia / EVEREST"
     },
     {
       "fichier": "F26080 - WNP - Maison Nicolas - Composition Musique Originale et ID Sonore - Droits 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9a2zczipjN5PE4iwm\"}"
+      "statut": "importe",
+      "numero": "26080",
+      "client": "WNP WHATS NEXT PARTNERS"
     },
     {
       "fichier": "F26081 - WNP - Maison Nicolas - Prestation Crystal Bachet.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9b1nGZ2nCf2GAEEvB\"}"
+      "statut": "importe",
+      "numero": "26081",
+      "client": "WNP WHATS NEXT PARTNERS"
     },
     {
       "fichier": "F26082 - KONBINI - BONJOUR QUEBEC - 1 Film 2 min - Rec + Clean + Droits ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9cCE59faDjwdRrdLo\"}"
+      "statut": "importe",
+      "numero": "26082",
+      "client": "SAS Konbini"
     },
     {
       "fichier": "F26083 - OCURENS - TAG HEUER - 1 Film 1 min 1 CUT et A2 - Rec + Mix - Droits WEB Social Media _ Digital - Monde 2 ans ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9ddYdiDGHahTdqgXP\"}"
+      "statut": "importe",
+      "numero": "26083",
+      "client": "OCURENS"
     },
     {
       "fichier": "F26084 - ARTEFACT - Coyote - 1 Film 1min 10 et 2 Packshots WEB - Rec + Mix + Renouvellement 2 Musique ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9f4s6ZE5mjE46rAdd\"}"
+      "statut": "importe",
+      "numero": "26084",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "F26084 - ARTEFACT - Coyote - 1 Film 1min 10 et 2 Packshots WEB - Rec + Mix + Renouvellement 2 Musique.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9gLGJtcHUnDGPmbdg\"}"
+      "statut": "skip",
+      "numero": "26084",
+      "client": "ARTEFACT",
+      "message": "Numéro déjà en base"
     },
     {
       "fichier": "F26085 - ARTEFACT - Coyote Ocon - 1 Film 30s et 2 cuts 15s WEB - Droits ☆.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9hXSzU5YFe8YQX37i\"}"
+      "statut": "importe",
+      "numero": "26085",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "F26085 - ARTEFACT - Coyote Ocon - 1 Film 30s et 2 cuts 15s WEB - Droits.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9icgbu2PQPQ7VjdUp\"}"
+      "statut": "skip",
+      "numero": "26085",
+      "client": "ARTEFACT",
+      "message": "Numéro déjà en base"
     },
     {
       "fichier": "F26086 - ELMA PRODUCTIONS - 1 Film 16 min - Documentaire Congo - Rec et Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9k1GmiSargawVeLtG\"}"
+      "statut": "importe",
+      "numero": "26086",
+      "client": "ELMA PRODUCTIONS"
     },
     {
       "fichier": "F26087 - BIRTH - Volvo - 1 Film testimonial - Droits Comédien.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9mRbmRhXgWKMRsVsh\"}"
+      "statut": "importe",
+      "numero": "26087",
+      "client": "BIRTH"
     },
     {
       "fichier": "F26088 - BIRTH - Volvo - Film testimonials pour Cannes - Studio.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9o26ZSw24ADKVKajZ\"}"
+      "statut": "importe",
+      "numero": "26088",
+      "client": "BIRTH"
     },
     {
       "fichier": "F26089 - HOMERUN - TGV Lyria - 1 BB 8s - Rec + Mix + SD - 1 VO - France et Suisse 1 an.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9p1dT9uJDEgygStvU\"}"
+      "statut": "importe",
+      "numero": "26089",
+      "client": "HOMERUN"
     },
     {
       "fichier": "F26091 - ARTEFACT - Coyote - 2 spots radio - offres Mai - Eric D - Rec + Mix.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9pvgx27MLg3ojaCcH\"}"
+      "statut": "importe",
+      "numero": "26091",
+      "client": "ARTEFACT"
     },
     {
       "fichier": "F26133 - NOVEMBRE - LIDL CVC Spots Radio _ Radio Locales _ VOL_RS SÉANCES 17_02_26 et 19_02_26.pdf",
       "type": "facture",
-      "statut": "erreur",
-      "message": "Claude API : Error: 400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.\"},\"request_id\":\"req_011CaFK9rd8q2nLrDVZRvLgj\"}"
+      "statut": "importe",
+      "numero": "26133",
+      "client": "Novembre Communication"
     }
   ]
 }
