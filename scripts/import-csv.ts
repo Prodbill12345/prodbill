@@ -386,7 +386,9 @@ async function main() {
       }
 
       // ── Comédien ───────────────────────────────────────────────────────
-      if (comedienNom) {
+      const COMEDIEN_FANTOME = /^[-?/\s]*$|^interne$|^pas de cachet$/i;
+      const comedienValide = comedienNom && !COMEDIEN_FANTOME.test(comedienNom.trim());
+      if (comedienValide) {
         const comedienId = await findOrCreateComedien(comedienNom, company.id);
         // Associer au devis via une ligne si le devis existe
         if (devisId) {
