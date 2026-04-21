@@ -225,11 +225,11 @@ Texte du PDF :
 const FACTURE_PROMPT = `Extrais les données structurées de cette facture française.
 Réponds avec ce JSON exact (numero et totalHt sont obligatoires) :
 {
-  "numero": "25-0042-A1",
+  "numero": "F26001",
   "date": "JJ/MM/AAAA",
   "type": "ACOMPTE",
   "client": { "nom": "...", "adresse": "...", "siret": "...", "email": "..." },
-  "devisReference": "25-0042",
+  "devisReference": "F25042",
   "lignes": [
     {
       "libelle": "...",
@@ -242,9 +242,14 @@ Réponds avec ce JSON exact (numero et totalHt sont obligatoires) :
   "tva": 0.00,
   "totalTtc": 0.00,
   "statutPaiement": "EMISE",
-  "numeroBdc": "BDC-25-0042",
+  "numeroBdc": "10000679",
   "dateReglement": "JJ/MM/AAAA"
 }
+
+IMPORTANT — distinction numero / numeroBdc :
+- "numero" : numéro de FACTURE interne Caleson (format : lettre(s) + année + séquentiel, ex: F26001, F25042, FAC-2025-001). C'est le numéro émis par Caleson.
+- "numeroBdc" : numéro de BON DE COMMANDE du CLIENT (format : long numérique, ex: 10000679, 4702097777, ou référence client comme "PO-2025-0042"). Ce numéro est fourni par le client, pas par Caleson. Si absent, mettre null.
+Ne pas confondre les deux : le BDC client n'est JAMAIS le numéro de facture.
 
 Types valides : ACOMPTE, SOLDE, AVOIR
 Statuts valides : BROUILLON, EMISE, PAYEE_PARTIEL, PAYEE, EN_RETARD, ANNULEE

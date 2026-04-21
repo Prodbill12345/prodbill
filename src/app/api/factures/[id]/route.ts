@@ -5,6 +5,9 @@ import { z } from "zod";
 const UpdateFactureSchema = z.object({
   numeroBdc: z.string().optional().nullable(),
   dateReglement: z.string().nullable().optional(), // "YYYY-MM-DD"
+  // Champs de correction (données importées)
+  numero: z.string().min(1).optional(),
+  dateEmission: z.string().nullable().optional(), // "YYYY-MM-DD"
 });
 
 export async function PUT(
@@ -23,10 +26,8 @@ export async function PUT(
     const body = await req.json();
     const input = UpdateFactureSchema.parse(body);
 
-    // numeroBdc : uniquement avant émission
-    if (existing.emiseAt && input.numeroBdc !== undefined) {
-      return Response.json({ error: "Facture immuable après émission" }, { status: 403 });
-    }
+    // numeroBdc : normalement verrouillé après émission, mais on autorise la correction
+    // de données importées (emiseAt peut être null pour les imports CSV)
 
     const facture = await prisma.facture.update({
       where: { id },
@@ -34,6 +35,10 @@ export async function PUT(
         ...(input.numeroBdc !== undefined && { numeroBdc: input.numeroBdc }),
         ...(input.dateReglement !== undefined && {
           dateReglement: input.dateReglement ? new Date(input.dateReglement) : null,
+        }),
+        ...(input.numero !== undefined && { numero: input.numero }),
+        ...(input.dateEmission !== undefined && {
+          dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
         }),
       },
     });

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileDown, Send, RotateCcw, Loader2, Bell } from "lucide-react";
+import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check } from "lucide-react";
 import type { Facture } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
+
+const ANNEES = [2023, 2024, 2025, 2026, 2027];
 
 interface FactureActionsProps {
   facture: Facture;
@@ -16,6 +18,48 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
   const [loading, setLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
+
+  // Formulaire de correction
+  const [showEdit, setShowEdit] = useState(false);
+  const initAnnee = facture.dateEmission
+    ? String(new Date(facture.dateEmission).getFullYear())
+    : "";
+  const [editNumero, setEditNumero] = useState(facture.numero);
+  const [editBdc, setEditBdc] = useState(facture.numeroBdc ?? "");
+  const [editAnnee, setEditAnnee] = useState(initAnnee);
+  const [saving, setSaving] = useState(false);
+
+  async function saveCorrection() {
+    setSaving(true);
+    try {
+      const dateEmission = editAnnee
+        ? `${editAnnee}-${String(
+            facture.dateEmission ? new Date(facture.dateEmission).getMonth() + 1 : 1
+          ).padStart(2, "0")}-${String(
+            facture.dateEmission ? new Date(facture.dateEmission).getDate() : 1
+          ).padStart(2, "0")}`
+        : null;
+
+      const res = await fetch(`/api/factures/${facture.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          numero: editNumero.trim() || facture.numero,
+          numeroBdc: editBdc.trim() || null,
+          dateEmission,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error ?? "Erreur lors de la sauvegarde");
+        return;
+      }
+      setShowEdit(false);
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function post(endpoint: string, key: string) {
     setLoading(key);
@@ -88,7 +132,69 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
 
   return (
     <div className="flex flex-col items-end gap-2">
+      {/* Formulaire de correction inline */}
+      {showEdit && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 w-80 space-y-3 shadow-sm">
+          <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Corriger la facture</p>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">N° Caleson</label>
+            <input
+              type="text"
+              value={editNumero}
+              onChange={(e) => setEditNumero(e.target.value)}
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">N° BDC client</label>
+            <input
+              type="text"
+              value={editBdc}
+              onChange={(e) => setEditBdc(e.target.value)}
+              placeholder="Ex : 10000679"
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Année</label>
+            <select
+              value={editAnnee}
+              onChange={(e) => setEditAnnee(e.target.value)}
+              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">—</option>
+              {ANNEES.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={saveCorrection}
+              disabled={saving}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 rounded-lg text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              Enregistrer
+            </button>
+            <button
+              onClick={() => setShowEdit(false)}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-medium text-slate-500 hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2 flex-wrap justify-end">
+        <button
+          onClick={() => setShowEdit((v) => !v)}
+          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <Pencil className="w-4 h-4" />
+          Modifier
+        </button>
+
         {canEmettre && (
           <button
             onClick={emettre}

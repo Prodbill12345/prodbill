@@ -1,10 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { formatEuros } from "@/lib/calculations";
-import { formatDate } from "@/lib/utils";
-import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS } from "@/types";
 import Link from "next/link";
-import { Plus, FileText, ChevronRight } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import { DevisListClient } from "@/components/devis/DevisListClient";
 
 export default async function DevisPage() {
   const { userId: clerkId } = await auth();
@@ -56,78 +54,7 @@ export default async function DevisPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Référence
-                </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Objet
-                </th>
-                <th className="text-center px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Année
-                </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Total TTC
-                </th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th className="w-10"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {devis.map((d) => (
-                <tr
-                  key={d.id}
-                  className="hover:bg-blue-50/30 transition-colors group"
-                >
-                  <td className="px-5 py-4">
-                    <Link
-                      href={`/devis/${d.id}`}
-                      className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors"
-                    >
-                      {d.numero ?? <span className="text-slate-400 font-normal italic">Brouillon</span>}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-600">
-                    {d.client.name}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-500 max-w-xs truncate">
-                    {d.objet}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-400 text-center tabular-nums">
-                    {d.annee ?? <span className="text-slate-300">—</span>}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-400">
-                    {formatDate(d.updatedAt)}
-                  </td>
-                  <td className="px-5 py-4 text-sm font-semibold text-slate-900 text-right tabular-nums">
-                    {formatEuros(d.totalTtc)}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${DEVIS_STATUT_COLORS[d.statut]}`}
-                    >
-                      {DEVIS_STATUT_LABELS[d.statut]}
-                    </span>
-                  </td>
-                  <td className="px-3 py-4">
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DevisListClient devis={devis} />
       )}
     </div>
   );
