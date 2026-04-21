@@ -28,7 +28,7 @@ const IMPORT_DIR = path.join(process.env.HOME!, "Desktop/import-prodbill");
 const DEVIS_DIR = path.join(IMPORT_DIR, "devis");
 const FACTURES_DIR = path.join(IMPORT_DIR, "factures");
 const REPORT_PATH = path.join(process.cwd(), "import-report.json");
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-sonnet-4-6";
 
 // ─── Prisma ───────────────────────────────────────────────────────────────────
 
