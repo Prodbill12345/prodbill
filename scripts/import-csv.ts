@@ -153,12 +153,21 @@ function mapFactureType(numero?: string): FactureType {
 
 function mapFactureStatut(raw?: string): FactureStatut {
   if (!raw) return "EMISE";
-  const u = raw.toUpperCase();
-  if (u.includes("PAY")) return "PAYEE";
+  const u = raw.toUpperCase().trim();
+  // "non-pay" / "non pay" doit rester EMISE même s'il contient "PAY"
+  if (u.includes("NON")) return "EMISE";
   if (u.includes("PARTIEL")) return "PAYEE_PARTIEL";
+  if (u.includes("PAY")) return "PAYEE";
   if (u.includes("RETARD")) return "EN_RETARD";
   if (u.includes("ANNUL")) return "ANNULEE";
   return "EMISE";
+}
+
+function isPaiementComedien(raw?: string): boolean {
+  if (!raw) return false;
+  const u = raw.toUpperCase().trim();
+  if (u.includes("NON")) return false;
+  return u.includes("PAY");
 }
 
 // Cache pour éviter les doublons en mémoire
@@ -292,6 +301,15 @@ async function main() {
 
   // Map numero → id pour les liens devis ↔ facture (peuplé au fur et à mesure)
   const devisNumeroToId = new Map<string, string>();
+
+  // Entrées pour la synchronisation des statuts après la boucle principale
+  interface SyncEntry {
+    noFacture: string;
+    statut: FactureStatut;
+    paiementComedien: boolean;
+    devisId: string | null;
+  }
+  const syncEntries: SyncEntry[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const lineNum = i + 1;
@@ -469,6 +487,14 @@ async function main() {
           create: { numero: noFacture, ...factureData },
           update: factureData,
         });
+
+        // Enregistrer pour la synchronisation finale (le CSV fait autorité sur le statut)
+        syncEntries.push({
+          noFacture,
+          statut: mapFactureStatut(statutPaie),
+          paiementComedien: isPaiementComedien(statutPaie),
+          devisId: factureDevisId,
+        });
       }
 
       const label = [noDevis, noFacture].filter(Boolean).join(" / ") || clientNom;
@@ -480,6 +506,38 @@ async function main() {
       nbErreur++;
     }
   }
+
+  // ── Synchronisation des statuts de paiement ──────────────────────────────
+  // Le CSV fait autorité : ses statuts écrasent ceux d'import-historique.ts
+  console.log(`\n🔄 Synchronisation des statuts (${syncEntries.length} factures)...`);
+  let nbSync = 0;
+  let nbSyncErr = 0;
+
+  for (const entry of syncEntries) {
+    try {
+      await prisma.facture.update({
+        where: { numero: entry.noFacture },
+        data: { statut: entry.statut },
+      });
+
+      // Si payée, marquer paiementComedien sur les lignes ARTISTE du devis lié
+      if (entry.paiementComedien && entry.devisId) {
+        await prisma.devisLigne.updateMany({
+          where: {
+            section: { devisId: entry.devisId },
+            tag: "ARTISTE",
+          },
+          data: { paiementComedien: true },
+        });
+      }
+      nbSync++;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log(`  ⚠️  Sync ${entry.noFacture} — ${msg}`);
+      nbSyncErr++;
+    }
+  }
+  console.log(`  ✅ ${nbSync} synchronisée(s)${nbSyncErr > 0 ? `  ⚠️  ${nbSyncErr} erreur(s)` : ""}`);
 
   // ── Résumé ─────────────────────────────────────────────────────────────────
   console.log("\n" + "═".repeat(60));
