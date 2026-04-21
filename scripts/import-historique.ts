@@ -3,7 +3,10 @@
  * Importe les PDFs historiques de Caleson en base via Claude API.
  *
  * Usage :
- *   npx tsx scripts/import-historique.ts [--dry-run]
+ *   npx tsx scripts/import-historique.ts [--dry-run] [--force]
+ *
+ * --dry-run  : affiche ce qui serait fait sans écrire en base
+ * --force    : ré-extrait et écrase les sections même si elles existent déjà
  *
  * Prérequis :
  *   - Dossiers ~/Desktop/import-prodbill/devis/ et factures/ avec les PDFs
@@ -23,7 +26,10 @@ dotenv.config({ path: ".env.local" });
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const DRY_RUN = process.argv.includes("--dry-run");
+const DRY_RUN    = process.argv.includes("--dry-run");
+const FORCE      = process.argv.includes("--force");
+const ONLY_DEVIS = process.argv.find((a) => a.startsWith("--devis="))?.split("=")[1] ?? null;
+if (ONLY_DEVIS) console.log(`🎯 Mode test : uniquement le devis ${ONLY_DEVIS}`);
 const IMPORT_DIR = path.join(process.env.HOME!, "Desktop/import-prodbill");
 const DEVIS_DIR = path.join(IMPORT_DIR, "devis");
 const FACTURES_DIR = path.join(IMPORT_DIR, "factures");
@@ -195,7 +201,7 @@ Statuts valides : BROUILLON, ENVOYE, ACCEPTE, REFUSE, EXPIRE
 Texte du PDF :
 `;
 
-const LIGNES_PROMPT = `Extrais uniquement les lignes détaillées de ce devis français.
+const LIGNES_PROMPT = `Extrais uniquement les lignes détaillées de ce devis français (émetteur : Caleson).
 Réponds avec ce JSON exact :
 {
   "dateSeance": "JJ/MM/AAAA ou null",
@@ -208,6 +214,25 @@ Réponds avec ce JSON exact :
     }
   ]
 }
+
+ORDRE DES COLONNES dans les tableaux Caleson (CRITIQUE — ne pas inverser) :
+  Colonne 1 : Libellé (description de la prestation)
+  Colonne 2 : Montant / Prix unitaire  → champ "prixUnit"
+  Colonne 3 : Unité / Quantité         → champ "quantite"
+  Colonne 4 : Total HT                 → NE PAS mettre dans le JSON, c'est prixUnit × quantite
+
+Vérification obligatoire avant de répondre :
+  Pour chaque ligne : prixUnit × quantite doit être ≈ Total HT lu dans le PDF (tolérance 1 €).
+  Si ce n'est pas le cas, inverser prixUnit et quantite et revérifier.
+  Si l'inversion corrige l'écart, utiliser les valeurs inversées.
+
+Exemples corrects :
+  "400,00 | 1 | 400,00"  → prixUnit: 400, quantite: 1
+  "450,00 | 2 | 900,00"  → prixUnit: 450, quantite: 2
+  "1 200,00 | 1 | 1 200,00" → prixUnit: 1200, quantite: 1
+
+NE PAS inclure les lignes suivantes (calculées automatiquement par ProdBill) :
+  Charges sociales, Frais généraux, Marge de fonctionnement, TVA, TOTAL, Sous-total
 
 Règles pour le champ "tag" :
 - "ARTISTE" : comédien, acteur, voix, narrateur, artiste, droits artistiques, nom de personne
@@ -379,13 +404,25 @@ async function importDevis(
     return { fichier: fileName, type: "devis", statut: "erreur", message: `JSON invalide : ${e}\n${raw.slice(0, 200)}` };
   }
 
+  if (ONLY_DEVIS && data.numero !== ONLY_DEVIS) {
+    return { fichier: fileName, type: "devis", statut: "skip", numero: data.numero, client: data.client?.nom, message: "filtré par --devis" };
+  }
+
   // Enrichissement si déjà en base : extraire les lignes et remplacer
   if (data.numero) {
     const existing = await prisma.devis.findFirst({
       where: { companyId, numero: data.numero },
-      select: { id: true },
+      select: {
+        id: true,
+        sections: { select: { id: true }, take: 1 },
+      },
     });
     if (existing) {
+      // Sans --force, skip si des sections existent déjà
+      if (existing.sections.length > 0 && !FORCE) {
+        log("⏭ ", `Skip     devis ${data.numero} — sections déjà en base (--force pour écraser)`);
+        return { fichier: fileName, type: "devis", statut: "skip", numero: data.numero, client: data.client.nom, message: "sections existantes" };
+      }
       let rawLignes: string;
       try {
         rawLignes = await callClaude(LIGNES_PROMPT, pdfText);
@@ -679,6 +716,7 @@ async function main() {
   } else {
     console.log(`\n── Devis (${devisPdfs.length} fichiers) ${"─".repeat(40)}\n`);
     for (const f of devisPdfs) {
+      if (ONLY_DEVIS && !f.includes(ONLY_DEVIS)) continue;
       const entry = await importDevis(path.join(DEVIS_DIR, f), company.id, adminUser.id, taux);
       report.push(entry);
       if (entry.statut === "erreur") log("❌", `  ${entry.message}`);
