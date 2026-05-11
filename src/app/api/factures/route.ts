@@ -88,6 +88,8 @@ export async function POST(req: Request) {
     const csTechniciens  = r2(devis.csTechniciens * ratio);
     const fraisGeneraux  = r2(devis.fraisGeneraux * ratio);
     const margeSnap      = r2(devis.marge         * ratio);
+    const remiseSnap     = r2(devis.remise        * ratio);
+    const coproductionSnap = r2(devis.coproduction * ratio);
     const baseMarge      = r2(sousTotal + csTechniciens);
 
     // Récupérer les infos société pour les mentions légales
@@ -111,6 +113,8 @@ export async function POST(req: Request) {
         baseMarge,
         fraisGeneraux,
         marge: margeSnap,
+        remise: remiseSnap,
+        coproduction: coproductionSnap,
         tauxCsComedien: devis.tauxCsComedien,
         tauxCsTech:     devis.tauxCsTech,
         tauxFg:         devis.tauxFg,
