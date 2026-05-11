@@ -1,161 +1,135 @@
 /**
  * scripts/import-csv.ts
- * Purge la base puis importe le tableau de suivi Caleson (CSV latin1 séparé par ;).
+ * Purge la base puis importe le tableau de suivi Caleson (CSV latin1, séparé par ;).
  *
- * Usage :
- *   npx tsx scripts/import-csv.ts
+ * Usage : npx tsx scripts/import-csv.ts
+ *         CSV_PATH=/chemin/vers/fichier.csv npx tsx scripts/import-csv.ts
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
+import iconv from "iconv-lite";
+import { parse as parseCsv } from "csv-parse/sync";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import {
   PrismaClient,
   DevisStatut,
   FactureType,
   FactureStatut,
+  LigneTag,
 } from "@prisma/client";
 
 dotenv.config({ path: ".env.local" });
 
 const CSV_PATH =
   process.env.CSV_PATH ??
-  path.join(process.env.HOME!, "Desktop/Tableau_de_suivi_ProdBill.csv");
-
-// ─── Prisma ───────────────────────────────────────────────────────────────────
+  "/Users/roselaine.touati/Desktop/Tableau de suivi pour ProdBill.csv";
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
-// ─── Purge ────────────────────────────────────────────────────────────────────
+// ─── CSV parsing ──────────────────────────────────────────────────────────────
 
-async function purgeBase() {
-  console.log("\n🗑️  Suppression des données existantes...");
-
-  // Ordre strict respectant les contraintes FK :
-  // 1. DevisLigne (FK → DevisSection cascade, mais suppression explicite demandée)
-  await prisma.devisLigne.deleteMany({});
-  // 2. Pas de modèle FactureLigne dans le schéma
-  // Tables intermédiaires nécessaires avant Facture / Devis
-  await prisma.paiement.deleteMany({});     // FK → Facture sans cascade
-  await prisma.relance.deleteMany({});      // FK → Facture avec cascade
-  await prisma.auditLog.deleteMany({});     // FK optionnelle → Devis/Facture sans cascade
-  await prisma.bDC.deleteMany({});          // FK → Devis sans cascade
-  await prisma.devisSection.deleteMany({}); // FK → Devis avec cascade
-  await prisma.budgetLigne.deleteMany({});  // FK → Client sans cascade
-  // 3–7. Tables demandées dans l'ordre spécifié
-  await prisma.facture.deleteMany({});
-  await prisma.devis.deleteMany({});
-  await prisma.comedien.deleteMany({});
-  await prisma.client.deleteMany({});
-  await prisma.agent.deleteMany({});
-
-  console.log("✅ Base nettoyée, début de l'import...\n");
+/**
+ * Normalisation des noms d'en-têtes pour le matching.
+ *
+ * Le CSV Caleson a été produit par un éditeur Mac qui semble avoir partiellement
+ * stripé les caractères accentués dans certains en-têtes (ex: "Numéro" devenu
+ * "Numro", "Échéance" devenu "chance"). Pour matcher de façon robuste les noms
+ * fournis dans le code avec ceux du fichier, on retire :
+ *   - les diacritiques (NFD + suppression des combining marks)
+ *   - mais AUSSI le caractère accentué entier (plages U+00C0–U+017F),
+ *     pour tolérer la perte complète d'accents.
+ *
+ * Ainsi "Numéro DEVIS" et "Numro DEVIS" se normalisent tous deux en "numro devis".
+ */
+function normalizeHeader(s: string): string {
+  return s
+    // Supprime entièrement les lettres latines accentuées (Latin-1 Supplement
+    // U+00C0–U+00FF hors × et ÷). Cela couvre à la fois le CSV original
+    // ("Numéro") et la version avec accents perdus ("Numro") — les deux
+    // donnent "numro" après normalisation.
+    .replace(/[À-ÖØ-öø-ÿ]/g, "")
+    .toLowerCase()
+    .replace(/[|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-// ─── CSV parser ───────────────────────────────────────────────────────────────
-
-function parseCsvLine(line: string, sep = ";"): string[] {
-  const cols: string[] = [];
-  let cur = "";
-  let inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      inQuote = !inQuote;
-    } else if (c === sep && !inQuote) {
-      cols.push(cur.trim());
-      cur = "";
-    } else {
-      cur += c;
-    }
-  }
-  cols.push(cur.trim());
-  return cols;
+function findHeaderIdx(headers: string[], name: string): number {
+  const n = normalizeHeader(name);
+  return headers.findIndex((h) => normalizeHeader(h) === n);
 }
 
-// ─── Index des colonnes (pas de ligne d'en-tête) ──────────────────────────────
+function findAllHeaderIdx(headers: string[], name: string): number[] {
+  const n = normalizeHeader(name);
+  const result: number[] = [];
+  headers.forEach((h, i) => {
+    if (normalizeHeader(h) === n) result.push(i);
+  });
+  return result;
+}
 
-const COL = {
-  SOCIETE:          0,
-  AGENCE:           1,  // → nom du Client
-  ANNONCEUR:        2,
-  FACTURE_01:       3,
-  NO_DEVIS:         4,
-  NO_FACTURE:       5,
-  NO_DEVIS_LIE:     6,
-  ANNEE:            7,
-  DATE:             8,
-  DELAI:            9,
-  STATUT_PAIEMENT:  10,
-  DATE_REGLEMENT:   11,
-  COMEDIEN:         12,
-  STATUT_COMEDIEN:  13,
-  COMMERCIAL:       14,
-  DATE_SEANCE1:     15,
-  DATE_SEANCE2:     16,
-  // Les colonnes de montants sont à la fin de la ligne (positions variables selon
-  // le nombre de colonnes "montants" intermédiaires) — on les lit depuis la fin.
-  // TotalHT = avant-avant-avant-dernière, TVA = avant-avant-dernière,
-  // TotalTTC = avant-dernière, MontantEncaissé = dernière.
-} as const;
+// ─── Helpers parsing ──────────────────────────────────────────────────────────
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function isEmptyValue(s?: string): boolean {
+  if (!s) return true;
+  const t = s.trim();
+  return t === "" || /^-\s*$/.test(t);
+}
 
 function parseAmount(s?: string): number {
-  if (!s) return 0;
-  const cleaned = s
-    .replace(/[\s\t]/g, "")          // espaces et tabs
-    .replace(/[^0-9,\-]/g, "")       // garde uniquement chiffres, virgule, tiret
-    .replace(",", ".");               // virgule décimale → point
-  if (cleaned === "" || cleaned === "-") return 0;
-  return parseFloat(cleaned) || 0;
+  if (isEmptyValue(s)) return 0;
+  const cleaned = s!
+    .replace(/[\s_]/g, "")
+    .replace(/[Û€$£]/g, "")
+    .replace(",", ".")
+    .replace(/[^0-9.\-]/g, "");
+  if (cleaned === "" || cleaned === "-" || cleaned === ".") return 0;
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
 }
 
 function cleanNumero(s?: string): string {
   if (!s) return "";
-  // Conserve lettres, chiffres, tirets et espaces — retire tout le reste (Ê, Û, etc.)
   return s.replace(/[^a-zA-Z0-9\- ]/g, "").trim();
 }
 
 function parseDate(s?: string): Date | null {
-  if (!s) return null;
-  const str = s.trim();
-  if (str === "" || str === "?") return null;
-  const parts = str.split("/");
+  if (isEmptyValue(s)) return null;
+  const t = s!.trim();
+  if (t === "?") return null;
+  const parts = t.split("/");
   if (parts.length !== 3) return null;
-  const jour = parseInt(parts[0], 10);
-  const mois = parseInt(parts[1], 10);
-  const annee = parseInt(parts[2], 10);
-  if (isNaN(jour) || isNaN(mois) || isNaN(annee)) return null;
-  const d = new Date(annee, mois - 1, jour);
+  const j = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  let a = parseInt(parts[2], 10);
+  if (isNaN(j) || isNaN(m) || isNaN(a)) return null;
+  if (a < 100) a += 2000;
+  const d = new Date(a, m - 1, j);
   return isNaN(d.getTime()) ? null : d;
 }
 
-function mapDevisStatut(raw?: string): DevisStatut {
-  if (!raw) return "BROUILLON";
-  const u = raw.toUpperCase();
-  if (u.includes("SIGN") || u.includes("ACCEPT")) return "ACCEPTE";
-  if (u.includes("ANNUL") || u.includes("REFUS")) return "REFUSE";
-  if (u.includes("ENVO") || u.includes("EMIT") || u.includes("ENVOY")) return "ENVOYE";
-  if (u.includes("EXPIR")) return "EXPIRE";
+function mapDevisStatut(noFacture: string, statut: string): DevisStatut {
+  const f = (noFacture ?? "").toUpperCase().trim();
+  const s = (statut ?? "").toUpperCase();
+  if (f && f !== "A FAIRE" && f !== "ANNUL" && /\d/.test(f)) return "ACCEPTE";
+  if (f === "ANNUL" || s.includes("ANNUL")) return "REFUSE";
   return "BROUILLON";
 }
 
-function mapFactureType(numero?: string): FactureType {
-  if (!numero) return "SOLDE";
-  if (numero.toUpperCase().startsWith("AV")) return "AVOIR";
+function mapFactureType(numero: string): FactureType {
+  const u = numero.toUpperCase();
+  if (u.startsWith("AV")) return "AVOIR";
   if (/-A\d/i.test(numero)) return "ACOMPTE";
-  if (/-S\d/i.test(numero)) return "SOLDE";
   return "SOLDE";
 }
 
-function mapFactureStatut(raw?: string): FactureStatut {
-  if (!raw) return "EMISE";
-  const u = raw.toUpperCase().trim();
-  // "non-pay" / "non pay" doit rester EMISE même s'il contient "PAY"
-  if (u.includes("NON")) return "EMISE";
+function mapFactureStatut(raw: string): FactureStatut {
+  const u = (raw ?? "").toUpperCase().trim();
+  if (!u) return "EMISE";
+  if (u.includes("NON")) return "EMISE"; // "non-pay" → non payée
   if (u.includes("PARTIEL")) return "PAYEE_PARTIEL";
   if (u.includes("PAY")) return "PAYEE";
   if (u.includes("RETARD")) return "EN_RETARD";
@@ -163,21 +137,153 @@ function mapFactureStatut(raw?: string): FactureStatut {
   return "EMISE";
 }
 
-function isPaiementComedien(raw?: string): boolean {
-  if (!raw) return false;
-  const u = raw.toUpperCase().trim();
-  if (u.includes("NON")) return false;
-  return u.includes("PAY");
+// ─── Sections et tags ─────────────────────────────────────────────────────────
+//
+// L'enum LigneTag du schéma ne contient que :
+//   ARTISTE, TECHNICIEN_HCS, STUDIO, MUSIQUE, AGENT
+//
+// Les sections « Droits » et « Autres » demandées par l'utilisateur n'ont pas
+// d'équivalent direct. Mapping pragmatique (sans impact sur les calculs CS) :
+//   - Droits  → MUSIQUE (droits musicaux/SACEM, pas de CS appliquée)
+//   - Autres  → STUDIO  (catégorie neutre, pas de CS appliquée)
+// Le titre de section reste « Droits » / « Autres » côté UI.
+
+type SectionCfg = {
+  titre: string;
+  tag: LigneTag;
+  noms: string[];
+};
+
+const SECTIONS: SectionCfg[] = [
+  {
+    titre: "Voix-Off",
+    tag: "ARTISTE",
+    noms: [
+      "Comédien | prestation",
+      "Comédien | droits en intitulé",
+      "Indexation annuelle artiste",
+      "Artistes",
+      "Agent Voix Off (10%)",
+      "Casting voix-off",
+    ],
+  },
+  {
+    titre: "Studio",
+    tag: "TECHNICIEN_HCS",
+    noms: [
+      "Studio Enregistrement | forfait heure",
+      "Réalisation et Montage Voix IA",
+      "Studio Enregistrement Sources Connect",
+      "Studio Clean | forfait heure",
+      "Studio Mixage | forfait heure",
+      "Forfait Animatic et Montage Musique",
+      "EDIT MUSIQUE",
+      "Studio Mixage 5.1 | forfait heure",
+      "Studio Réduction Stéréo",
+      "Post-Producteur",
+      "Ingénieur Son | hors cs",
+      "Ingénieur Son - MUSIQUE",
+      "Ingénieur Son - Montage",
+      "Ingénieur Son - Mixage 5.1",
+      "Réalisation | hors cs",
+      "Gestion de production",
+      "Sound Design| Forfait",
+      "Fourniture et Sauvegarde",
+      "EXPORT FICHIERS",
+      "LIVRAISON REGIES RADIOS",
+      "Sortie d'éléments/ forfait",
+      "STUDIO DÉCLINAISON ADAPTATION",
+    ],
+  },
+  {
+    titre: "Musique",
+    tag: "MUSIQUE",
+    noms: [
+      "Recherche Musicale",
+      "Composition Originale Caleson",
+      "Adaptations Musiques du passé / forfait",
+      "Montage Musique",
+      "Musique de librairie droits en intitulé",
+      "Remise exceptionnelle musique",
+      "Finalisation musique",
+      "Finalisaton musique",
+      "Programmateur Synthé",
+      "Programmateur Synthe",
+      "Supervision paroles",
+      "Studio Musique",
+      "Mixage Musique",
+      "Mixeur Musque",
+      "Additif Studio Musique",
+      "Réalisation musique hors CS",
+    ],
+  },
+  {
+    titre: "Droits",
+    tag: "MUSIQUE",
+    noms: [
+      "Droits Musique",
+      "INDEXATION Droits Musique",
+      "Droits Radio",
+      "Droits Achat Espace A2",
+      "indexation renouvellement A2",
+      "SACEM",
+    ],
+  },
+  {
+    titre: "Autres",
+    tag: "STUDIO",
+    noms: [
+      "Frais de communication / marketing",
+      "Frais juridiques",
+      "Frais de déplacement",
+      "Conception et Rédaction Originale. REEL",
+      "Conception et Rédaction Originale. DEVIS",
+      "Vente materiel",
+      "Loyer",
+      "CO-PRODUCTION (APPORT EN INDUSTRIE SUR STUDIOS ET SALAIRES)",
+      "REMISE EXCEPTIONNELLE",
+    ],
+  },
+];
+
+const EXCLUSIONS = new Set(
+  [
+    "Charges sociales comédien",
+    "Charges sociales techniciens",
+    "Frais généraux",
+    "Marge de fonctionnement",
+  ].map(normalizeHeader)
+);
+
+// ─── Purge ────────────────────────────────────────────────────────────────────
+
+async function purgeBase() {
+  console.log("\n🗑️  Suppression des données existantes...");
+  // Tables dépendantes (FK non-cascade) — libérer avant de toucher aux entités principales.
+  await prisma.paiement.deleteMany({});
+  await prisma.relance.deleteMany({});
+  await prisma.auditLog.deleteMany({});
+  await prisma.bDC.deleteMany({});
+  await prisma.budgetLigne.deleteMany({});
+  // Ordre demandé :
+  await prisma.devisLigne.deleteMany({});
+  await prisma.devisSection.deleteMany({});
+  await prisma.facture.deleteMany({});
+  await prisma.devis.deleteMany({});
+  await prisma.comedien.deleteMany({});
+  await prisma.client.deleteMany({});
+  console.log("✅ Base nettoyée.\n");
 }
 
-// Cache pour éviter les doublons en mémoire
-const clientCache = new Map<string, string>();   // nom → id
-const comedienCache = new Map<string, string>(); // "prenom nom" → id
+// ─── Caches ───────────────────────────────────────────────────────────────────
+
+const clientCache = new Map<string, string>();
+const comedienCache = new Map<string, string>();
 
 async function findOrCreateClient(nom: string, companyId: string): Promise<string> {
   const key = nom.trim().toLowerCase();
-  if (clientCache.has(key)) return clientCache.get(key)!;
-
+  const cached = clientCache.get(key);
+  if (cached) return cached;
   const existing = await prisma.client.findFirst({
     where: { companyId, name: { equals: nom.trim(), mode: "insensitive" } },
     select: { id: true },
@@ -186,7 +292,6 @@ async function findOrCreateClient(nom: string, companyId: string): Promise<strin
     clientCache.set(key, existing.id);
     return existing.id;
   }
-
   const created = await prisma.client.create({
     data: { companyId, name: nom.trim(), address: "", email: "" },
     select: { id: true },
@@ -195,25 +300,18 @@ async function findOrCreateClient(nom: string, companyId: string): Promise<strin
   return created.id;
 }
 
-async function findOrCreateComedien(
-  fullName: string,
-  companyId: string
-): Promise<string> {
+async function findOrCreateComedien(fullName: string, companyId: string): Promise<string> {
   const key = fullName.trim().toLowerCase();
-  if (comedienCache.has(key)) return comedienCache.get(key)!;
-
+  const cached = comedienCache.get(key);
+  if (cached) return cached;
+  const parts = fullName.trim().split(/\s+/);
+  const prenom = parts[0] ?? "";
+  const nom = parts.slice(1).join(" ") || prenom;
   const existing = await prisma.comedien.findFirst({
     where: {
       companyId,
-      OR: [
-        { nom: { equals: fullName.trim(), mode: "insensitive" } },
-        {
-          AND: [
-            { prenom: { equals: fullName.split(" ")[0]?.trim(), mode: "insensitive" } },
-            { nom: { equals: fullName.split(" ").slice(1).join(" ").trim(), mode: "insensitive" } },
-          ],
-        },
-      ],
+      prenom: { equals: prenom, mode: "insensitive" },
+      nom: { equals: nom, mode: "insensitive" },
     },
     select: { id: true },
   });
@@ -221,11 +319,6 @@ async function findOrCreateComedien(
     comedienCache.set(key, existing.id);
     return existing.id;
   }
-
-  const parts = fullName.trim().split(/\s+/);
-  const prenom = parts[0] ?? "";
-  const nom = parts.slice(1).join(" ") || prenom;
-
   const created = await prisma.comedien.create({
     data: { companyId, prenom, nom },
     select: { id: true },
@@ -245,21 +338,52 @@ async function main() {
     console.error("❌ DATABASE_URL manquante dans .env.local");
     process.exit(1);
   }
-
-  // Récupérer la company et l'utilisateur admin
-  const company = await prisma.company.findFirst({
-    select: {
-      id: true,
-      name: true,
-      defaultTauxCsComedien: true,
-      defaultTauxCsTech: true,
-      defaultTauxFg: true,
-      defaultTauxMarge: true,
-    },
-  });
-  if (!company) {
-    console.error("❌ Aucune company trouvée en base.");
+  if (!fs.existsSync(CSV_PATH)) {
+    console.error(`❌ Fichier CSV introuvable : ${CSV_PATH}`);
+    console.error("   Définissez CSV_PATH=<chemin> ou placez le CSV à cet emplacement.");
     process.exit(1);
+  }
+
+  // Cherche en priorité la company "Caleson" ; fallback sur la première.
+  const allCompanies = await prisma.company.findMany({
+    select: { id: true, name: true, clerkOrgId: true },
+  });
+  console.log(
+    `\n🔎 ${allCompanies.length} company(ies) en base : ${allCompanies
+      .map((c) => `"${c.name}" (${c.id})`)
+      .join(", ")}`
+  );
+  const company =
+    (await prisma.company.findFirst({
+      where: { name: { contains: "Caleson", mode: "insensitive" } },
+      select: {
+        id: true,
+        name: true,
+        defaultTauxCsComedien: true,
+        defaultTauxCsTech: true,
+        defaultTauxFg: true,
+        defaultTauxMarge: true,
+      },
+    })) ??
+    (await prisma.company.findFirst({
+      select: {
+        id: true,
+        name: true,
+        defaultTauxCsComedien: true,
+        defaultTauxCsTech: true,
+        defaultTauxFg: true,
+        defaultTauxMarge: true,
+      },
+    }));
+  if (!company) {
+    console.error("❌ Aucune company trouvée.");
+    process.exit(1);
+  }
+  console.log("Company ID:", company.id);
+  if (!/caleson/i.test(company.name)) {
+    console.log(
+      `⚠️  La company sélectionnée ne s'appelle pas "Caleson" — vérifie que c'est bien celle attendue.`
+    );
   }
   const adminUser = await prisma.user.findFirst({
     where: { companyId: company.id },
@@ -273,104 +397,158 @@ async function main() {
   console.log(`\n🏢 Company  : ${company.name}`);
   console.log(`📄 Fichier  : ${CSV_PATH}\n`);
 
-  // Vérifier le CSV
-  if (!fs.existsSync(CSV_PATH)) {
-    console.error(`❌ Fichier CSV introuvable : ${CSV_PATH}`);
-    console.error("   Placez votre CSV à cet emplacement ou définissez CSV_PATH=<chemin>");
-    process.exit(1);
-  }
-
-  // ── Purge ─────────────────────────────────────────────────────────────────
   await purgeBase();
 
-  // ── Lecture CSV (latin1) ─────────────────────────────────────────────────
-  const raw = fs.readFileSync(CSV_PATH, "latin1");
-  const lines = raw.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  // Lecture en Mac Roman : le CSV a été produit par un éditeur Mac (bytes 0x8e,
+  // 0x8f, 0x83… correspondent aux accents Mac Roman, pas latin1).
+  const buf = fs.readFileSync(CSV_PATH);
+  const raw = iconv.decode(buf, "macintosh");
 
-  if (lines.length < 1) {
-    console.error("❌ CSV vide.");
+  // Vrai parser CSV : gère les guillemets et les cellules multi-lignes
+  // (descriptions entre " qui contiennent des \n).
+  const rows: string[][] = parseCsv(raw, {
+    delimiter: ";",
+    relax_quotes: true,
+    relax_column_count: true,
+    skip_empty_lines: false, // on garde la numérotation fidèle
+    bom: true,
+  });
+
+  if (rows.length < 2) {
+    console.error("❌ CSV vide ou sans données.");
     process.exit(1);
   }
+  const headers = rows[0].map((h) => (h ?? "").trim());
 
-  console.log(`📋 ${lines.length} lignes à importer\n`);
+  // Index des colonnes métadonnées (par nom d'en-tête)
+  const idx = {
+    commercial:     findHeaderIdx(headers, "Nom du Commercial"),
+    client:         findHeaderIdx(headers, "Client"),
+    projet:         findHeaderIdx(headers, "Nom du Projet"),
+    objet:          findHeaderIdx(headers, "Objet du devis"),
+    description:    findHeaderIdx(headers, "Description du projet"),
+    pipe:           findHeaderIdx(headers, "PIPE DEVIS %"),
+    noDevis:        findHeaderIdx(headers, "Numéro DEVIS"),
+    noBdc:          findHeaderIdx(headers, "Numéro de BDC"),
+    noFacture:      findHeaderIdx(headers, "Numéro Facture"),
+    annee:          findHeaderIdx(headers, "Année"),
+    dateEmission:   findHeaderIdx(headers, "Date émission"),
+    echeance:       findHeaderIdx(headers, "Échéance"),
+    statut:         findHeaderIdx(headers, "Statut"),
+    datePaiement:   findHeaderIdx(headers, "Date paiement"),
+    nomComedien:    findHeaderIdx(headers, "Nom Comédien"),
+    statutCachet:   findHeaderIdx(headers, "Statut cachet comédien"),
+    agent:          findHeaderIdx(headers, "Agent"),
+    dateReglPresta: findHeaderIdx(headers, "Date du règlement de la prestation"),
+    dateReglDroits: findHeaderIdx(headers, "Date du règlement des droits"),
+    totalHt:        findHeaderIdx(headers, "TOTAL HT"),
+    ht:             findHeaderIdx(headers, "HT (Û)"),
+    tva:            findHeaderIdx(headers, "TVA (Û)"),
+    ttc:            findHeaderIdx(headers, "TTC (Û)"),
+  };
 
-  // ── Import ligne par ligne ────────────────────────────────────────────────
+  // Pré-calcul des index pour chaque section (avec gestion des doublons d'en-têtes)
+  const sectionColumns = SECTIONS.map((sec) => {
+    const colonnes: Array<{ libelle: string; idx: number }> = [];
+    for (const nom of sec.noms) {
+      const indices = findAllHeaderIdx(headers, nom);
+      for (const i of indices) {
+        colonnes.push({ libelle: headers[i].trim() || nom, idx: i });
+      }
+    }
+    return { titre: sec.titre, tag: sec.tag, colonnes };
+  });
+
+  // Colonnes non mappées (info uniquement)
+  const mapped = new Set<number>();
+  for (const s of sectionColumns) for (const c of s.colonnes) mapped.add(c.idx);
+  for (const k of Object.values(idx)) if (k >= 0) mapped.add(k);
+  const unmapped: string[] = [];
+  for (let i = 0; i < headers.length; i++) {
+    const h = headers[i];
+    if (!h) continue;
+    if (mapped.has(i)) continue;
+    if (EXCLUSIONS.has(normalizeHeader(h))) continue;
+    unmapped.push(`#${i}:"${h}"`);
+  }
+  if (unmapped.length > 0) {
+    console.log(`ℹ️  Colonnes ignorées (non mappées, hors exclusions) : ${unmapped.join(", ")}\n`);
+  }
+
+  // Ligne « vide » = toutes les colonnes vides (après trim).
+  const isBlankRow = (r: string[]) =>
+    r.every((c) => (c ?? "").trim() === "");
+
+  const dataRows = rows.slice(1);
+  console.log(`📋 ${dataRows.length} ligne(s) brutes après l'en-tête\n`);
+
   let nbImporte = 0;
   let nbSkip = 0;
   let nbErreur = 0;
-
-  // Map numero → id pour les liens devis ↔ facture (peuplé au fur et à mesure)
+  let firstDevisLogged = false;
   const devisNumeroToId = new Map<string, string>();
 
-  // Entrées pour la synchronisation des statuts après la boucle principale
-  interface SyncEntry {
-    noFacture: string;
-    statut: FactureStatut;
-    paiementComedien: boolean;
-    devisId: string | null;
-  }
-  const syncEntries: SyncEntry[] = [];
+  for (let i = 0; i < dataRows.length; i++) {
+    const lineNum = i + 2; // +1 pour l'en-tête, +1 pour passer en base 1
+    const cols = dataRows[i];
 
-  for (let i = 0; i < lines.length; i++) {
-    const lineNum = i + 1;
-    const cols = parseCsvLine(lines[i]);
+    // Arrêt immédiat dès la première ligne entièrement vide.
+    if (isBlankRow(cols)) {
+      console.log(`\n🛑 Ligne ${lineNum} vide — arrêt de la boucle.\n`);
+      break;
+    }
 
-    const c = (idx: number) => cols[idx]?.trim() ?? "";
+    const get = (k: number) => (k >= 0 ? (cols[k] ?? "").trim() : "");
 
-    const agence      = c(COL.AGENCE);
-    const societe     = c(COL.SOCIETE);
-    const annonceur   = c(COL.ANNONCEUR);
-    const noDevis       = cleanNumero(c(COL.NO_DEVIS));
-    const noFacture     = cleanNumero(c(COL.NO_FACTURE));
-    const noDevisLie    = cleanNumero(c(COL.NO_DEVIS_LIE));
-    const statutDevisTxt = c(COL.NO_FACTURE); // cols[5] : "DEVIS SIGN", "ANNUL", etc.
-    const estFacture    = c(COL.FACTURE_01) === "1"; // cols[3] : "1" = devis facturé
-    const statutPaie    = c(COL.STATUT_PAIEMENT);
-    const dateRegl      = c(COL.DATE_REGLEMENT);
-    const comedienNom = c(COL.COMEDIEN);
-    const dateSeance1 = c(COL.DATE_SEANCE1);
-    const annee       = parseInt(c(COL.ANNEE)) || new Date().getFullYear();
-
-    // Montants : lus depuis les 4 dernières valeurs non vides
-    // (les colonnes intermédiaires vides font varier les indices absolus)
-    const nonEmpty = cols.filter((v) => {
-      const t = v.trim();
-      return t !== "" && !/^-\s*$/.test(t);
-    });
-    const totalHt  = parseAmount(nonEmpty[nonEmpty.length - 4]);
-    const tva      = parseAmount(nonEmpty[nonEmpty.length - 3]);
-    const totalTtc = parseAmount(nonEmpty[nonEmpty.length - 2]);
-
-    // Client = Agence (index 1) — skip uniquement si vide
-    const clientNom = agence;
+    const clientNom = get(idx.client);
     if (!clientNom) {
-      console.log(`⏭  Ligne ${lineNum} — agence vide, skip`);
+      console.log(`⚠️  Ligne ${lineNum} skippée (client vide)`);
       nbSkip++;
       continue;
     }
 
+    const noDevis = cleanNumero(get(idx.noDevis));
+    const noFacture = cleanNumero(get(idx.noFacture));
+    const noBdc = cleanNumero(get(idx.noBdc));
+
+    const totalHt = parseAmount(get(idx.totalHt)) || parseAmount(get(idx.ht));
+    const tva = parseAmount(get(idx.tva));
+    const totalTtc = parseAmount(get(idx.ttc));
+
     try {
       const clientId = await findOrCreateClient(clientNom, company.id);
 
-      // ── Devis ──────────────────────────────────────────────────────────
+      // ── DEVIS ─────────────────────────────────────────────────────────
       let devisId: string | null = null;
-
       if (noDevis && noDevis.toUpperCase() !== "ANNUL") {
-        // Devis.numero n'a pas de contrainte @unique → findFirst + create/update
-        const cachedDevisId = devisNumeroToId.get(noDevis);
-        if (cachedDevisId) {
-          devisId = cachedDevisId;
+        const cached = devisNumeroToId.get(noDevis);
+        if (cached) {
+          devisId = cached;
         } else {
+          const projet = get(idx.projet);
+          const objet = get(idx.objet) || projet || "Import CSV";
+          const description = get(idx.description) || null;
+          const dateEmiss = parseDate(get(idx.dateEmission));
+          const anneeVal =
+            parseInt(get(idx.annee)) ||
+            dateEmiss?.getFullYear() ||
+            new Date().getFullYear();
+          const pipeRaw = get(idx.pipe).replace(",", ".").replace("%", "").trim();
+          const pipeNum = pipeRaw ? parseFloat(pipeRaw) : NaN;
+          const pipe = !isNaN(pipeNum)
+            ? Math.max(0, Math.min(100, Math.round(pipeNum <= 1 ? pipeNum * 100 : pipeNum)))
+            : null;
+
           const devisData = {
             companyId: company.id,
             clientId,
             createdById: adminUser.id,
             numero: noDevis,
-            objet: annonceur || agence || "Import CSV",
-            statut: estFacture ? "ACCEPTE" : mapDevisStatut(statutDevisTxt),
-            annee,
-            dateEmission: parseDate(c(COL.DATE)),
-            dateSeance: parseDate(dateSeance1),
+            objet,
+            description,
+            nomProjet: projet || null,
+            annee: anneeVal,
+            statut: mapDevisStatut(noFacture, get(idx.statut)),
             tauxCsComedien: company.defaultTauxCsComedien,
             tauxCsTech: company.defaultTauxCsTech,
             tauxFg: company.defaultTauxFg,
@@ -380,169 +558,143 @@ async function main() {
             totalApresRemise: totalHt,
             tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
             totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
+            dateEmission: dateEmiss,
+            tauxPipe: pipe,
           };
-          const existingInDb = await prisma.devis.findFirst({
+
+          const existing = await prisma.devis.findFirst({
             where: { companyId: company.id, numero: noDevis },
             select: { id: true },
           });
-          let devis: { id: string };
-          if (existingInDb) {
-            devis = await prisma.devis.update({
-              where: { id: existingInDb.id },
-              data: devisData,
-              select: { id: true },
-            });
-          } else {
-            devis = await prisma.devis.create({
-              data: devisData,
-              select: { id: true },
-            });
-          }
+          const devis = existing
+            ? await prisma.devis.update({
+                where: { id: existing.id },
+                data: devisData,
+                select: { id: true },
+              })
+            : await prisma.devis.create({
+                data: devisData,
+                select: { id: true },
+              });
           devisId = devis.id;
           devisNumeroToId.set(noDevis, devisId);
-        }
-      }
 
-      // ── Comédien ───────────────────────────────────────────────────────
-      const COMEDIEN_FANTOME = /^[-?/\s]*$|^interne$|^pas de cachet$/i;
-      const comedienValide = comedienNom && !COMEDIEN_FANTOME.test(comedienNom.trim());
-      if (comedienValide) {
-        const comedienId = await findOrCreateComedien(comedienNom, company.id);
-        // Associer au devis via une ligne si le devis existe
-        if (devisId) {
-          const sectionExists = await prisma.devisSection.findFirst({
-            where: { devisId },
-            select: { id: true },
-          });
-          if (!sectionExists) {
-            await prisma.devisSection.create({
-              data: {
-                devisId,
-                titre: "Artistes",
-                ordre: 0,
-                lignes: {
-                  create: {
-                    libelle: comedienNom,
-                    tag: "ARTISTE",
-                    quantite: 1,
-                    prixUnit: 0,
-                    total: 0,
-                    tauxIndexation: 0,
-                    ordre: 0,
-                    comedienId,
+          if (!firstDevisLogged) {
+            const check = await prisma.devis.findUnique({
+              where: { id: devisId },
+              select: { id: true, numero: true, companyId: true, clientId: true },
+            });
+            console.log(
+              `🔍 Premier devis créé — id=${check?.id} numero=${check?.numero} companyId=${check?.companyId} clientId=${check?.clientId}`
+            );
+            firstDevisLogged = true;
+          }
+
+          // Sections & lignes — rebuild propre (delete-then-create)
+          await prisma.devisSection.deleteMany({ where: { devisId } });
+          let ordreSection = 0;
+          for (const sec of sectionColumns) {
+            const lignes: Array<{
+              libelle: string;
+              tag: LigneTag;
+              prixUnit: number;
+            }> = [];
+            for (const col of sec.colonnes) {
+              const v = parseAmount(cols[col.idx]);
+              if (v !== 0) {
+                lignes.push({ libelle: col.libelle, tag: sec.tag, prixUnit: v });
+              }
+            }
+            if (lignes.length > 0) {
+              await prisma.devisSection.create({
+                data: {
+                  devisId,
+                  titre: sec.titre,
+                  ordre: ordreSection++,
+                  lignes: {
+                    create: lignes.map((l, k) => ({
+                      libelle: l.libelle,
+                      tag: l.tag,
+                      quantite: 1,
+                      prixUnit: l.prixUnit,
+                      total: l.prixUnit,
+                      tauxIndexation: 0,
+                      ordre: k,
+                    })),
                   },
                 },
-              },
+              });
+            }
+          }
+        }
+      }
+
+      // ── COMÉDIEN ──────────────────────────────────────────────────────
+      const comedienNom = get(idx.nomComedien);
+      if (comedienNom && !["-", "?"].includes(comedienNom)) {
+        const comedienId = await findOrCreateComedien(comedienNom, company.id);
+        if (devisId) {
+          // Associer au premier ligne ARTISTE du devis (sans comédien encore)
+          const ligne = await prisma.devisLigne.findFirst({
+            where: { section: { devisId }, tag: "ARTISTE", comedienId: null },
+            select: { id: true },
+          });
+          if (ligne) {
+            await prisma.devisLigne.update({
+              where: { id: ligne.id },
+              data: { comedienId },
             });
           }
         }
       }
 
-      // ── Facture ────────────────────────────────────────────────────────
-      // cols[5] peut contenir un statut texte ("DEVIS SIGN", "ANNUL") ou un vrai numéro
-      const isRealFactureNumero = noFacture && /\d/.test(noFacture) && noFacture.toUpperCase() !== "ANNUL";
-      if (isRealFactureNumero) {
-        // Résolution du devis lié : N°DevisLié en priorité, puis N°Devis
-        let factureDevisId = devisId;
-        if (noDevisLie && noDevisLie !== noDevis) {
-          factureDevisId = devisNumeroToId.get(noDevisLie) ?? null;
-          if (!factureDevisId) {
-            // Chercher en base (au cas où déjà importé depuis une autre ligne)
-            const linked = await prisma.devis.findFirst({
-              where: { companyId: company.id, numero: noDevisLie },
-              select: { id: true },
-            });
-            factureDevisId = linked?.id ?? devisId;
-          }
-        }
+      // ── FACTURE ───────────────────────────────────────────────────────
+      const fU = noFacture.toUpperCase();
+      const factureValide =
+        noFacture && fU !== "A FAIRE" && fU !== "ANNUL" && /\d/.test(noFacture);
 
-        const factTva = tva || Math.round(totalHt * 0.2 * 100) / 100;
-        const factTtc = totalTtc || Math.round(totalHt * 1.2 * 100) / 100;
-
-        // Facture.numero est @unique → upsert standard
+      if (factureValide) {
+        const statutRaw = get(idx.statut);
+        const datePaie = parseDate(get(idx.datePaiement));
+        const dateEmiss = parseDate(get(idx.dateEmission));
+        const dateRegl = parseDate(get(idx.dateReglPresta)) || datePaie;
         const factureData = {
           companyId: company.id,
           clientId,
-          devisId: factureDevisId,
+          devisId,
           createdById: adminUser.id,
           type: mapFactureType(noFacture),
-          statut: mapFactureStatut(statutPaie),
+          statut: mapFactureStatut(statutRaw),
           totalHt,
-          tva: factTva,
-          totalTtc: factTtc,
-          dateEmission: parseDate(c(COL.DATE)),
-          dateReglement: parseDate(dateRegl),
-          numeroBdc: null,
-          siretEmetteur: "",
-          tvaIntraEmetteur: "",
-          ibanEmetteur: "",
-          bicEmetteur: "",
-          nomBanqueEmetteur: "",
-          conditionsPaiement: "",
-          nomEmetteur: "",
-          adresseEmetteur: "",
+          tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
+          totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
+          dateEmission: dateEmiss,
+          dateReglement: dateRegl,
+          datePaiement: datePaie,
+          numeroBdc: noBdc || null,
         };
         await prisma.facture.upsert({
           where: { numero: noFacture },
           create: { numero: noFacture, ...factureData },
           update: factureData,
         });
-
-        // Enregistrer pour la synchronisation finale (le CSV fait autorité sur le statut)
-        syncEntries.push({
-          noFacture,
-          statut: mapFactureStatut(statutPaie),
-          paiementComedien: isPaiementComedien(statutPaie),
-          devisId: factureDevisId,
-        });
       }
 
       const label = [noDevis, noFacture].filter(Boolean).join(" / ") || clientNom;
-      console.log(`✅ Ligne ${lineNum} — ${label} (${clientNom})`);
+      console.log(`✅ Ligne ${lineNum} importée — ${label} (${clientNom})`);
       nbImporte++;
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.log(`❌ Ligne ${lineNum} — ${noDevis || clientNom} — ${msg}`);
+      console.log(
+        `❌ Ligne ${lineNum} erreur — ${noDevis || noFacture || clientNom} — ${msg}`
+      );
       nbErreur++;
     }
   }
 
-  // ── Synchronisation des statuts de paiement ──────────────────────────────
-  // Le CSV fait autorité : ses statuts écrasent ceux d'import-historique.ts
-  console.log(`\n🔄 Synchronisation des statuts (${syncEntries.length} factures)...`);
-  let nbSync = 0;
-  let nbSyncErr = 0;
-
-  for (const entry of syncEntries) {
-    try {
-      await prisma.facture.update({
-        where: { numero: entry.noFacture },
-        data: { statut: entry.statut },
-      });
-
-      // Si payée, marquer paiementComedien sur les lignes ARTISTE du devis lié
-      if (entry.paiementComedien && entry.devisId) {
-        await prisma.devisLigne.updateMany({
-          where: {
-            section: { devisId: entry.devisId },
-            tag: "ARTISTE",
-          },
-          data: { paiementComedien: true },
-        });
-      }
-      nbSync++;
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.log(`  ⚠️  Sync ${entry.noFacture} — ${msg}`);
-      nbSyncErr++;
-    }
-  }
-  console.log(`  ✅ ${nbSync} synchronisée(s)${nbSyncErr > 0 ? `  ⚠️  ${nbSyncErr} erreur(s)` : ""}`);
-
-  // ── Résumé ─────────────────────────────────────────────────────────────────
   console.log("\n" + "═".repeat(60));
   console.log(
-    `Résumé : ✅ ${nbImporte} importé(s)  ⏭  ${nbSkip} ignoré(s)  ❌ ${nbErreur} erreur(s)`
+    `Résumé : ✅ ${nbImporte} importé(s)   ⚠️  ${nbSkip} skippé(s)   ❌ ${nbErreur} erreur(s)`
   );
   console.log("═".repeat(60) + "\n");
 

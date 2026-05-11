@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     facturesEnRetardCount,
     recentDevis,
     recentFactures,
-    paiements6Mois,
+    facturesPayees6Mois,
   ] = await Promise.all([
     prisma.devis.count({ where: { companyId: user.companyId, statut: "ENVOYE" } }),
     prisma.facture.findMany({
@@ -81,18 +81,22 @@ export default async function DashboardPage() {
       orderBy: { updatedAt: "desc" },
       take: 4,
     }),
-    prisma.paiement.findMany({
+    // CA encaissé : on s'appuie directement sur les factures PAYEE avec
+    // une dateReglement renseignée (la table Paiement n'est pas alimentée
+    // par l'import historique).
+    prisma.facture.findMany({
       where: {
-        facture: { companyId: user.companyId },
-        date: { gte: startOf6Months },
+        companyId: user.companyId,
+        statut: "PAYEE",
+        dateReglement: { gte: startOf6Months, not: null },
       },
-      select: { montant: true, date: true },
+      select: { totalTtc: true, dateReglement: true },
     }),
   ]);
 
-  const encaisseMonth = paiements6Mois
-    .filter((p) => new Date(p.date) >= startOfMonth)
-    .reduce((s, p) => s + p.montant, 0);
+  const encaisseMonth = facturesPayees6Mois
+    .filter((f) => f.dateReglement && new Date(f.dateReglement) >= startOfMonth)
+    .reduce((s, f) => s + f.totalTtc, 0);
 
   const enAttenteTtc = facturesEnCours.reduce((s, f) => {
     const paye = f.paiements.reduce((sp, p) => sp + p.montant, 0);
@@ -119,11 +123,12 @@ export default async function DashboardPage() {
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     caParMois.set(key, 0);
   }
-  for (const p of paiements6Mois) {
-    const d = new Date(p.date);
+  for (const f of facturesPayees6Mois) {
+    if (!f.dateReglement) continue;
+    const d = new Date(f.dateReglement);
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     if (caParMois.has(key)) {
-      caParMois.set(key, (caParMois.get(key) ?? 0) + p.montant);
+      caParMois.set(key, (caParMois.get(key) ?? 0) + f.totalTtc);
     }
   }
   const chartData: MonthData[] = Array.from(caParMois.entries()).map(([key, ca]) => {

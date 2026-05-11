@@ -37,7 +37,13 @@
       "Bash(mkdir -p /Users/roselaine.touati/Desktop/prodbill/src/app/landing)",
       "Bash(mv /Users/roselaine.touati/Desktop/prodbill/src/app/page.tsx /Users/roselaine.touati/Desktop/prodbill/src/app/landing/page.tsx)",
       "Bash(git -C /Users/roselaine.touati/Desktop/prodbill commit -m \"fix: landing vers /landing, dashboard back sur /\")",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Read(//Users/roselaine.touati/Desktop/**)",
+      "Bash(iconv -f LATIN1 -t UTF-8 ~/Desktop/Tableau_de_suivi_ProdBill.csv)",
+      "Bash(awk -F';' 'NR>1 && NF>20 {print NR\": \"$2\" | \"$3\" | devis=\"$5\" | fact=\"$7; if \\(NR>5\\) exit}')",
+      "Bash(awk '-F;' 'NR==2 {for\\(i=1;i<=20;i++\\) print i\": [\"$i\"]\"}')",
+      "Bash(xxd)",
+      "Bash(iconv -f MAC -t UTF-8)"
     ]
   }
 }
