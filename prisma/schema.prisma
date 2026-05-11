@@ -301,6 +301,25 @@ model Facture {
   tva      Float
   totalTtc Float
 
+  // Décomposition snapshot (au moment de l'émission ou de l'import) — permet
+  // de reproduire sur la facture le même bloc récapitulatif que le devis.
+  // Pour un ACOMPTE 50 %, ces valeurs sont ramenées au prorata.
+  // TODO immuabilité légale : aujourd'hui la facture lit les lignes
+  // depuis le devis source. Une modif post-émission du devis altère
+  // la facture, ce qui viole l'art. 289 CGI. À traiter avant prod :
+  // soit dupliquer les lignes en FactureSection/FactureLigne au moment
+  // de l'émission, soit verrouiller le devis dès qu'il a une facture.
+  sousTotal      Float @default(0)
+  csComedien     Float @default(0)
+  csTechniciens  Float @default(0)
+  baseMarge      Float @default(0)
+  fraisGeneraux  Float @default(0)
+  marge          Float @default(0)
+  tauxCsComedien Float @default(0)
+  tauxCsTech     Float @default(0)
+  tauxFg         Float @default(0)
+  tauxMarge      Float @default(0)
+
   // Dates
   dateEmission   DateTime?
   dateEcheance   DateTime?

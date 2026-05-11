@@ -43,7 +43,9 @@
       "Bash(awk -F';' 'NR>1 && NF>20 {print NR\": \"$2\" | \"$3\" | devis=\"$5\" | fact=\"$7; if \\(NR>5\\) exit}')",
       "Bash(awk '-F;' 'NR==2 {for\\(i=1;i<=20;i++\\) print i\": [\"$i\"]\"}')",
       "Bash(xxd)",
-      "Bash(iconv -f MAC -t UTF-8)"
+      "Bash(iconv -f MAC -t UTF-8)",
+      "Bash(grep -vE \"node_modules|^$|@types/react-pdf|pdfjs|prisma/client-runtime|neondatabase\")",
+      "Bash(open *)"
     ]
   }
 }
