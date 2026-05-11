@@ -401,7 +401,9 @@ export default async function FactureDetailPage({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">TVA 20%</span>
+                <span className="text-slate-500">
+                  TVA {(facture.tauxTva % 1 === 0 ? facture.tauxTva.toFixed(0) : String(facture.tauxTva).replace(".", ","))}%
+                </span>
                 <span className="tabular-nums text-slate-700">
                   {isAvoir
                     ? `- ${formatEuros(Math.abs(facture.tva))}`
