@@ -61,15 +61,13 @@ export function DevisActions({ devis }: DevisActionsProps) {
 
   return (
     <div className="flex gap-2 flex-wrap justify-end">
-      {(devis.statut === "BROUILLON" || devis.statut === "ENVOYE" || devis.statut === "ACCEPTE" || devis.statut === "REFUSE") && (
-        <Link
-          href={`/devis/${devis.id}/modifier`}
-          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <Pencil className="w-4 h-4" />
-          Modifier
-        </Link>
-      )}
+      <Link
+        href={`/devis/${devis.id}/modifier`}
+        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+      >
+        <Pencil className="w-4 h-4" />
+        Modifier
+      </Link>
 
       {devis.statut === "BROUILLON" && (
         <button
