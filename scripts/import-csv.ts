@@ -463,6 +463,10 @@ async function main() {
     ht:             findHeaderIdx(headers, "HT (€)"),
     tva:            findHeaderIdx(headers, "TVA (€)"),
     ttc:            findHeaderIdx(headers, "TTC (€)"),
+    csComedien:     findHeaderIdx(headers, "Charges sociales comédien"),
+    csTech:         findHeaderIdx(headers, "Charges sociales techniciens"),
+    fraisGeneraux:  findHeaderIdx(headers, "Frais généraux"),
+    marge:          findHeaderIdx(headers, "Marge de fonctionnement"),
   };
 
   // Pré-calcul des index pour chaque section (avec gestion des doublons d'en-têtes)
@@ -509,6 +513,10 @@ async function main() {
     totalHt: number;
     tva: number;
     totalTtc: number;
+    csComedien: number;
+    csTechniciens: number;
+    fraisGeneraux: number;
+    marge: number;
     rowIdxs: number[];
   };
   const devisAgreg = new Map<string, DevisAgreg>();
@@ -524,11 +532,23 @@ async function main() {
       (idx.totalHt >= 0 ? parseAmount(cols[idx.totalHt]) : 0);
     const tva = idx.tva >= 0 ? parseAmount(cols[idx.tva]) : 0;
     const ttc = idx.ttc >= 0 ? parseAmount(cols[idx.ttc]) : 0;
+    const csCom  = idx.csComedien    >= 0 ? parseAmount(cols[idx.csComedien])    : 0;
+    const csTech = idx.csTech        >= 0 ? parseAmount(cols[idx.csTech])        : 0;
+    const fg     = idx.fraisGeneraux >= 0 ? parseAmount(cols[idx.fraisGeneraux]) : 0;
+    const m      = idx.marge         >= 0 ? parseAmount(cols[idx.marge])         : 0;
     const cur =
-      devisAgreg.get(noDevisRaw) ?? { totalHt: 0, tva: 0, totalTtc: 0, rowIdxs: [] };
+      devisAgreg.get(noDevisRaw) ?? {
+        totalHt: 0, tva: 0, totalTtc: 0,
+        csComedien: 0, csTechniciens: 0, fraisGeneraux: 0, marge: 0,
+        rowIdxs: [],
+      };
     cur.totalHt += ht;
     cur.tva += tva;
     cur.totalTtc += ttc;
+    cur.csComedien    += csCom;
+    cur.csTechniciens += csTech;
+    cur.fraisGeneraux += fg;
+    cur.marge         += m;
     cur.rowIdxs.push(i);
     devisAgreg.set(noDevisRaw, cur);
   }
@@ -632,6 +652,44 @@ async function main() {
           const devisTva = aggreg?.tva ?? rowTva;
           const devisTtc = aggreg?.totalTtc ?? rowTtc;
           const devisRowIdxs = aggreg?.rowIdxs ?? [i];
+          const csComedien    = aggreg?.csComedien    ?? 0;
+          const csTechniciens = aggreg?.csTechniciens ?? 0;
+          const fraisGeneraux = aggreg?.fraisGeneraux ?? 0;
+          const margeAgr      = aggreg?.marge         ?? 0;
+
+          // Pré-construction des lignes (en mémoire) pour pouvoir calculer
+          // sousTotal = Σ (quantite × prixUnit) AVANT de créer le devis.
+          // Les lignes représentent uniquement les prestations brutes —
+          // CS/FG/marge sont stockés séparément sur le Devis, pas comme lignes.
+          type LigneDraft = { libelle: string; tag: LigneTag; prixUnit: number };
+          const sectionsDraft: Array<{
+            titre: string;
+            ordre: number;
+            lignes: LigneDraft[];
+          }> = [];
+          let ordreSection = 0;
+          for (const sec of sectionColumns) {
+            const lignes: LigneDraft[] = [];
+            for (const rowIdx of devisRowIdxs) {
+              const rowCols = dataRows[rowIdx];
+              for (const col of sec.colonnes) {
+                const v = parseAmount(rowCols[col.idx]);
+                if (v !== 0) {
+                  lignes.push({ libelle: col.libelle, tag: sec.tag, prixUnit: v });
+                }
+              }
+            }
+            if (lignes.length > 0) {
+              sectionsDraft.push({ titre: sec.titre, ordre: ordreSection++, lignes });
+            }
+          }
+          const sousTotal = Math.round(
+            sectionsDraft.reduce(
+              (acc, s) => acc + s.lignes.reduce((a, l) => a + l.prixUnit, 0),
+              0
+            ) * 100
+          ) / 100;
+          const baseMarge = Math.round((sousTotal + csTechniciens) * 100) / 100;
 
           const projet = get(idx.projet);
           const objet = get(idx.objet) || projet || "Import CSV";
@@ -657,11 +715,20 @@ async function main() {
             nomProjet: projet || null,
             annee: anneeVal,
             statut: mapDevisStatut(noFacture, get(idx.statut)),
+            // Snapshot des taux Company (gardé pour l'UI/PDF, même si on
+            // n'applique PAS la formule — les montants viennent du CSV brut).
             tauxCsComedien: company.defaultTauxCsComedien,
             tauxCsTech: company.defaultTauxCsTech,
             tauxFg: company.defaultTauxFg,
             tauxMarge: company.defaultTauxMarge,
-            sousTotal: devisHt,
+            // Montants : sousTotal = prestations brutes, le reste vient du CSV
+            // tel quel (Caleson n'applique pas toujours les taux uniformément).
+            sousTotal,
+            csComedien,
+            csTechniciens,
+            baseMarge,
+            fraisGeneraux,
+            marge: margeAgr,
             totalHt: devisHt,
             totalApresRemise: devisHt,
             tva: devisTva || Math.round(devisHt * 0.2 * 100) / 100,
@@ -698,45 +765,27 @@ async function main() {
             firstDevisLogged = true;
           }
 
-          // Sections & lignes — rebuild propre. On parcourt TOUTES les rows
-          // CSV qui appartiennent à ce devis (cas multi-comédiens).
+          // Persistance des sections & lignes pré-construites en mémoire.
           await prisma.devisSection.deleteMany({ where: { devisId } });
-          let ordreSection = 0;
-          for (const sec of sectionColumns) {
-            const lignes: Array<{
-              libelle: string;
-              tag: LigneTag;
-              prixUnit: number;
-            }> = [];
-            for (const rowIdx of devisRowIdxs) {
-              const rowCols = dataRows[rowIdx];
-              for (const col of sec.colonnes) {
-                const v = parseAmount(rowCols[col.idx]);
-                if (v !== 0) {
-                  lignes.push({ libelle: col.libelle, tag: sec.tag, prixUnit: v });
-                }
-              }
-            }
-            if (lignes.length > 0) {
-              await prisma.devisSection.create({
-                data: {
-                  devisId,
-                  titre: sec.titre,
-                  ordre: ordreSection++,
-                  lignes: {
-                    create: lignes.map((l, k) => ({
-                      libelle: l.libelle,
-                      tag: l.tag,
-                      quantite: 1,
-                      prixUnit: l.prixUnit,
-                      total: l.prixUnit,
-                      tauxIndexation: 0,
-                      ordre: k,
-                    })),
-                  },
+          for (const sec of sectionsDraft) {
+            await prisma.devisSection.create({
+              data: {
+                devisId,
+                titre: sec.titre,
+                ordre: sec.ordre,
+                lignes: {
+                  create: sec.lignes.map((l, k) => ({
+                    libelle: l.libelle,
+                    tag: l.tag,
+                    quantite: 1,
+                    prixUnit: l.prixUnit,
+                    total: l.prixUnit,
+                    tauxIndexation: 0,
+                    ordre: k,
+                  })),
                 },
-              });
-            }
+              },
+            });
           }
         }
       }
