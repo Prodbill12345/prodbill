@@ -207,7 +207,7 @@ export default async function DevisDetailPage({
                   <span>{formatEuros(devis.totalHt)}</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
-                  <span>TVA 20%</span>
+                  <span>TVA {(devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ","))}%</span>
                   <span>{formatEuros(devis.tva)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-base border-t border-slate-200 pt-2 mt-2">
