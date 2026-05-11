@@ -600,7 +600,23 @@ async function main() {
   let nbSkip = 0;
   let nbErreur = 0;
   let firstDevisLogged = false;
-  const devisNumeroToId = new Map<string, string>();
+  // Cache enrichi : id + breakdown du devis pour pouvoir snapshot
+  // les CS/FG/Marge sur la facture (au prorata pour les acomptes).
+  type DevisSnapshot = {
+    id: string;
+    sousTotal: number;
+    csComedien: number;
+    csTechniciens: number;
+    baseMarge: number;
+    fraisGeneraux: number;
+    marge: number;
+    totalHt: number;
+    tauxCsComedien: number;
+    tauxCsTech: number;
+    tauxFg: number;
+    tauxMarge: number;
+  };
+  const devisNumeroToData = new Map<string, DevisSnapshot>();
   const factureNumeroProcessed = new Set<string>();
 
   for (let i = 0; i < dataRows.length; i++) {
@@ -642,9 +658,9 @@ async function main() {
       // ── DEVIS ─────────────────────────────────────────────────────────
       let devisId: string | null = null;
       if (noDevis && noDevis.toUpperCase() !== "ANNUL") {
-        const cached = devisNumeroToId.get(noDevis);
+        const cached = devisNumeroToData.get(noDevis);
         if (cached) {
-          devisId = cached;
+          devisId = cached.id;
         } else {
           // Totaux agrégés : somme sur toutes les lignes CSV du même devis.
           const aggreg = devisAgreg.get(noDevis);
@@ -752,7 +768,20 @@ async function main() {
                 select: { id: true },
               });
           devisId = devis.id;
-          devisNumeroToId.set(noDevis, devisId);
+          devisNumeroToData.set(noDevis, {
+            id: devis.id,
+            sousTotal,
+            csComedien,
+            csTechniciens,
+            baseMarge,
+            fraisGeneraux,
+            marge: margeAgr,
+            totalHt: devisHt,
+            tauxCsComedien: company.defaultTauxCsComedien,
+            tauxCsTech: company.defaultTauxCsTech,
+            tauxFg: company.defaultTauxFg,
+            tauxMarge: company.defaultTauxMarge,
+          });
 
           if (!firstDevisLogged) {
             const check = await prisma.devis.findUnique({
@@ -824,6 +853,29 @@ async function main() {
         const factTva = aggregF?.tva ?? rowTva;
         const factTtc = aggregF?.totalTtc ?? rowTtc;
 
+        // Snapshot du breakdown du devis lié, ramené au prorata du montant facturé.
+        // Ratio basé sur totalHt (plus stable que TTC à cause des arrondis TVA).
+        const devisSnap = devisId ? devisNumeroToData.get(noDevis) : null;
+        const ratio =
+          devisSnap && devisSnap.totalHt > 0 ? factHt / devisSnap.totalHt : 0;
+        const r2 = (n: number) => Math.round(n * 100) / 100;
+        const factBreakdown = devisSnap
+          ? {
+              sousTotal:      r2(devisSnap.sousTotal     * ratio),
+              csComedien:     r2(devisSnap.csComedien    * ratio),
+              csTechniciens:  r2(devisSnap.csTechniciens * ratio),
+              fraisGeneraux:  r2(devisSnap.fraisGeneraux * ratio),
+              marge:          r2(devisSnap.marge         * ratio),
+              tauxCsComedien: devisSnap.tauxCsComedien,
+              tauxCsTech:     devisSnap.tauxCsTech,
+              tauxFg:         devisSnap.tauxFg,
+              tauxMarge:      devisSnap.tauxMarge,
+            }
+          : null;
+        const factBaseMarge = factBreakdown
+          ? r2(factBreakdown.sousTotal + factBreakdown.csTechniciens)
+          : 0;
+
         const statutRaw = get(idx.statut);
         const datePaie = parseDate(get(idx.datePaiement));
         const dateEmiss = parseDate(get(idx.dateEmission));
@@ -860,6 +912,17 @@ async function main() {
           bicEmetteur: company.bic,
           nomBanqueEmetteur: company.nomBanque,
           conditionsPaiement: company.conditionsPaiement,
+          // Breakdown ramené au prorata depuis le devis lié
+          sousTotal:      factBreakdown?.sousTotal      ?? 0,
+          csComedien:     factBreakdown?.csComedien     ?? 0,
+          csTechniciens:  factBreakdown?.csTechniciens  ?? 0,
+          baseMarge:      factBaseMarge,
+          fraisGeneraux:  factBreakdown?.fraisGeneraux  ?? 0,
+          marge:          factBreakdown?.marge          ?? 0,
+          tauxCsComedien: factBreakdown?.tauxCsComedien ?? 0,
+          tauxCsTech:     factBreakdown?.tauxCsTech     ?? 0,
+          tauxFg:         factBreakdown?.tauxFg         ?? 0,
+          tauxMarge:      factBreakdown?.tauxMarge      ?? 0,
         };
         await prisma.facture.upsert({
           where: { numero: noFacture },
