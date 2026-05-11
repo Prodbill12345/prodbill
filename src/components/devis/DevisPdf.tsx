@@ -454,7 +454,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                   <Text style={s.totHtValue}>{euros(devis.totalHt)}</Text>
                 </View>
                 <View style={s.totRow}>
-                  <Text style={s.totLabel}>TVA 20 %</Text>
+                  <Text style={s.totLabel}>TVA {devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ",")} %</Text>
                   <Text style={s.totValue}>{euros(devis.tva)}</Text>
                 </View>
 
