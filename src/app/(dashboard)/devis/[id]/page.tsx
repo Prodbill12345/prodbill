@@ -181,20 +181,24 @@ export default async function DevisDetailPage({
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
             <h3 className="font-semibold text-slate-900 mb-4">Récapitulatif</h3>
             <div className="space-y-2 text-sm">
-              {[
-                ["Sous-total HT", devis.sousTotal],
-                [`CS Comédiens (${formatPct(devis.tauxCsComedien)})`, devis.csComedien],
-                [`CS Techniciens (${formatPct(devis.tauxCsTech)})`, devis.csTechniciens],
-                [`FG (${formatPct(devis.tauxFg)})`, devis.fraisGeneraux],
-                [`Marge (${formatPct(devis.tauxMarge)})`, devis.marge],
-              ].map(([label, value]) => (
-                <div key={String(label)} className="flex justify-between">
-                  <span className="text-slate-500">{label}</span>
-                  <span className="tabular-nums text-slate-700">
-                    {formatEuros(Number(value))}
-                  </span>
-                </div>
-              ))}
+              {(
+                [
+                  { label: "Sous-total HT", value: devis.sousTotal, alwaysShow: true },
+                  { label: `CS Comédiens (${formatPct(devis.tauxCsComedien)})`, value: devis.csComedien },
+                  { label: `CS Techniciens (${formatPct(devis.tauxCsTech)})`, value: devis.csTechniciens },
+                  { label: `FG (${formatPct(devis.tauxFg)})`, value: devis.fraisGeneraux },
+                  { label: `Marge (${formatPct(devis.tauxMarge)})`, value: devis.marge },
+                ] as { label: string; value: number; alwaysShow?: boolean }[]
+              )
+                .filter((r) => r.alwaysShow || r.value !== 0)
+                .map((r) => (
+                  <div key={r.label} className="flex justify-between">
+                    <span className="text-slate-500">{r.label}</span>
+                    <span className="tabular-nums text-slate-700">
+                      {formatEuros(r.value)}
+                    </span>
+                  </div>
+                ))}
               <div className="border-t border-slate-100 pt-2 mt-2 space-y-1.5">
                 <div className="flex justify-between font-semibold">
                   <span>TOTAL HT</span>

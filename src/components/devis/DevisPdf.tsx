@@ -13,7 +13,6 @@ import type {
   Client,
   Company,
 } from "@prisma/client";
-import { calculerDevis } from "@/lib/calculations";
 
 export type DevisForPdf = Devis & {
   client: Client;
@@ -213,18 +212,12 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
     .filter((s) => s.trim())
     .join(" — ");
 
-  // Recalcul depuis les lignes — plus fiable que les valeurs dénormalisées en DB
-  // (elles peuvent être à 0 si le devis a été créé avec une ancienne version du code)
+  // Lignes à plat — utilisées uniquement pour recalculer les indexations
+  // annuelles (non stockées sur le devis). Les CS/FG/Marge viennent des
+  // champs dénormalisés du devis (snapshot à la sauvegarde/à l'import).
   const allLignes = devis.sections.flatMap((sec) =>
     sec.lignes.map((l) => ({ tag: l.tag, quantite: l.quantite, prixUnit: l.prixUnit, tauxIndexation: l.tauxIndexation }))
   );
-  const taux = {
-    tauxCsComedien: devis.tauxCsComedien,
-    tauxCsTech: devis.tauxCsTech,
-    tauxFg: devis.tauxFg,
-    tauxMarge: devis.tauxMarge,
-  };
-  const totaux = calculerDevis(allLignes, taux);
 
   return (
     <Document
@@ -389,65 +382,77 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
           </View>
         ))}
 
-        {/* ── Totaux (recalculés depuis les lignes) ─────────────── */}
-        <View style={s.totauxSection}>
-          <View style={s.totauxBox}>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>Sous-total HT</Text>
-              <Text style={s.totValue}>{euros(totaux.sousTotal)}</Text>
-            </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>
-                CS Comédiens ({pct(devis.tauxCsComedien)})
-              </Text>
-              <Text style={s.totValue}>{euros(totaux.csComedien)}</Text>
-            </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>
-                CS Techniciens ({pct(devis.tauxCsTech)})
-              </Text>
-              <Text style={s.totValue}>{euros(totaux.csTechniciens)}</Text>
-            </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>
-                Frais généraux ({pct(devis.tauxFg)})
-              </Text>
-              <Text style={s.totValue}>{euros(totaux.fraisGeneraux)}</Text>
-            </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>Marge ({pct(devis.tauxMarge)})</Text>
-              <Text style={s.totValue}>{euros(totaux.marge)}</Text>
-            </View>
-            {totaux.indexationsArtiste > 0 && (
-              <View style={s.totRow}>
-                <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle artiste</Text>
-                <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(totaux.indexationsArtiste)}</Text>
+        {/* ── Totaux (valeurs stockées sur le devis) ────────────── */}
+        {(() => {
+          // Indexations recalculées depuis les lignes (non stockées sur devis).
+          const indexArtiste = Math.round(
+            allLignes
+              .filter((l) => l.tag === "ARTISTE")
+              .reduce((s, l) => s + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0) * 100
+          ) / 100;
+          const indexMusique = Math.round(
+            allLignes
+              .filter((l) => l.tag === "MUSIQUE")
+              .reduce((s, l) => s + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0) * 100
+          ) / 100;
+          // 4 lignes CS/FG/Marge — masquées si à 0 €.
+          const detailRows = [
+            { label: "Charges sociales / comédien",    taux: devis.tauxCsComedien, montant: devis.csComedien },
+            { label: "Charges sociales / techniciens", taux: devis.tauxCsTech,     montant: devis.csTechniciens },
+            { label: "Frais généraux",                 taux: devis.tauxFg,         montant: devis.fraisGeneraux },
+            { label: "Marge de fonctionnement",        taux: devis.tauxMarge,      montant: devis.marge },
+          ].filter((r) => r.montant !== 0);
+
+          return (
+            <View style={s.totauxSection}>
+              <View style={s.totauxBox}>
+                <View style={s.totRow}>
+                  <Text style={s.totLabel}>SOUS TOTAL HT</Text>
+                  <Text style={s.totValue}>{euros(devis.sousTotal)}</Text>
+                </View>
+
+                {detailRows.length > 0 && <View style={{ height: 4 }} />}
+
+                {detailRows.map((r) => (
+                  <View key={r.label} style={s.totRow}>
+                    <Text style={s.totLabel}>{r.label}</Text>
+                    <Text style={[s.totLabel, { width: 50, textAlign: "right" }]}>{pct(r.taux)}</Text>
+                    <Text style={s.totValue}>{euros(r.montant)}</Text>
+                  </View>
+                ))}
+
+                {indexArtiste > 0 && (
+                  <View style={s.totRow}>
+                    <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle artiste</Text>
+                    <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(indexArtiste)}</Text>
+                  </View>
+                )}
+                {indexMusique > 0 && (
+                  <View style={s.totRow}>
+                    <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle musique</Text>
+                    <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(indexMusique)}</Text>
+                  </View>
+                )}
+
+                <View style={s.totDivider} />
+
+                <View style={s.totRow}>
+                  <Text style={s.totHtLabel}>TOTAL HT</Text>
+                  <Text style={s.totHtValue}>{euros(devis.totalHt)}</Text>
+                </View>
+                <View style={s.totRow}>
+                  <Text style={s.totLabel}>TVA 20 %</Text>
+                  <Text style={s.totValue}>{euros(devis.tva)}</Text>
+                </View>
+
+                <View style={s.totTtcRow}>
+                  <Text style={s.totTtcLabel}>TOTAL TTC</Text>
+                  <Text style={s.totTtcValue}>{euros(devis.totalTtc)}</Text>
+                </View>
               </View>
-            )}
-            {totaux.indexationsMusique > 0 && (
-              <View style={s.totRow}>
-                <Text style={[s.totLabel, { color: "#7c3aed" }]}>Indexation annuelle musique</Text>
-                <Text style={[s.totValue, { color: "#7c3aed" }]}>{euros(totaux.indexationsMusique)}</Text>
-              </View>
-            )}
-
-            <View style={s.totDivider} />
-
-            <View style={s.totRow}>
-              <Text style={s.totHtLabel}>TOTAL HT</Text>
-              <Text style={s.totHtValue}>{euros(totaux.totalHt)}</Text>
             </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>TVA 20%</Text>
-              <Text style={s.totValue}>{euros(totaux.tva)}</Text>
-            </View>
-
-            <View style={s.totTtcRow}>
-              <Text style={s.totTtcLabel}>TOTAL TTC</Text>
-              <Text style={s.totTtcValue}>{euros(totaux.totalTtc)}</Text>
-            </View>
-          </View>
-        </View>
+          );
+        })()}
 
         {/* ── Mentions légales art. L441-9 C. com. ─────────────── */}
         <View style={s.mentionsBlock}>
