@@ -188,27 +188,35 @@ async function main() {
   // ─── SECTION C ────────────────────────────────────────────────────────────
   section("C", "Anomalies à investiguer");
 
-  // Devis sans section / sans ligne
+  // Devis : on charge tout pour pouvoir trier en plusieurs catégories
   const devisAvecSections = await prisma.devis.findMany({
     where: { companyId: company.id },
     select: {
-      id: true, numero: true,
+      id: true, numero: true, statut: true, totalHt: true,
       client: { select: { name: true } },
       sousTotal: true,
       sections: {
-        select: {
-          lignes: { select: { total: true } },
-        },
+        select: { lignes: { select: { total: true } } },
       },
     },
   });
 
+  // ── Devis incomplets à investiguer ─────────────────────────────────
+  // Règle : on flagge uniquement les devis ACTIFS (BROUILLON, ACCEPTE,
+  // ENVOYE) sans aucune section. Les devis REFUSE+0 ou EXPIRE+0 sont des
+  // brouillons abandonnés légitimes → reclassés en note informationnelle.
+  const STATUTS_ACTIFS = new Set(["BROUILLON", "ACCEPTE", "ENVOYE"]);
   const devisSansSection = devisAvecSections.filter((d) => d.sections.length === 0);
+  const devisIncomplets = devisSansSection.filter(
+    (d) => STATUTS_ACTIFS.has(d.statut) && d.totalHt > 0
+  );
+  const devisAnnulesVides = devisSansSection.filter((d) => !devisIncomplets.includes(d));
+
   const devisSansLigne = devisAvecSections.filter(
     (d) => d.sections.length > 0 && d.sections.every((s) => s.lignes.length === 0)
   );
 
-  const TOL = 0.05; // tolérance arrondi
+  const TOL = 0.05;
   const devisIncoherents = devisAvecSections
     .map((d) => {
       const sommeLignes = d.sections.reduce(
@@ -219,7 +227,7 @@ async function main() {
     })
     .filter((x) => x.d.sections.length > 0 && Math.abs(x.ecart) > TOL);
 
-  sub("Devis sans aucune ligne");
+  sub("Devis sans aucune ligne (sections vides)");
   if (devisSansLigne.length === 0) {
     console.log("  ✓ Aucun");
   } else {
@@ -230,15 +238,15 @@ async function main() {
     console.log(`  → ${C_BOLD}${devisSansLigne.length}${C_RESET} devis concerné(s)`);
   }
 
-  sub("Devis sans section");
-  if (devisSansSection.length === 0) {
+  sub("Devis incomplets à investiguer (actif sans section, HT > 0)");
+  if (devisIncomplets.length === 0) {
     console.log("  ✓ Aucun");
   } else {
-    for (const d of devisSansSection.slice(0, 20)) {
-      console.log(`  ${C_YELLOW}⚠${C_RESET}  ${d.numero ?? "—"}  ${d.client.name}`);
+    for (const d of devisIncomplets.slice(0, 20)) {
+      console.log(`  ${C_YELLOW}⚠${C_RESET}  ${d.numero ?? "—"}  ${d.client.name}  [${d.statut}]  ${fmtEuros(d.totalHt)}`);
     }
-    if (devisSansSection.length > 20) console.log(`  ${C_DIM}…et ${devisSansSection.length - 20} autres${C_RESET}`);
-    console.log(`  → ${C_BOLD}${devisSansSection.length}${C_RESET} devis concerné(s)`);
+    if (devisIncomplets.length > 20) console.log(`  ${C_DIM}…et ${devisIncomplets.length - 20} autres${C_RESET}`);
+    console.log(`  → ${C_BOLD}${devisIncomplets.length}${C_RESET} devis concerné(s)`);
   }
 
   sub(`Devis avec sousTotal ≠ Σ lignes (tolérance ${TOL} €)`);
@@ -258,31 +266,41 @@ async function main() {
     console.log(`  → ${C_BOLD}${devisIncoherents.length}${C_RESET} devis concerné(s)`);
   }
 
-  // Factures sans devis lié
+  // ── Factures sans devis lié : split charges récurrentes vs à investiguer ──
+  // Heuristique de récurrence :
+  //   1. Nom du client matche une liste de mots-clés (SACEM, Loyer, …)
+  //   2. OU le client a ≥ 2 factures sans devis lié (cadence = récurrent)
   const factSansDevis = await prisma.facture.findMany({
     where: { companyId: company.id, devisId: null },
     select: {
-      numero: true, totalTtc: true, statut: true,
+      numero: true, totalTtc: true, statut: true, dateEmission: true,
       client: { select: { name: true } },
     },
     orderBy: { numero: "asc" },
   });
+  const KEYWORDS_RECURRENT = /SACEM|Loyer|Indexation|Droits\s*Radio|Cotisation|Abonnement|Co.production/i;
+  const countByClient = new Map<string, number>();
+  for (const f of factSansDevis) countByClient.set(f.client.name, (countByClient.get(f.client.name) ?? 0) + 1);
+  const isRecurrent = (clientName: string) =>
+    KEYWORDS_RECURRENT.test(clientName) || (countByClient.get(clientName) ?? 0) >= 2;
+  const factRecurrentes = factSansDevis.filter((f) => isRecurrent(f.client.name));
+  const factInvestiguer = factSansDevis.filter((f) => !isRecurrent(f.client.name));
 
-  sub("Factures sans devis lié");
-  if (factSansDevis.length === 0) {
+  sub("Factures sans devis à investiguer (hors récurrentes)");
+  if (factInvestiguer.length === 0) {
     console.log("  ✓ Aucune");
   } else {
     console.log(`  ${"N°".padEnd(12)}${"Client".padEnd(32)}${"Statut".padEnd(12)}${"TTC".padStart(14)}`);
     console.log("  " + C_GRAY + bar() + C_RESET);
-    for (const f of factSansDevis) {
+    for (const f of factInvestiguer) {
       const num = (f.numero ?? "—").padEnd(12).slice(0, 12);
       const cl = f.client.name.padEnd(32).slice(0, 32);
       console.log(`  ${num}${cl}${f.statut.padEnd(12)}${fmtEuros(f.totalTtc).padStart(14)}`);
     }
-    console.log(`  → ${C_BOLD}${factSansDevis.length}${C_RESET} facture(s) concernée(s)`);
+    console.log(`  → ${C_BOLD}${factInvestiguer.length}${C_RESET} facture(s) concernée(s)`);
   }
 
-  // Comédiens orphelins (0 lignes)
+  // Comédiens suspects (vrai bug potentiel — noms aberrants)
   const comediensAll = await prisma.comedien.findMany({
     where: { companyId: company.id },
     select: {
@@ -290,47 +308,11 @@ async function main() {
       _count: { select: { lignes: true } },
     },
   });
-  const comediensOrphelins = comediensAll.filter((c) => c._count.lignes === 0);
-
-  sub("Comédiens orphelins (liés à 0 ligne)");
-  if (comediensOrphelins.length === 0) {
-    console.log("  ✓ Aucun");
-  } else {
-    for (const c of comediensOrphelins.slice(0, 20)) {
-      console.log(`  ${C_YELLOW}⚠${C_RESET}  ${c.prenom} ${c.nom}`.trim());
-    }
-    if (comediensOrphelins.length > 20) console.log(`  ${C_DIM}…et ${comediensOrphelins.length - 20} autres${C_RESET}`);
-    console.log(`  → ${C_BOLD}${comediensOrphelins.length}${C_RESET} comédien(s) concerné(s)`);
-  }
-
-  // Clients orphelins (0 devis)
-  const clientsAll = await prisma.client.findMany({
-    where: { companyId: company.id },
-    select: {
-      id: true, name: true,
-      _count: { select: { devis: true, factures: true } },
-    },
-  });
-  const clientsOrphelins = clientsAll.filter((c) => c._count.devis === 0);
-
-  sub("Clients orphelins (liés à 0 devis)");
-  if (clientsOrphelins.length === 0) {
-    console.log("  ✓ Aucun");
-  } else {
-    for (const c of clientsOrphelins.slice(0, 20)) {
-      const factTag = c._count.factures > 0 ? C_DIM + ` (${c._count.factures} fact.)` + C_RESET : "";
-      console.log(`  ${C_YELLOW}⚠${C_RESET}  ${c.name}${factTag}`);
-    }
-    if (clientsOrphelins.length > 20) console.log(`  ${C_DIM}…et ${clientsOrphelins.length - 20} autres${C_RESET}`);
-    console.log(`  → ${C_BOLD}${clientsOrphelins.length}${C_RESET} client(s) concerné(s)`);
-  }
-
-  // Comédiens suspects
   const SUSPECT_RE = /^[\d\s\-_.,;:!?@#$%&*()/\\]*$/;
   const comediensSuspects = comediensAll.filter((c) => {
     const full = `${c.prenom} ${c.nom}`.trim();
     if (full.length < 3) return true;
-    if (SUSPECT_RE.test(full)) return true; // que des chiffres/symboles
+    if (SUSPECT_RE.test(full)) return true;
     return false;
   });
 
@@ -342,6 +324,86 @@ async function main() {
       console.log(`  ${C_RED}✗${C_RESET}  "${c.prenom} ${c.nom}".trim()`);
     }
     console.log(`  → ${C_BOLD}${comediensSuspects.length}${C_RESET} comédien(s) concerné(s)`);
+  }
+
+  // ─── SECTION C-bis ─ Notes informationnelles ──────────────────────────────
+  // Reclassement des "anomalies" qui sont en réalité des cas légitimes :
+  // données présentes en BD mais sans impact bloquant.
+  section("C-bis", "Notes informationnelles");
+
+  // Devis annulés / expirés vides (REFUSE+0 ou EXPIRE+0)
+  sub("Devis annulés vides (REFUSE/EXPIRE sans section, HT = 0)");
+  if (devisAnnulesVides.length === 0) {
+    console.log("  · Aucun");
+  } else {
+    for (const d of devisAnnulesVides.slice(0, 10)) {
+      console.log(`  · ${d.numero ?? "—"}  ${d.client.name}  [${d.statut}]`);
+    }
+    if (devisAnnulesVides.length > 10) console.log(`  ${C_DIM}…et ${devisAnnulesVides.length - 10} autres${C_RESET}`);
+    console.log(`  ${C_DIM}${devisAnnulesVides.length} devis (brouillons abandonnés, non bloquants)${C_RESET}`);
+  }
+
+  // Factures sans devis — charges récurrentes
+  sub("Factures sans devis — charges récurrentes");
+  if (factRecurrentes.length === 0) {
+    console.log("  · Aucune");
+  } else {
+    console.log(`  ${"N°".padEnd(12)}${"Client".padEnd(32)}${"Statut".padEnd(12)}${"TTC".padStart(14)}`);
+    console.log("  " + C_GRAY + bar() + C_RESET);
+    for (const f of factRecurrentes) {
+      const num = (f.numero ?? "—").padEnd(12).slice(0, 12);
+      const cl = f.client.name.padEnd(32).slice(0, 32);
+      console.log(`  ${num}${cl}${f.statut.padEnd(12)}${fmtEuros(f.totalTtc).padStart(14)}`);
+    }
+    console.log(`  ${C_DIM}${factRecurrentes.length} facture(s) (SACEM, NONNA récurrent, etc.)${C_RESET}`);
+  }
+
+  // Comédiens sans ligne active (réutilisables)
+  const comediensOrphelins = comediensAll.filter((c) => c._count.lignes === 0);
+  sub("Comédiens sans ligne active (réutilisables)");
+  if (comediensOrphelins.length === 0) {
+    console.log("  · Aucun");
+  } else {
+    for (const c of comediensOrphelins.slice(0, 20)) {
+      console.log(`  · ${c.prenom} ${c.nom}`.trim());
+    }
+    if (comediensOrphelins.length > 20) console.log(`  ${C_DIM}…et ${comediensOrphelins.length - 20} autres${C_RESET}`);
+    console.log(`  ${C_DIM}${comediensOrphelins.length} comédien(s) (peuvent être réutilisés)${C_RESET}`);
+  }
+
+  // Clients sans devis MAIS avec factures (cas charges récurrentes)
+  const clientsAll = await prisma.client.findMany({
+    where: { companyId: company.id },
+    select: {
+      id: true, name: true,
+      _count: { select: { devis: true, factures: true } },
+    },
+  });
+  const clientsSansDevisVraiment = clientsAll.filter(
+    (c) => c._count.devis === 0 && c._count.factures === 0
+  );
+  const clientsSansDevisAvecFact = clientsAll.filter(
+    (c) => c._count.devis === 0 && c._count.factures > 0
+  );
+
+  sub("Clients sans devis ni facture (à nettoyer ?)");
+  if (clientsSansDevisVraiment.length === 0) {
+    console.log("  · Aucun");
+  } else {
+    for (const c of clientsSansDevisVraiment.slice(0, 20)) {
+      console.log(`  · ${c.name}`);
+    }
+    console.log(`  ${C_DIM}${clientsSansDevisVraiment.length} client(s) (zéro activité)${C_RESET}`);
+  }
+
+  sub("Clients sans devis MAIS avec factures (charges récurrentes)");
+  if (clientsSansDevisAvecFact.length === 0) {
+    console.log("  · Aucun");
+  } else {
+    for (const c of clientsSansDevisAvecFact) {
+      console.log(`  · ${c.name}  (${c._count.factures} fact.)`);
+    }
+    console.log(`  ${C_DIM}${clientsSansDevisAvecFact.length} client(s) (légitime — pas d'orphelin réel)${C_RESET}`);
   }
 
   // ─── SECTION D ────────────────────────────────────────────────────────────
