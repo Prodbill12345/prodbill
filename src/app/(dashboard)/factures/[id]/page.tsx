@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Mail, AlertTriangle } from "lucide-react";
-import { formatEuros } from "@/lib/calculations";
+import { formatEuros, formatPct } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import {
   FACTURE_STATUT_COLORS,
@@ -44,7 +44,34 @@ export default async function FactureDetailPage({
     where: { id, companyId: user.companyId },
     include: {
       client: true,
-      devis: { select: { id: true, numero: true, objet: true } },
+      devis: {
+        select: {
+          id: true,
+          numero: true,
+          objet: true,
+          totalHt: true,
+          sections: {
+            orderBy: { ordre: "asc" },
+            select: {
+              id: true,
+              titre: true,
+              ordre: true,
+              lignes: {
+                orderBy: { ordre: "asc" },
+                select: {
+                  id: true,
+                  libelle: true,
+                  tag: true,
+                  quantite: true,
+                  prixUnit: true,
+                  total: true,
+                  tauxIndexation: true,
+                },
+              },
+            },
+          },
+        },
+      },
       paiements: { orderBy: { date: "desc" } },
       relances: { orderBy: { sentAt: "desc" } },
     },
@@ -158,42 +185,114 @@ export default async function FactureDetailPage({
             />
           </div>
 
-          {/* Détail */}
-          <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-              <h4 className="font-semibold text-slate-800">Détail</h4>
+          {/* Détail — sections/lignes lues depuis le devis lié,
+              valeurs ramenées au prorata (ratio = facture.totalHt / devis.totalHt).
+              Fallback single-line pour les factures sans devis (NONNA/SACEM). */}
+          {facture.devis && facture.devis.sections.length > 0 ? (
+            (() => {
+              const ratio =
+                facture.devis!.totalHt > 0
+                  ? facture.totalHt / facture.devis!.totalHt
+                  : 1;
+              return (
+                <>
+                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                      <h4 className="font-semibold text-slate-800">
+                        {facture.type === "ACOMPTE"
+                          ? `Acompte ${Math.round(ratio * 100)}% sur devis n° ${facture.devis!.numero}`
+                          : `Solde sur devis n° ${facture.devis!.numero}`}
+                      </h4>
+                      {facture.devis!.objet && (
+                        <span className="text-sm text-slate-500">
+                          {facture.devis!.objet}
+                        </span>
+                      )}
+                    </div>
+                    {facture.devis!.sections.map((section) => (
+                      <div key={section.id} className="border-t border-slate-100">
+                        <div className="px-5 py-2.5 bg-slate-50/40 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          {section.titre}
+                        </div>
+                        <table className="w-full">
+                          <thead>
+                            <tr>
+                              <th className="text-left px-5 py-2 text-xs text-slate-400 font-medium">
+                                Libellé
+                              </th>
+                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-20">
+                                Qté
+                              </th>
+                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-32">
+                                P.U. HT
+                              </th>
+                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-32">
+                                Total HT
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {section.lignes.map((ligne) => {
+                              const pu = Math.round(ligne.prixUnit * ratio * 100) / 100;
+                              const tot = Math.round(ligne.total * ratio * 100) / 100;
+                              return (
+                                <tr key={ligne.id} className="border-t border-slate-50">
+                                  <td className="px-5 py-3 text-sm text-slate-700">
+                                    {ligne.libelle}
+                                  </td>
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                                    {ligne.quantite}
+                                  </td>
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                                    {formatEuros(pu)}
+                                  </td>
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-slate-900">
+                                    {formatEuros(tot)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()
+          ) : (
+            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
+                <h4 className="font-semibold text-slate-800">Détail</h4>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                      Description
+                    </th>
+                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
+                      Montant HT
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-slate-50">
+                    <td className="px-5 py-4 text-sm text-slate-700">
+                      {isAvoir && facture.devis
+                        ? `Avoir sur devis n° ${facture.devis.numero}`
+                        : FACTURE_TYPE_LABELS[facture.type]}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-right tabular-nums font-medium text-slate-900">
+                      {isAvoir
+                        ? `- ${formatEuros(Math.abs(facture.totalHt))}`
+                        : formatEuros(facture.totalHt)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
-                    Description
-                  </th>
-                  <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
-                    Montant HT
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t border-slate-50">
-                  <td className="px-5 py-4 text-sm text-slate-700">
-                    {facture.type === "ACOMPTE" && facture.devis
-                      ? `Acompte sur devis n° ${facture.devis.numero} — ${facture.devis.objet}`
-                      : facture.type === "SOLDE" && facture.devis
-                        ? `Solde sur devis n° ${facture.devis.numero} — ${facture.devis.objet}`
-                        : isAvoir && facture.devis
-                          ? `Avoir sur devis n° ${facture.devis.numero}`
-                          : FACTURE_TYPE_LABELS[facture.type]}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-right tabular-nums font-medium text-slate-900">
-                    {isAvoir
-                      ? `- ${formatEuros(Math.abs(facture.totalHt))}`
-                      : formatEuros(facture.totalHt)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          )}
 
           {/* Paiements */}
           {facture.paiements.length > 0 && (
@@ -266,11 +365,34 @@ export default async function FactureDetailPage({
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
             <h3 className="font-semibold text-slate-900 mb-4">Récapitulatif</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-500">
-                  {isAvoir ? "Avoir HT" : "Total HT"}
-                </span>
-                <span className="tabular-nums text-slate-700">
+              {/* Sous-total + CS/FG/Marge : affichés seulement si on a un
+                  breakdown valide. Lignes à 0 € masquées (cf. devis). */}
+              {!isAvoir && facture.sousTotal > 0 && (
+                <>
+                  {(
+                    [
+                      { label: "Sous-total HT", value: facture.sousTotal, alwaysShow: true },
+                      { label: `CS Comédiens (${formatPct(facture.tauxCsComedien)})`, value: facture.csComedien },
+                      { label: `CS Techniciens (${formatPct(facture.tauxCsTech)})`, value: facture.csTechniciens },
+                      { label: `FG (${formatPct(facture.tauxFg)})`, value: facture.fraisGeneraux },
+                      { label: `Marge (${formatPct(facture.tauxMarge)})`, value: facture.marge },
+                    ] as { label: string; value: number; alwaysShow?: boolean }[]
+                  )
+                    .filter((r) => r.alwaysShow || r.value !== 0)
+                    .map((r) => (
+                      <div key={r.label} className="flex justify-between">
+                        <span className="text-slate-500">{r.label}</span>
+                        <span className="tabular-nums text-slate-700">
+                          {formatEuros(r.value)}
+                        </span>
+                      </div>
+                    ))}
+                  <div className="border-t border-slate-100 pt-2 mt-2" />
+                </>
+              )}
+              <div className="flex justify-between font-semibold">
+                <span>{isAvoir ? "Avoir HT" : "Total HT"}</span>
+                <span className="tabular-nums">
                   {isAvoir
                     ? `- ${formatEuros(Math.abs(facture.totalHt))}`
                     : formatEuros(facture.totalHt)}
