@@ -51,8 +51,11 @@ function normalizeHeader(s: string): string {
     // ("Numéro") et la version avec accents perdus ("Numro") — les deux
     // donnent "numro" après normalisation.
     .replace(/[À-ÖØ-öø-ÿ]/g, "")
+    // Supprime les symboles monétaires : iconv-lite décode Mac Roman 0xDB
+    // en ¤ (U+00A4) alors qu'on s'attendrait à €. Strip les deux + les usuels.
+    .replace(/[€¤$£¥]/g, "")
     .toLowerCase()
-    .replace(/[|]/g, " ")
+    .replace(/[|()]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -113,10 +116,24 @@ function parseDate(s?: string): Date | null {
 
 function mapDevisStatut(noFacture: string, statut: string): DevisStatut {
   const f = (noFacture ?? "").toUpperCase().trim();
-  const s = (statut ?? "").toUpperCase();
-  if (f && f !== "A FAIRE" && f !== "ANNUL" && /\d/.test(f)) return "ACCEPTE";
+  const s = (statut ?? "").toUpperCase().trim();
+  // Annulation prioritaire
   if (f === "ANNUL" || s.includes("ANNUL")) return "REFUSE";
+  // Devis signé : soit la facture existe (numéro réel), soit elle est planifiée
+  // ("A FAIRE" = client a signé, on attend juste de facturer).
+  if (f === "A FAIRE") return "ACCEPTE";
+  if (f && /\d/.test(f)) return "ACCEPTE";
+  // Sinon : brouillon
   return "BROUILLON";
+}
+
+// Comédien « fantôme » : nom vide, ou contenant uniquement des tirets,
+// points d'interrogation ou espaces. À ignorer pendant l'import.
+function isComedienFantome(nom?: string): boolean {
+  if (!nom) return true;
+  const t = nom.trim();
+  if (t === "") return true;
+  return /^[\s\-–—?]*$/.test(t);
 }
 
 function mapFactureType(numero: string): FactureType {
@@ -353,28 +370,29 @@ async function main() {
       .map((c) => `"${c.name}" (${c.id})`)
       .join(", ")}`
   );
+  const companySelect = {
+    id: true,
+    name: true,
+    siret: true,
+    tvaIntra: true,
+    address: true,
+    city: true,
+    postalCode: true,
+    iban: true,
+    bic: true,
+    nomBanque: true,
+    conditionsPaiement: true,
+    defaultTauxCsComedien: true,
+    defaultTauxCsTech: true,
+    defaultTauxFg: true,
+    defaultTauxMarge: true,
+  } as const;
   const company =
     (await prisma.company.findFirst({
       where: { name: { contains: "Caleson", mode: "insensitive" } },
-      select: {
-        id: true,
-        name: true,
-        defaultTauxCsComedien: true,
-        defaultTauxCsTech: true,
-        defaultTauxFg: true,
-        defaultTauxMarge: true,
-      },
+      select: companySelect,
     })) ??
-    (await prisma.company.findFirst({
-      select: {
-        id: true,
-        name: true,
-        defaultTauxCsComedien: true,
-        defaultTauxCsTech: true,
-        defaultTauxFg: true,
-        defaultTauxMarge: true,
-      },
-    }));
+    (await prisma.company.findFirst({ select: companySelect }));
   if (!company) {
     console.error("❌ Aucune company trouvée.");
     process.exit(1);
@@ -442,9 +460,9 @@ async function main() {
     dateReglPresta: findHeaderIdx(headers, "Date du règlement de la prestation"),
     dateReglDroits: findHeaderIdx(headers, "Date du règlement des droits"),
     totalHt:        findHeaderIdx(headers, "TOTAL HT"),
-    ht:             findHeaderIdx(headers, "HT (Û)"),
-    tva:            findHeaderIdx(headers, "TVA (Û)"),
-    ttc:            findHeaderIdx(headers, "TTC (Û)"),
+    ht:             findHeaderIdx(headers, "HT (€)"),
+    tva:            findHeaderIdx(headers, "TVA (€)"),
+    ttc:            findHeaderIdx(headers, "TTC (€)"),
   };
 
   // Pré-calcul des index pour chaque section (avec gestion des doublons d'en-têtes)
@@ -482,11 +500,88 @@ async function main() {
   const dataRows = rows.slice(1);
   console.log(`📋 ${dataRows.length} ligne(s) brutes après l'en-tête\n`);
 
+  // ── Pré-agrégation des totaux par numéro de devis ─────────────────────────
+  // Le CSV peut contenir plusieurs lignes pour un même devis (cas multi-
+  // comédiens). Les totaux HT (€) / TVA (€) / TTC (€) du devis doivent être
+  // la SOMME des colonnes correspondantes sur toutes les lignes partageant
+  // le même Numéro DEVIS. Les lignes de section sont elles aussi cumulées.
+  type DevisAgreg = {
+    totalHt: number;
+    tva: number;
+    totalTtc: number;
+    rowIdxs: number[];
+  };
+  const devisAgreg = new Map<string, DevisAgreg>();
+  for (let i = 0; i < dataRows.length; i++) {
+    const cols = dataRows[i];
+    if (isBlankRow(cols)) break;
+    const noDevisRaw = cleanNumero(
+      idx.noDevis >= 0 ? (cols[idx.noDevis] ?? "").trim() : ""
+    );
+    if (!noDevisRaw || noDevisRaw.toUpperCase() === "ANNUL") continue;
+    const ht =
+      (idx.ht >= 0 ? parseAmount(cols[idx.ht]) : 0) ||
+      (idx.totalHt >= 0 ? parseAmount(cols[idx.totalHt]) : 0);
+    const tva = idx.tva >= 0 ? parseAmount(cols[idx.tva]) : 0;
+    const ttc = idx.ttc >= 0 ? parseAmount(cols[idx.ttc]) : 0;
+    const cur =
+      devisAgreg.get(noDevisRaw) ?? { totalHt: 0, tva: 0, totalTtc: 0, rowIdxs: [] };
+    cur.totalHt += ht;
+    cur.tva += tva;
+    cur.totalTtc += ttc;
+    cur.rowIdxs.push(i);
+    devisAgreg.set(noDevisRaw, cur);
+  }
+  const nbMulti = Array.from(devisAgreg.values()).filter((a) => a.rowIdxs.length > 1).length;
+  console.log(
+    `🔁 ${devisAgreg.size} devis distincts (dont ${nbMulti} multi-lignes) — totaux pré-agrégés sur HT/TVA/TTC (€)`
+  );
+
+  // ── Pré-agrégation des totaux par numéro de facture ───────────────────────
+  // Même logique que pour les devis : plusieurs lignes CSV peuvent porter le
+  // même Numéro Facture (cas multi-comédiens). Les métadonnées (dates,
+  // statut, client, devis lié) sont identiques sur toutes les lignes du
+  // groupe — on prend la première. Les totaux HT/TVA/TTC sont sommés.
+  type FactureAgreg = {
+    totalHt: number;
+    tva: number;
+    totalTtc: number;
+    rowIdxs: number[];
+  };
+  const factureAgreg = new Map<string, FactureAgreg>();
+  for (let i = 0; i < dataRows.length; i++) {
+    const cols = dataRows[i];
+    if (isBlankRow(cols)) break;
+    const noFactRaw = cleanNumero(
+      idx.noFacture >= 0 ? (cols[idx.noFacture] ?? "").trim() : ""
+    );
+    if (!noFactRaw) continue;
+    const u = noFactRaw.toUpperCase();
+    if (u === "A FAIRE" || u === "ANNUL" || !/\d/.test(noFactRaw)) continue;
+    const ht =
+      (idx.ht >= 0 ? parseAmount(cols[idx.ht]) : 0) ||
+      (idx.totalHt >= 0 ? parseAmount(cols[idx.totalHt]) : 0);
+    const tva = idx.tva >= 0 ? parseAmount(cols[idx.tva]) : 0;
+    const ttc = idx.ttc >= 0 ? parseAmount(cols[idx.ttc]) : 0;
+    const cur =
+      factureAgreg.get(noFactRaw) ?? { totalHt: 0, tva: 0, totalTtc: 0, rowIdxs: [] };
+    cur.totalHt += ht;
+    cur.tva += tva;
+    cur.totalTtc += ttc;
+    cur.rowIdxs.push(i);
+    factureAgreg.set(noFactRaw, cur);
+  }
+  const nbFactMulti = Array.from(factureAgreg.values()).filter((a) => a.rowIdxs.length > 1).length;
+  console.log(
+    `🧾 ${factureAgreg.size} factures distinctes (dont ${nbFactMulti} multi-lignes) — totaux pré-agrégés sur HT/TVA/TTC (€)\n`
+  );
+
   let nbImporte = 0;
   let nbSkip = 0;
   let nbErreur = 0;
   let firstDevisLogged = false;
   const devisNumeroToId = new Map<string, string>();
+  const factureNumeroProcessed = new Set<string>();
 
   for (let i = 0; i < dataRows.length; i++) {
     const lineNum = i + 2; // +1 pour l'en-tête, +1 pour passer en base 1
@@ -509,11 +604,17 @@ async function main() {
 
     const noDevis = cleanNumero(get(idx.noDevis));
     const noFacture = cleanNumero(get(idx.noFacture));
-    const noBdc = cleanNumero(get(idx.noBdc));
+    // BDC : on n'accepte que les vrais numéros (au moins un chiffre). La
+    // colonne contient parfois du texte type "DEVIS SIGN", "ANNUL", "A FAIRE"
+    // qui doit être ignoré et stocké en null.
+    const noBdcRaw = cleanNumero(get(idx.noBdc));
+    const noBdc = noBdcRaw && /\d/.test(noBdcRaw) ? noBdcRaw : "";
 
-    const totalHt = parseAmount(get(idx.totalHt)) || parseAmount(get(idx.ht));
-    const tva = parseAmount(get(idx.tva));
-    const totalTtc = parseAmount(get(idx.ttc));
+    // Montants par-ligne (utilisés pour la FACTURE, qui correspond 1:1 à la ligne CSV).
+    // Source : col "HT (€)" (= HT après remise/co-prod), pas col "TOTAL HT" (brut).
+    const rowHt = parseAmount(get(idx.ht)) || parseAmount(get(idx.totalHt));
+    const rowTva = parseAmount(get(idx.tva));
+    const rowTtc = parseAmount(get(idx.ttc));
 
     try {
       const clientId = await findOrCreateClient(clientNom, company.id);
@@ -525,6 +626,13 @@ async function main() {
         if (cached) {
           devisId = cached;
         } else {
+          // Totaux agrégés : somme sur toutes les lignes CSV du même devis.
+          const aggreg = devisAgreg.get(noDevis);
+          const devisHt = aggreg?.totalHt ?? rowHt;
+          const devisTva = aggreg?.tva ?? rowTva;
+          const devisTtc = aggreg?.totalTtc ?? rowTtc;
+          const devisRowIdxs = aggreg?.rowIdxs ?? [i];
+
           const projet = get(idx.projet);
           const objet = get(idx.objet) || projet || "Import CSV";
           const description = get(idx.description) || null;
@@ -553,11 +661,11 @@ async function main() {
             tauxCsTech: company.defaultTauxCsTech,
             tauxFg: company.defaultTauxFg,
             tauxMarge: company.defaultTauxMarge,
-            sousTotal: totalHt,
-            totalHt,
-            totalApresRemise: totalHt,
-            tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
-            totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
+            sousTotal: devisHt,
+            totalHt: devisHt,
+            totalApresRemise: devisHt,
+            tva: devisTva || Math.round(devisHt * 0.2 * 100) / 100,
+            totalTtc: devisTtc || Math.round(devisHt * 1.2 * 100) / 100,
             dateEmission: dateEmiss,
             tauxPipe: pipe,
           };
@@ -590,7 +698,8 @@ async function main() {
             firstDevisLogged = true;
           }
 
-          // Sections & lignes — rebuild propre (delete-then-create)
+          // Sections & lignes — rebuild propre. On parcourt TOUTES les rows
+          // CSV qui appartiennent à ce devis (cas multi-comédiens).
           await prisma.devisSection.deleteMany({ where: { devisId } });
           let ordreSection = 0;
           for (const sec of sectionColumns) {
@@ -599,10 +708,13 @@ async function main() {
               tag: LigneTag;
               prixUnit: number;
             }> = [];
-            for (const col of sec.colonnes) {
-              const v = parseAmount(cols[col.idx]);
-              if (v !== 0) {
-                lignes.push({ libelle: col.libelle, tag: sec.tag, prixUnit: v });
+            for (const rowIdx of devisRowIdxs) {
+              const rowCols = dataRows[rowIdx];
+              for (const col of sec.colonnes) {
+                const v = parseAmount(rowCols[col.idx]);
+                if (v !== 0) {
+                  lignes.push({ libelle: col.libelle, tag: sec.tag, prixUnit: v });
+                }
               }
             }
             if (lignes.length > 0) {
@@ -631,7 +743,7 @@ async function main() {
 
       // ── COMÉDIEN ──────────────────────────────────────────────────────
       const comedienNom = get(idx.nomComedien);
-      if (comedienNom && !["-", "?"].includes(comedienNom)) {
+      if (!isComedienFantome(comedienNom)) {
         const comedienId = await findOrCreateComedien(comedienNom, company.id);
         if (devisId) {
           // Associer au premier ligne ARTISTE du devis (sans comédien encore)
@@ -649,15 +761,33 @@ async function main() {
       }
 
       // ── FACTURE ───────────────────────────────────────────────────────
+      // Une facture = un Numéro Facture unique. Les lignes CSV partageant le
+      // même numéro sont agrégées (HT/TVA/TTC sommés ; métadonnées de la 1ʳᵉ
+      // ligne du groupe, identiques sur toutes les autres).
       const fU = noFacture.toUpperCase();
       const factureValide =
         noFacture && fU !== "A FAIRE" && fU !== "ANNUL" && /\d/.test(noFacture);
 
-      if (factureValide) {
+      if (factureValide && !factureNumeroProcessed.has(noFacture)) {
+        factureNumeroProcessed.add(noFacture);
+        const aggregF = factureAgreg.get(noFacture);
+        const factHt = aggregF?.totalHt ?? rowHt;
+        const factTva = aggregF?.tva ?? rowTva;
+        const factTtc = aggregF?.totalTtc ?? rowTtc;
+
         const statutRaw = get(idx.statut);
         const datePaie = parseDate(get(idx.datePaiement));
         const dateEmiss = parseDate(get(idx.dateEmission));
-        const dateRegl = parseDate(get(idx.dateReglPresta)) || datePaie;
+        // dateReglement = colonne "Date paiement" du CSV (col 13). On NE prend
+        // PAS "Date du règlement de la prestation" (col 17) qui correspond au
+        // règlement des cachets comédiens et non au règlement de la facture.
+        const dateRegl = datePaie;
+        const adresseEmetteur = [
+          company.address,
+          [company.postalCode, company.city].filter(Boolean).join(" "),
+        ]
+          .filter(Boolean)
+          .join("\n");
         const factureData = {
           companyId: company.id,
           clientId,
@@ -665,13 +795,22 @@ async function main() {
           createdById: adminUser.id,
           type: mapFactureType(noFacture),
           statut: mapFactureStatut(statutRaw),
-          totalHt,
-          tva: tva || Math.round(totalHt * 0.2 * 100) / 100,
-          totalTtc: totalTtc || Math.round(totalHt * 1.2 * 100) / 100,
+          totalHt: factHt,
+          tva: factTva || Math.round(factHt * 0.2 * 100) / 100,
+          totalTtc: factTtc || Math.round(factHt * 1.2 * 100) / 100,
           dateEmission: dateEmiss,
           dateReglement: dateRegl,
           datePaiement: datePaie,
           numeroBdc: noBdc || null,
+          // Snapshot des coordonnées émetteur (immuabilité légale L441-9)
+          nomEmetteur: company.name,
+          adresseEmetteur,
+          siretEmetteur: company.siret,
+          tvaIntraEmetteur: company.tvaIntra,
+          ibanEmetteur: company.iban,
+          bicEmetteur: company.bic,
+          nomBanqueEmetteur: company.nomBanque,
+          conditionsPaiement: company.conditionsPaiement,
         };
         await prisma.facture.upsert({
           where: { numero: noFacture },
@@ -697,6 +836,71 @@ async function main() {
     `Résumé : ✅ ${nbImporte} importé(s)   ⚠️  ${nbSkip} skippé(s)   ❌ ${nbErreur} erreur(s)`
   );
   console.log("═".repeat(60) + "\n");
+
+  // ── Nettoyage des Comédiens fantômes encore en base ──────────────────────
+  // Sécurité : on supprime ceux dont le nom matche le pattern et qui ne sont
+  // liés à aucune ligne de devis. Les fantômes liés (cas anormal) sont loggés.
+  const allComediens = await prisma.comedien.findMany({
+    where: { companyId: company.id },
+    select: { id: true, prenom: true, nom: true, _count: { select: { lignes: true } } },
+  });
+  const fantomes = allComediens.filter((c) =>
+    isComedienFantome(`${c.prenom} ${c.nom}`.trim())
+  );
+  let nbFantSupp = 0;
+  let nbFantOrph = 0;
+  for (const f of fantomes) {
+    if (f._count.lignes > 0) {
+      console.log(
+        `⚠️  Comédien fantôme "${f.prenom} ${f.nom}" lié à ${f._count.lignes} ligne(s) — conservé.`
+      );
+      nbFantOrph++;
+    } else {
+      await prisma.comedien.delete({ where: { id: f.id } });
+      nbFantSupp++;
+    }
+  }
+  if (fantomes.length > 0) {
+    console.log(`🧹 Comédiens fantômes : ${nbFantSupp} supprimé(s), ${nbFantOrph} conservé(s) car liés.\n`);
+  } else {
+    console.log("🧹 Aucun comédien fantôme détecté en base.\n");
+  }
+
+  // ── Statistiques finales ─────────────────────────────────────────────────
+  const [devisBrouillon, devisAccepte, devisRefuse, devisEnvoye, devisExpire] = await Promise.all([
+    prisma.devis.count({ where: { companyId: company.id, statut: "BROUILLON" } }),
+    prisma.devis.count({ where: { companyId: company.id, statut: "ACCEPTE" } }),
+    prisma.devis.count({ where: { companyId: company.id, statut: "REFUSE" } }),
+    prisma.devis.count({ where: { companyId: company.id, statut: "ENVOYE" } }),
+    prisma.devis.count({ where: { companyId: company.id, statut: "EXPIRE" } }),
+  ]);
+  const [factPayee, factEmise, factPartielle, factRetard, factAnnulee, factBrouillon] = await Promise.all([
+    prisma.facture.count({ where: { companyId: company.id, statut: "PAYEE" } }),
+    prisma.facture.count({ where: { companyId: company.id, statut: "EMISE" } }),
+    prisma.facture.count({ where: { companyId: company.id, statut: "PAYEE_PARTIEL" } }),
+    prisma.facture.count({ where: { companyId: company.id, statut: "EN_RETARD" } }),
+    prisma.facture.count({ where: { companyId: company.id, statut: "ANNULEE" } }),
+    prisma.facture.count({ where: { companyId: company.id, statut: "BROUILLON" } }),
+  ]);
+  const nbComediens = await prisma.comedien.count({ where: { companyId: company.id } });
+
+  console.log("📊 Statistiques finales");
+  console.log("─".repeat(60));
+  console.log("Devis :");
+  console.log(`  • BROUILLON : ${devisBrouillon}`);
+  console.log(`  • ACCEPTE   : ${devisAccepte}`);
+  console.log(`  • REFUSE    : ${devisRefuse}`);
+  if (devisEnvoye) console.log(`  • ENVOYE    : ${devisEnvoye}`);
+  if (devisExpire) console.log(`  • EXPIRE    : ${devisExpire}`);
+  console.log("Factures :");
+  console.log(`  • PAYEE          : ${factPayee}`);
+  console.log(`  • EMISE          : ${factEmise}`);
+  if (factPartielle) console.log(`  • PAYEE_PARTIEL  : ${factPartielle}`);
+  if (factRetard)    console.log(`  • EN_RETARD      : ${factRetard}`);
+  if (factAnnulee)   console.log(`  • ANNULEE        : ${factAnnulee}`);
+  if (factBrouillon) console.log(`  • BROUILLON      : ${factBrouillon}`);
+  console.log(`Comédiens : ${nbComediens} en base`);
+  console.log("─".repeat(60) + "\n");
 
   await prisma.$disconnect();
 }
