@@ -492,6 +492,18 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                         <Text style={s.totValue}>{euros(r.montant)}</Text>
                       </View>
                     ))}
+                    {facture.coproduction !== 0 && (
+                      <View style={s.totRow}>
+                        <Text style={s.totLabel}>Co-production</Text>
+                        <Text style={s.totValue}>{euros(-facture.coproduction)}</Text>
+                      </View>
+                    )}
+                    {facture.remise !== 0 && (
+                      <View style={s.totRow}>
+                        <Text style={s.totLabel}>Remise exceptionnelle</Text>
+                        <Text style={s.totValue}>{euros(-facture.remise)}</Text>
+                      </View>
+                    )}
                     <View style={s.totDivider} />
                   </>
                 )}

@@ -434,6 +434,19 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                   </View>
                 )}
 
+                {devis.coproduction !== 0 && (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>Co-production</Text>
+                    <Text style={s.totValue}>{euros(-devis.coproduction)}</Text>
+                  </View>
+                )}
+                {devis.remise !== 0 && (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>Remise exceptionnelle</Text>
+                    <Text style={s.totValue}>{euros(-devis.remise)}</Text>
+                  </View>
+                )}
+
                 <View style={s.totDivider} />
 
                 <View style={s.totRow}>
