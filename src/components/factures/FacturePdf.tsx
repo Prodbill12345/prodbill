@@ -514,7 +514,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                   </Text>
                 </View>
                 <View style={s.totRow}>
-                  <Text style={s.totLabel}>TVA 20 %</Text>
+                  <Text style={s.totLabel}>TVA {facture.tauxTva % 1 === 0 ? facture.tauxTva.toFixed(0) : String(facture.tauxTva).replace(".", ",")} %</Text>
                   <Text style={s.totValue}>
                     {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
                   </Text>
