@@ -25,7 +25,33 @@ export async function POST(
         where: { id, companyId: user.companyId },
         include: {
           client: true,
-          devis: { select: { numero: true, objet: true } },
+          devis: {
+            select: {
+              numero: true,
+              objet: true,
+              totalHt: true,
+              sections: {
+                orderBy: { ordre: "asc" },
+                select: {
+                  id: true,
+                  titre: true,
+                  ordre: true,
+                  lignes: {
+                    orderBy: { ordre: "asc" },
+                    select: {
+                      id: true,
+                      libelle: true,
+                      tag: true,
+                      quantite: true,
+                      prixUnit: true,
+                      total: true,
+                      tauxIndexation: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       }),
       prisma.company.findUnique({

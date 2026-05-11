@@ -74,6 +74,22 @@ export async function POST(req: Request) {
     const tva = Math.round(totalHt * 0.2 * 100) / 100;
     const totalTtc = Math.round((totalHt + tva) * 100) / 100;
 
+    // Snapshot du breakdown du devis lié, ramené au prorata du montant facturé.
+    // Ratio sur totalHt (plus stable que TTC à cause des arrondis TVA).
+    // TODO immuabilité légale : aujourd'hui la facture lit les lignes
+    // depuis le devis source. Une modif post-émission du devis altère
+    // la facture, ce qui viole l'art. 289 CGI. À traiter avant prod :
+    // soit dupliquer les lignes en FactureSection/FactureLigne au moment
+    // de l'émission, soit verrouiller le devis dès qu'il a une facture.
+    const r2 = (n: number) => Math.round(n * 100) / 100;
+    const ratio = devis.totalHt > 0 ? totalHt / devis.totalHt : 0;
+    const sousTotal      = r2(devis.sousTotal     * ratio);
+    const csComedien     = r2(devis.csComedien    * ratio);
+    const csTechniciens  = r2(devis.csTechniciens * ratio);
+    const fraisGeneraux  = r2(devis.fraisGeneraux * ratio);
+    const margeSnap      = r2(devis.marge         * ratio);
+    const baseMarge      = r2(sousTotal + csTechniciens);
+
     // Récupérer les infos société pour les mentions légales
     const company = user.company;
     const numero = await getNextFactureNumero(user.companyId, input.type, devis.numero);
@@ -88,6 +104,17 @@ export async function POST(req: Request) {
         totalHt,
         tva,
         totalTtc,
+        // Breakdown au prorata
+        sousTotal,
+        csComedien,
+        csTechniciens,
+        baseMarge,
+        fraisGeneraux,
+        marge: margeSnap,
+        tauxCsComedien: devis.tauxCsComedien,
+        tauxCsTech:     devis.tauxCsTech,
+        tauxFg:         devis.tauxFg,
+        tauxMarge:      devis.tauxMarge,
         dateEcheance: input.dateEcheance ? new Date(input.dateEcheance) : null,
         // Snapshot mentions légales L441-9
         siretEmetteur: company.siret,
