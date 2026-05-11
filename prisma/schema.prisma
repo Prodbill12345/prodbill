@@ -208,6 +208,7 @@ model Devis {
   remise           Float @default(0) // Remise exceptionnelle (montant déductible)
   coproduction     Float @default(0) // Apport en industrie (montant déductible)
   totalApresRemise Float @default(0)
+  tauxTva          Float @default(20) // Taux TVA appliqué (%) — 20, 10, 5.5, 0…
   tva              Float @default(0)
   totalTtc         Float @default(0)
 
@@ -299,6 +300,7 @@ model Facture {
 
   // Montants
   totalHt  Float
+  tauxTva  Float @default(20) // Taux TVA appliqué (%) — 20, 10, 5.5, 0… (snapshot)
   tva      Float
   totalTtc Float
 

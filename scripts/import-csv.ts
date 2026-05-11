@@ -768,6 +768,10 @@ async function main() {
             totalHt: devisHt,
             totalApresRemise: devisHt,
             tva: devisTva || Math.round(devisHt * 0.2 * 100) / 100,
+            tauxTva:
+              devisHt > 0 && devisTva > 0
+                ? Math.round((devisTva / devisHt) * 100 * 100) / 100
+                : 20,
             totalTtc: devisTtc || Math.round(devisHt * 1.2 * 100) / 100,
             dateEmission: dateEmiss,
             tauxPipe: pipe,
@@ -922,6 +926,13 @@ async function main() {
           statut: mapFactureStatut(statutRaw),
           totalHt: factHt,
           tva: factTva || Math.round(factHt * 0.2 * 100) / 100,
+          // Calcul du taux réel depuis les montants CSV : permet de gérer
+          // SACEM (10 %), alimentation (5,5 %), etc. Fallback 20 % si la
+          // facture n'a pas de TVA renseignée (cas rares ou exports).
+          tauxTva:
+            factHt > 0 && factTva > 0
+              ? Math.round((factTva / factHt) * 100 * 100) / 100
+              : 20,
           totalTtc: factTtc || Math.round(factHt * 1.2 * 100) / 100,
           dateEmission: dateEmiss,
           dateReglement: dateRegl,

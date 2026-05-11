@@ -71,7 +71,10 @@ export async function POST(req: Request) {
       totalHt = Math.round((devis.totalHt - (acomptesTotal._sum.totalHt ?? 0)) * 100) / 100;
     }
 
-    const tva = Math.round(totalHt * 0.2 * 100) / 100;
+    // Snapshot du taux TVA depuis le devis (default 20 % pour les anciens
+    // devis sans champ tauxTva renseigné).
+    const tauxTva = devis.tauxTva ?? 20;
+    const tva = Math.round(totalHt * (tauxTva / 100) * 100) / 100;
     const totalTtc = Math.round((totalHt + tva) * 100) / 100;
 
     // Snapshot du breakdown du devis lié, ramené au prorata du montant facturé.
@@ -104,6 +107,7 @@ export async function POST(req: Request) {
         numero,
         type: input.type,
         totalHt,
+        tauxTva,
         tva,
         totalTtc,
         // Breakdown au prorata
