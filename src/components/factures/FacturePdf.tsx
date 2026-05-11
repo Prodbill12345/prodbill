@@ -6,12 +6,38 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
-import type { Facture, Client } from "@prisma/client";
+import type { Facture, Client, LigneTag } from "@prisma/client";
 
 export type FactureForPdf = Facture & {
   client: Client;
-  devis?: { numero: string; objet: string } | null;
+  devis?: {
+    numero: string;
+    objet: string;
+    totalHt: number;
+    sections: Array<{
+      id: string;
+      titre: string;
+      ordre: number;
+      lignes: Array<{
+        id: string;
+        libelle: string;
+        tag: LigneTag;
+        quantite: number;
+        prixUnit: number;
+        total: number;
+        tauxIndexation: number;
+      }>;
+    }>;
+  } | null;
   logoUrl?: string | null; // logo courant de la société (passé depuis le PDF route)
+};
+
+const TAG_LABELS: Record<LigneTag, string> = {
+  ARTISTE: "Artiste",
+  TECHNICIEN_HCS: "Technicien",
+  STUDIO: "Studio",
+  MUSIQUE: "Musique",
+  AGENT: "Agent",
 };
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -28,6 +54,10 @@ function euros(n: number): string {
 function fmtDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   return new Intl.DateTimeFormat("fr-FR").format(new Date(d));
+}
+
+function pct(r: number): string {
+  return `${Math.round(r * 10000) / 100} %`;
 }
 
 // ─── styles ─────────────────────────────────────────────────────────────────
@@ -92,9 +122,62 @@ const s = StyleSheet.create({
   tdText: { fontSize: 8.5, color: "#334155" },
   tdRight: { fontSize: 8.5, color: "#334155", textAlign: "right" },
   colDesc: { flex: 4 },
+  colLib: { flex: 3.2 },
+  colTag: { flex: 1.1 },
   colQte: { flex: 0.6, textAlign: "right" },
   colPu: { flex: 1.2, textAlign: "right" },
   colTot: { flex: 1.2, textAlign: "right" },
+
+  // Sections (pattern repris du DevisPdf)
+  sectionBlock: { marginBottom: 12 },
+  sectionTitle: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 9,
+    color: "#1e293b",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "#eff6ff",
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  tableHead: {
+    flexDirection: "row",
+    backgroundColor: "#f1f5f9",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+  tableRowAlt: { backgroundColor: "#fafbfc" },
+  sectionSubtotalRow: {
+    flexDirection: "row",
+    backgroundColor: "#f8fafc",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e2e8f0",
+  },
+  sectionSubtotalLabel: {
+    flex: 4.3,
+    fontFamily: "Helvetica-Bold",
+    fontSize: 8,
+    color: "#475569",
+    textAlign: "right",
+  },
+  sectionSubtotalValue: {
+    flex: 1.2,
+    fontFamily: "Helvetica-Bold",
+    fontSize: 8.5,
+    color: "#1e293b",
+    textAlign: "right",
+  },
 
   // Totaux
   totauxSection: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8 },
@@ -290,53 +373,152 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
           </View>
         )}
 
-        {/* ── Tableau de facturation ────────────────────────────── */}
-        <View style={s.amountsBlock}>
-          <View style={s.amountsTable}>
-            <View style={s.amountsHead}>
-              <Text style={[s.thText, s.colDesc]}>Description</Text>
-              <Text style={[s.thText, s.colQte]}>Qté</Text>
-              <Text style={[s.thText, s.colPu]}>P.U. HT</Text>
-              <Text style={[s.thText, s.colTot]}>Total HT</Text>
-            </View>
-            <View style={s.amountsRow}>
-              <Text style={[s.tdText, s.colDesc]}>{ligneDescription}</Text>
-              <Text style={[s.tdRight, s.colQte]}>1</Text>
-              <Text style={[s.tdRight, s.colPu]}>
-                {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
-              </Text>
-              <Text style={[s.tdRight, s.colTot]}>
-                {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
-              </Text>
-            </View>
-          </View>
-        </View>
+        {/* ── Détail des prestations ─────────────────────────────
+            Sections/lignes lues depuis le devis lié, valeurs ramenées
+            au prorata (ratio = facture.totalHt / devis.totalHt).
+            Fallback single-line si pas de devis (NONNA/SACEM) ou avoir. */}
+        {(() => {
+          const hasDetail =
+            !isAvoir &&
+            facture.devis &&
+            facture.devis.sections.length > 0 &&
+            facture.devis.totalHt > 0;
 
-        {/* ── Totaux ────────────────────────────────────────────── */}
-        <View style={s.totauxSection}>
-          <View style={s.totauxBox}>
-            <View style={s.totRow}>
-              <Text style={s.totHtLabel}>TOTAL HT</Text>
-              <Text style={s.totHtValue}>
-                {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
-              </Text>
+          if (!hasDetail) {
+            return (
+              <View style={s.amountsBlock}>
+                <View style={s.amountsTable}>
+                  <View style={s.amountsHead}>
+                    <Text style={[s.thText, s.colDesc]}>Description</Text>
+                    <Text style={[s.thText, s.colQte]}>Qté</Text>
+                    <Text style={[s.thText, s.colPu]}>P.U. HT</Text>
+                    <Text style={[s.thText, s.colTot]}>Total HT</Text>
+                  </View>
+                  <View style={s.amountsRow}>
+                    <Text style={[s.tdText, s.colDesc]}>{ligneDescription}</Text>
+                    <Text style={[s.tdRight, s.colQte]}>1</Text>
+                    <Text style={[s.tdRight, s.colPu]}>
+                      {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
+                    </Text>
+                    <Text style={[s.tdRight, s.colTot]}>
+                      {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            );
+          }
+
+          const devis = facture.devis!;
+          const ratio = facture.totalHt / devis.totalHt;
+          return (
+            <View>
+              {devis.sections.map((section) => {
+                const sectionLignesAdj = section.lignes.map((l) => ({
+                  ...l,
+                  prixUnit: Math.round(l.prixUnit * ratio * 100) / 100,
+                  total: Math.round(l.total * ratio * 100) / 100,
+                }));
+                const sectionSubtotal =
+                  Math.round(
+                    sectionLignesAdj.reduce((s, l) => s + l.total, 0) * 100
+                  ) / 100;
+                return (
+                  <View key={section.id} style={s.sectionBlock} wrap={false}>
+                    <Text style={s.sectionTitle}>{section.titre}</Text>
+                    <View style={s.tableHead}>
+                      <Text style={[s.thText, s.colLib]}>Libellé</Text>
+                      <Text style={[s.thText, s.colTag]}>Catégorie</Text>
+                      <Text style={[s.thText, s.colQte]}>Qté</Text>
+                      <Text style={[s.thText, s.colPu]}>P.U. HT</Text>
+                      <Text style={[s.thText, s.colTot]}>Total HT</Text>
+                    </View>
+                    {sectionLignesAdj.map((l, i) => (
+                      <View
+                        key={l.id}
+                        style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}
+                      >
+                        <Text style={[s.tdText, s.colLib]}>{l.libelle}</Text>
+                        <Text style={[s.tdText, s.colTag]}>
+                          {TAG_LABELS[l.tag] ?? l.tag}
+                        </Text>
+                        <Text style={[s.tdRight, s.colQte]}>{l.quantite}</Text>
+                        <Text style={[s.tdRight, s.colPu]}>{euros(l.prixUnit)}</Text>
+                        <Text style={[s.tdRight, s.colTot]}>{euros(l.total)}</Text>
+                      </View>
+                    ))}
+                    <View style={s.sectionSubtotalRow}>
+                      <Text style={s.sectionSubtotalLabel}>
+                        SOUS TOTAL {section.titre.toUpperCase()}
+                      </Text>
+                      <Text style={s.sectionSubtotalValue}>
+                        {euros(sectionSubtotal)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
             </View>
-            <View style={s.totRow}>
-              <Text style={s.totLabel}>TVA 20%</Text>
-              <Text style={s.totValue}>
-                {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
-              </Text>
+          );
+        })()}
+
+        {/* ── Totaux ──────────────────────────────────────────── */}
+        {(() => {
+          const hasBreakdown = !isAvoir && facture.sousTotal > 0;
+          const detailRows = hasBreakdown
+            ? [
+                { label: "Charges sociales / comédien",    taux: facture.tauxCsComedien, montant: facture.csComedien },
+                { label: "Charges sociales / techniciens", taux: facture.tauxCsTech,     montant: facture.csTechniciens },
+                { label: "Frais généraux",                 taux: facture.tauxFg,         montant: facture.fraisGeneraux },
+                { label: "Marge de fonctionnement",        taux: facture.tauxMarge,      montant: facture.marge },
+              ].filter((r) => r.montant !== 0)
+            : [];
+          return (
+            <View style={s.totauxSection} wrap={false}>
+              <View style={s.totauxBox}>
+                {hasBreakdown && (
+                  <>
+                    <View style={s.totRow}>
+                      <Text style={s.totLabel}>SOUS TOTAL HT</Text>
+                      <Text style={s.totValue}>{euros(facture.sousTotal)}</Text>
+                    </View>
+                    {detailRows.length > 0 && <View style={{ height: 4 }} />}
+                    {detailRows.map((r) => (
+                      <View key={r.label} style={s.totRow}>
+                        <Text style={s.totLabel}>{r.label}</Text>
+                        <Text style={[s.totLabel, { width: 50, textAlign: "right" }]}>
+                          {pct(r.taux)}
+                        </Text>
+                        <Text style={s.totValue}>{euros(r.montant)}</Text>
+                      </View>
+                    ))}
+                    <View style={s.totDivider} />
+                  </>
+                )}
+                <View style={s.totRow}>
+                  <Text style={s.totHtLabel}>TOTAL HT</Text>
+                  <Text style={s.totHtValue}>
+                    {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
+                  </Text>
+                </View>
+                <View style={s.totRow}>
+                  <Text style={s.totLabel}>TVA 20 %</Text>
+                  <Text style={s.totValue}>
+                    {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
+                  </Text>
+                </View>
+                <View style={isAvoir ? s.totTtcRowAvoir : s.totTtcRow}>
+                  <Text style={s.totTtcLabel}>
+                    {isAvoir ? "MONTANT DE L'AVOIR TTC" : "TOTAL TTC"}
+                  </Text>
+                  <Text style={s.totTtcValue}>
+                    {isAvoir ? `- ${euros(absTtc)}` : euros(absTtc)}
+                  </Text>
+                </View>
+              </View>
             </View>
-            <View style={isAvoir ? s.totTtcRowAvoir : s.totTtcRow}>
-              <Text style={s.totTtcLabel}>
-                {isAvoir ? "MONTANT DE L'AVOIR TTC" : "TOTAL TTC"}
-              </Text>
-              <Text style={s.totTtcValue}>
-                {isAvoir ? `- ${euros(absTtc)}` : euros(absTtc)}
-              </Text>
-            </View>
-          </View>
-        </View>
+          );
+        })()}
 
         {/* ── Mentions légales art. L441-9 C. com. ─────────────── */}
         {!isAvoir && (
