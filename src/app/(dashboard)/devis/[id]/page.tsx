@@ -188,6 +188,8 @@ export default async function DevisDetailPage({
                   { label: `CS Techniciens (${formatPct(devis.tauxCsTech)})`, value: devis.csTechniciens },
                   { label: `FG (${formatPct(devis.tauxFg)})`, value: devis.fraisGeneraux },
                   { label: `Marge (${formatPct(devis.tauxMarge)})`, value: devis.marge },
+                  { label: "Co-production", value: -devis.coproduction },
+                  { label: "Remise exceptionnelle", value: -devis.remise },
                 ] as { label: string; value: number; alwaysShow?: boolean }[]
               )
                 .filter((r) => r.alwaysShow || r.value !== 0)

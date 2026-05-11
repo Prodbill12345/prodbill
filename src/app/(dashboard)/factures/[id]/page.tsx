@@ -376,6 +376,8 @@ export default async function FactureDetailPage({
                       { label: `CS Techniciens (${formatPct(facture.tauxCsTech)})`, value: facture.csTechniciens },
                       { label: `FG (${formatPct(facture.tauxFg)})`, value: facture.fraisGeneraux },
                       { label: `Marge (${formatPct(facture.tauxMarge)})`, value: facture.marge },
+                      { label: "Co-production", value: -facture.coproduction },
+                      { label: "Remise exceptionnelle", value: -facture.remise },
                     ] as { label: string; value: number; alwaysShow?: boolean }[]
                   )
                     .filter((r) => r.alwaysShow || r.value !== 0)
