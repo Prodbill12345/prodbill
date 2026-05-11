@@ -257,8 +257,10 @@ const SECTIONS: SectionCfg[] = [
       "Conception et Rédaction Originale. DEVIS",
       "Vente materiel",
       "Loyer",
-      "CO-PRODUCTION (APPORT EN INDUSTRIE SUR STUDIOS ET SALAIRES)",
-      "REMISE EXCEPTIONNELLE",
+      // "CO-PRODUCTION (APPORT EN INDUSTRIE...)" et "REMISE EXCEPTIONNELLE"
+      // ne sont PAS des lignes de prestation : elles représentent des montants
+      // déductibles. Voir idx.coproduction / idx.remise + champs dédiés sur
+      // Devis (remise, coproduction) et Facture (remise, coproduction).
     ],
   },
 ];
@@ -467,6 +469,8 @@ async function main() {
     csTech:         findHeaderIdx(headers, "Charges sociales techniciens"),
     fraisGeneraux:  findHeaderIdx(headers, "Frais généraux"),
     marge:          findHeaderIdx(headers, "Marge de fonctionnement"),
+    coproduction:   findHeaderIdx(headers, "CO-PRODUCTION (APPORT EN INDUSTRIE SUR STUDIOS ET SALAIRES)"),
+    remise:         findHeaderIdx(headers, "REMISE EXCEPTIONNELLE"),
   };
 
   // Pré-calcul des index pour chaque section (avec gestion des doublons d'en-têtes)
@@ -517,6 +521,8 @@ async function main() {
     csTechniciens: number;
     fraisGeneraux: number;
     marge: number;
+    coproduction: number;
+    remise: number;
     rowIdxs: number[];
   };
   const devisAgreg = new Map<string, DevisAgreg>();
@@ -536,10 +542,16 @@ async function main() {
     const csTech = idx.csTech        >= 0 ? parseAmount(cols[idx.csTech])        : 0;
     const fg     = idx.fraisGeneraux >= 0 ? parseAmount(cols[idx.fraisGeneraux]) : 0;
     const m      = idx.marge         >= 0 ? parseAmount(cols[idx.marge])         : 0;
+    // Caleson stocke parfois ces deux montants en positif, parfois en
+    // négatif (ex : 26029 = +148.05, 26007 = -108). Dans les deux cas
+    // c'est |valeur| qui se déduit du HT. On normalise en absolu.
+    const cop    = idx.coproduction  >= 0 ? Math.abs(parseAmount(cols[idx.coproduction]))  : 0;
+    const rem    = idx.remise        >= 0 ? Math.abs(parseAmount(cols[idx.remise]))        : 0;
     const cur =
       devisAgreg.get(noDevisRaw) ?? {
         totalHt: 0, tva: 0, totalTtc: 0,
         csComedien: 0, csTechniciens: 0, fraisGeneraux: 0, marge: 0,
+        coproduction: 0, remise: 0,
         rowIdxs: [],
       };
     cur.totalHt += ht;
@@ -549,6 +561,8 @@ async function main() {
     cur.csTechniciens += csTech;
     cur.fraisGeneraux += fg;
     cur.marge         += m;
+    cur.coproduction  += cop;
+    cur.remise        += rem;
     cur.rowIdxs.push(i);
     devisAgreg.set(noDevisRaw, cur);
   }
@@ -610,6 +624,8 @@ async function main() {
     baseMarge: number;
     fraisGeneraux: number;
     marge: number;
+    remise: number;
+    coproduction: number;
     totalHt: number;
     tauxCsComedien: number;
     tauxCsTech: number;
@@ -672,6 +688,8 @@ async function main() {
           const csTechniciens = aggreg?.csTechniciens ?? 0;
           const fraisGeneraux = aggreg?.fraisGeneraux ?? 0;
           const margeAgr      = aggreg?.marge         ?? 0;
+          const coproduction  = aggreg?.coproduction  ?? 0;
+          const remiseAgr     = aggreg?.remise        ?? 0;
 
           // Pré-construction des lignes (en mémoire) pour pouvoir calculer
           // sousTotal = Σ (quantite × prixUnit) AVANT de créer le devis.
@@ -745,6 +763,8 @@ async function main() {
             baseMarge,
             fraisGeneraux,
             marge: margeAgr,
+            remise: remiseAgr,
+            coproduction,
             totalHt: devisHt,
             totalApresRemise: devisHt,
             tva: devisTva || Math.round(devisHt * 0.2 * 100) / 100,
@@ -776,6 +796,8 @@ async function main() {
             baseMarge,
             fraisGeneraux,
             marge: margeAgr,
+            remise: remiseAgr,
+            coproduction,
             totalHt: devisHt,
             tauxCsComedien: company.defaultTauxCsComedien,
             tauxCsTech: company.defaultTauxCsTech,
@@ -866,6 +888,8 @@ async function main() {
               csTechniciens:  r2(devisSnap.csTechniciens * ratio),
               fraisGeneraux:  r2(devisSnap.fraisGeneraux * ratio),
               marge:          r2(devisSnap.marge         * ratio),
+              remise:         r2(devisSnap.remise        * ratio),
+              coproduction:   r2(devisSnap.coproduction  * ratio),
               tauxCsComedien: devisSnap.tauxCsComedien,
               tauxCsTech:     devisSnap.tauxCsTech,
               tauxFg:         devisSnap.tauxFg,
@@ -919,6 +943,8 @@ async function main() {
           baseMarge:      factBaseMarge,
           fraisGeneraux:  factBreakdown?.fraisGeneraux  ?? 0,
           marge:          factBreakdown?.marge          ?? 0,
+          remise:         factBreakdown?.remise         ?? 0,
+          coproduction:   factBreakdown?.coproduction   ?? 0,
           tauxCsComedien: factBreakdown?.tauxCsComedien ?? 0,
           tauxCsTech:     factBreakdown?.tauxCsTech     ?? 0,
           tauxFg:         factBreakdown?.tauxFg         ?? 0,
