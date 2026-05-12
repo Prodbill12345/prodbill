@@ -92,6 +92,18 @@ model Company {
   // Conditions de paiement par défaut (mention L441-9)
   conditionsPaiement String @default("Paiement à 30 jours. Pénalités de retard : 15% par an exigibles à 45 jours. Indemnité forfaitaire de recouvrement : 40 €.")
 
+  // Préfixes de numérotation appliqués lors de la génération (ex : "DEV-2026-",
+  // "FAC-2026-"). Le Counter stocke le numéro seul ; le format final est
+  // `${prefixDevis}${counter.value}` côté getNextDevisNumero.
+  prefixDevis   String @default("")
+  prefixFacture String @default("")
+
+  // Sections custom proposées en plus des 5 par défaut (Voix-Off, Studio,
+  // Musique, Droits, Autres) lors de la création d'un devis.
+  // Format : [{ nom: string, categorie: "ARTISTE"|"TECHNICIEN_HCS"|"STUDIO"|"MUSIQUE"|"AUTRE" }]
+  // JSON plutôt que table dédiée car liste statique et rarement lue.
+  customSections Json @default("[]")
+
   clerkOrgId String   @unique
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

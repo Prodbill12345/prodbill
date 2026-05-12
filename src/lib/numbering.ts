@@ -3,8 +3,9 @@
  * Utilise une transaction Prisma atomique pour éviter les doublons.
  *
  * Formats :
- *   DEVIS   → "25-0042"
- *   FACTURE → "25-0042"    (puis suffixe ajouté à l'appelant : -A1, -S1, AV-)
+ *   DEVIS   → "25-0042"  (legacy, sans préfixe)
+ *           → "DEV-2026-26001"  (si Company.prefixDevis = "DEV-2026-")
+ *   FACTURE → dérivé du numéro de devis : "${devisNumero}-A1", "-S1", "AV-…"
  *   BDC     → "BDC-25-0042"
  */
 
@@ -24,7 +25,11 @@ async function getNextValue(
   return counter.value;
 }
 
-function formatNumero(year: number, value: number): string {
+function formatNumero(year: number, value: number, prefix?: string): string {
+  // Si un préfixe est configuré sur la Company, on l'utilise tel quel suivi
+  // du compteur brut (cas NONNA : "DEV-2026-" + 26001 = "DEV-2026-26001").
+  if (prefix && prefix.length > 0) return `${prefix}${value}`;
+  // Legacy : "YY-NNNN" (Caleson)
   const yy = String(year).slice(-2);
   const seq = String(value).padStart(4, "0");
   return `${yy}-${seq}`;
@@ -35,8 +40,12 @@ export async function getNextDevisNumero(
   year: number = new Date().getFullYear()
 ): Promise<string> {
   return prisma.$transaction(async () => {
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: { prefixDevis: true },
+    });
     const value = await getNextValue(companyId, year, "DEVIS");
-    return formatNumero(year, value);
+    return formatNumero(year, value, company?.prefixDevis);
   });
 }
 
