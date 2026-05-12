@@ -59,7 +59,7 @@ L'extension intercepte les opérations sur les 16 modèles scopés :
 
 Script : `scripts/test-isolation-phase1.ts`.
 
-Couvre 8 scénarios d'attaque cross-tenant :
+Couvre 10 scénarios d'attaque cross-tenant :
 
 1. `findMany` cross-workspace → ne remonte que le tenant actif
 2. `findUnique` par ID d'un autre tenant → `null`
@@ -69,6 +69,8 @@ Couvre 8 scénarios d'attaque cross-tenant :
 6. `connect` (FK) cross-tenant → `CrossTenantError`
 7. Route `/api/comediens/[id]/projets` cross-tenant → 404
 8. Lignes du comédien cross-tenant via `comedienId` → 0 row
+9. Page SSR `/devis` ouverte côté Caleson — pas de fuite W2 dans la liste
+10. Page SSR `/factures` ouverte côté Workspace 2 — uniquement factures W2
 
 À relancer **après tout refactor majeur** sur les routes ou le schéma :
 
@@ -78,7 +80,7 @@ npx tsx scripts/test-isolation-phase1.ts
 
 ## Inventaire des fichiers couverts par Phase 1
 
-### Routes API critiques refactorées (7)
+### Routes API critiques refactorées (11)
 
 - `/api/devis/route.ts` (POST) — companyId sur nested sections + lignes
 - `/api/devis/[id]/route.ts` (PUT) — idem en update
@@ -87,6 +89,10 @@ npx tsx scripts/test-isolation-phase1.ts
 - `/api/budget/[id]/route.ts` — companyId sur nested BudgetLigne
 - `/api/comediens/lignes/[ligneId]/paiement/route.ts` — filtre direct
 - `/api/comediens/[id]/projets/route.ts` — refacto vers `scopedPrisma`
+- `/api/agents/[id]/route.ts` (DELETE) — `scopedPrisma` (Phase 1.5)
+- `/api/comediens/[id]/route.ts` (PUT + DELETE) — `scopedPrisma` (Phase 1.5)
+- `/api/export/excel/route.ts` — `scopedPrisma` sur facture/paiement/devis (Phase 1.5)
+- `/api/export/fec/route.ts` — `scopedPrisma` sur facture/paiement (Phase 1.5)
 
 ### Scripts batch refactorés (4)
 
@@ -95,27 +101,33 @@ npx tsx scripts/test-isolation-phase1.ts
 - `scripts/restore-from-report.ts`
 - `scripts/seed-demo.ts`
 
-### Routes/pages dont l'isolation tient via filtre manuel
+### Pages SSR refactorées vers `scopedPrisma` (Phase 1.5)
 
-Toutes les autres routes API (~30) et pages serveur (~14) filtrent par `user.companyId` manuellement. Fonctionnellement OK, **mais structurellement fragile** : un oubli humain est possible.
+13 pages serveur dans `src/app/(dashboard)/`, toutes migrées vers `scopedPrisma(user.companyId)` :
+
+- `page.tsx` (dashboard)
+- `clients/page.tsx`, `clients/[id]/page.tsx`
+- `devis/page.tsx`, `devis/nouveau/page.tsx`, `devis/[id]/page.tsx`, `devis/[id]/modifier/page.tsx`
+- `factures/page.tsx`, `factures/[id]/page.tsx`
+- `comediens/page.tsx`, `agents/page.tsx`
+- `paiements/page.tsx`, `budget/page.tsx`
+
+`parametres/page.tsx` n'utilise pas `scopedPrisma` (lit seulement `user.company` qui est hors scope).
+
+### Routes/pages dont l'isolation tient encore via filtre manuel
+
+Les autres routes API (~25) filtrent par `user.companyId` manuellement (pattern `findFirst({ where: { id, companyId } })`). Fonctionnellement OK ; généralisation possible mais à coût marginal.
 
 ## Roadmap
 
-### Phase 1.5 — Defense-in-depth (TODO)
+### Phase 1.5 — Defense-in-depth — Done [12 mai 2026]
 
-Généraliser `scopedPrisma` sur tous les fichiers qui font encore du `prisma.*.findMany/findFirst/etc.` avec filtre manuel. À chercher avec :
+Généralisation effectuée le 12 mai 2026 :
+- 13 pages SSR migrées vers `scopedPrisma`
+- 4 routes API précédemment marquées TODO refactorées (`agents/[id]` DELETE, `comediens/[id]` DELETE, `export/excel`, `export/fec`)
+- 2 scénarios de test supplémentaires (8 et 9) — passage à 10 scénarios validés
 
-```bash
-grep -rn "TODO Phase 1.5" src/
-```
-
-Points actuellement marqués :
-- `/api/agents/[id]/route.ts` DELETE — `updateMany` sur DevisLigne sans helper
-- `/api/comediens/[id]/route.ts` DELETE — idem
-- `/api/export/excel/route.ts` — jointure indirecte sur Paiement
-- `/api/export/fec/route.ts` — idem
-
-Plus globalement : les 14 pages serveur SSR (`src/app/(dashboard)/**/page.tsx`) qui utilisent `prisma` directement.
+Les fichiers refactorés en Phase 1.5 sont signalés par un commentaire « Phase 1.5 multi-tenant » ou utilisent directement `scopedPrisma(user.companyId)`.
 
 ### Phase 2 — Membership N-N
 

@@ -299,12 +299,47 @@ async function main() {
     record("7. comediens/[id]/projets cross-tenant", false, `Exception : ${(e as Error).message}`);
   }
 
-  // ── Inversion : depuis W2, peut-on lire Caleson ? ──────────────────
+  // ── Scénario 8 : page SSR /devis ouverte dans le contexte Caleson ───
+  // Simule ce que fait `(dashboard)/devis/page.tsx` : findMany sans filtre
+  // companyId explicite — c'est le helper qui doit l'injecter.
+  try {
+    const devisListCaleson = await db.devis.findMany({
+      include: { client: { select: { name: true } } },
+      orderBy: { updatedAt: "desc" },
+    });
+    const leakedW2 = devisListCaleson.some((d) => d.id === w2Devis.id);
+    record(
+      "8. /devis SSR — pas de fuite W2 dans la liste Caleson",
+      !leakedW2 && devisListCaleson.length >= 328,
+      `${devisListCaleson.length} devis remontés depuis Caleson, fuite W2 = ${leakedW2}`
+    );
+  } catch (e) {
+    record("8. /devis SSR cross-tenant", false, `Exception : ${(e as Error).message}`);
+  }
+
+  // ── Scénario 9 : page SSR /factures ouverte dans le contexte W2 ────
+  // Inversion : depuis Workspace 2, on doit voir uniquement la facture W2,
+  // pas les 101 factures Caleson. Simule ce que fait /factures/page.tsx.
   const dbW2 = scopedPrisma(w2.id);
+  try {
+    const facturesListW2 = await dbW2.facture.findMany({
+      include: { client: { select: { name: true } }, paiements: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const onlyW2 = facturesListW2.every((f) => f.companyId === w2.id);
+    record(
+      "9. /factures SSR — depuis W2 ne voit que les factures W2",
+      facturesListW2.length === 1 && onlyW2,
+      `${facturesListW2.length} facture(s) remontée(s), toutes du W2 = ${onlyW2}`
+    );
+  } catch (e) {
+    record("9. /factures SSR cross-tenant", false, `Exception : ${(e as Error).message}`);
+  }
+
+  // ── Inversion devis (sanity check existant) ────────────────────────
   const seenFromW2 = await dbW2.devis.count({});
-  console.log(`\n${C_DIM}Inversion : depuis Workspace 2, count Devis = ${seenFromW2} (attendu 1, le W2-0001)${C_RESET}`);
   if (seenFromW2 !== 1) {
-    record("Inversion W2→Caleson", false, `count = ${seenFromW2}, attendu 1`);
+    record("Inversion W2→Caleson (count devis)", false, `count = ${seenFromW2}, attendu 1`);
   }
   // Le comédien W2 doit être visible depuis W2
   const comFromW2 = await dbW2.comedien.findFirst({ where: { id: w2Comedien.id }, select: { id: true } });
