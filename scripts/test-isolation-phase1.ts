@@ -260,6 +260,45 @@ async function main() {
     );
   }
 
+  // ── Scénario 7 : route /api/comediens/[id]/projets cross-tenant ────
+  // Reproduit ce que faisait la route AVANT le fix (filtre manuel post-query)
+  // pour valider que l'injection scoped-prisma est suffisante. On crée d'abord
+  // un comédien W2 lié à une ligne du devis W2.
+  const w2Comedien = await prisma.comedien.create({
+    data: { companyId: w2.id, prenom: "Test", nom: "Voix W2" },
+  });
+  await prisma.devisLigne.update({
+    where: { id: w2Ligne.id },
+    data: { comedienId: w2Comedien.id, tag: "ARTISTE" },
+  });
+
+  try {
+    // Depuis le contexte Caleson, on demande les projets du comédien W2.
+    // db.comedien.findFirst({ id: w2Comedien.id }) doit retourner null
+    // (le comédien appartient à W2), donc la route répond 404 — pas de fuite.
+    const comFromCaleson = await db.comedien.findFirst({
+      where: { id: w2Comedien.id },
+      select: { id: true },
+    });
+    record(
+      "7. comediens/[id]/projets cross-tenant",
+      comFromCaleson === null,
+      `comedien W2 vu depuis Caleson = ${comFromCaleson === null ? "null ✓ (404 attendu)" : "FUITE — comédien W2 visible !"}`
+    );
+
+    // En complément : les lignes du comédien W2 ne doivent pas remonter non plus.
+    const lignesFromCaleson = await db.devisLigne.findMany({
+      where: { comedienId: w2Comedien.id },
+    });
+    record(
+      "7-bis. lignes du comédien W2 depuis Caleson",
+      lignesFromCaleson.length === 0,
+      `${lignesFromCaleson.length} ligne(s) remontée(s) — attendu 0`
+    );
+  } catch (e) {
+    record("7. comediens/[id]/projets cross-tenant", false, `Exception : ${(e as Error).message}`);
+  }
+
   // ── Inversion : depuis W2, peut-on lire Caleson ? ──────────────────
   const dbW2 = scopedPrisma(w2.id);
   const seenFromW2 = await dbW2.devis.count({});
@@ -267,12 +306,18 @@ async function main() {
   if (seenFromW2 !== 1) {
     record("Inversion W2→Caleson", false, `count = ${seenFromW2}, attendu 1`);
   }
+  // Le comédien W2 doit être visible depuis W2
+  const comFromW2 = await dbW2.comedien.findFirst({ where: { id: w2Comedien.id }, select: { id: true } });
+  if (!comFromW2) {
+    record("Inversion comédien W2", false, "comédien W2 invisible depuis W2 — bug helper");
+  }
 
   // ── Cleanup ────────────────────────────────────────────────────────
   await prisma.facture.deleteMany({ where: { companyId: w2.id } });
   await prisma.devisLigne.deleteMany({ where: { companyId: w2.id } });
   await prisma.devisSection.deleteMany({ where: { companyId: w2.id } });
   await prisma.devis.deleteMany({ where: { companyId: w2.id } });
+  await prisma.comedien.deleteMany({ where: { companyId: w2.id } });
   await prisma.client.deleteMany({ where: { companyId: w2.id } });
   await prisma.user.deleteMany({ where: { companyId: w2.id } });
   await prisma.company.delete({ where: { id: w2.id } });
