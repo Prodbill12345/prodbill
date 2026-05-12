@@ -1,5 +1,5 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import ExcelJS from "exceljs";
 
 function parseRange(url: URL): { debut: Date; fin: Date } {
@@ -56,35 +56,26 @@ export async function GET(req: Request) {
   try {
     const user = await requireAuth("facture:read");
     const { debut, fin } = parseRange(new URL(req.url));
+    const db = scopedPrisma(user.companyId);
 
     const [factures, paiements, devis] = await Promise.all([
-      prisma.facture.findMany({
+      db.facture.findMany({
         where: {
-          companyId: user.companyId,
           dateEmission: { gte: debut, lte: fin },
           statut: { not: "BROUILLON" },
         },
         include: { client: { select: { name: true, siret: true } } },
         orderBy: { dateEmission: "asc" },
       }),
-      // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma + filtre
-      // companyId direct sur Paiement (au lieu de la jointure indirecte
-      // via facture.companyId, qui marche mais double le travail SQL).
-      prisma.paiement.findMany({
-        where: {
-          facture: { companyId: user.companyId },
-          date: { gte: debut, lte: fin },
-        },
+      db.paiement.findMany({
+        where: { date: { gte: debut, lte: fin } },
         include: {
           facture: { include: { client: { select: { name: true } } } },
         },
         orderBy: { date: "asc" },
       }),
-      prisma.devis.findMany({
-        where: {
-          companyId: user.companyId,
-          createdAt: { gte: debut, lte: fin },
-        },
+      db.devis.findMany({
+        where: { createdAt: { gte: debut, lte: fin } },
         include: { client: { select: { name: true } } },
         orderBy: { createdAt: "asc" },
       }),

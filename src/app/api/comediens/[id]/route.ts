@@ -1,5 +1,5 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { z } from "zod";
 
 const ComedienSchema = z.object({
@@ -15,11 +15,12 @@ export async function PUT(
   try {
     const user = await requireAuth("devis:edit");
     const { id } = await params;
-    const existing = await prisma.comedien.findFirst({ where: { id, companyId: user.companyId } });
+    const db = scopedPrisma(user.companyId);
+    const existing = await db.comedien.findFirst({ where: { id } });
     if (!existing) return Response.json({ error: "Comédien introuvable" }, { status: 404 });
     const body = await req.json();
     const input = ComedienSchema.parse(body);
-    const comedien = await prisma.comedien.update({
+    const comedien = await db.comedien.update({
       where: { id },
       data: {
         ...(input.prenom && { prenom: input.prenom }),
@@ -44,14 +45,12 @@ export async function DELETE(
   try {
     const user = await requireAuth("devis:delete");
     const { id } = await params;
-    const existing = await prisma.comedien.findFirst({ where: { id, companyId: user.companyId } });
+    const db = scopedPrisma(user.companyId);
+    const existing = await db.comedien.findFirst({ where: { id } });
     if (!existing) return Response.json({ error: "Comédien introuvable" }, { status: 404 });
-    // Détacher les lignes avant suppression.
-    // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma(user.companyId).
-    // Même rationale que /api/agents/[id] DELETE : FK + ownership protègent
-    // déjà ; helper ajouterait la garantie au niveau extension Prisma.
-    await prisma.devisLigne.updateMany({ where: { comedienId: id }, data: { comedienId: null } });
-    await prisma.comedien.delete({ where: { id } });
+    // Détacher les lignes avant suppression (scopedPrisma garantit le scope tenant).
+    await db.devisLigne.updateMany({ where: { comedienId: id }, data: { comedienId: null } });
+    await db.comedien.delete({ where: { id } });
     return Response.json({ success: true });
   } catch (err) {
     return handleAuthError(err);

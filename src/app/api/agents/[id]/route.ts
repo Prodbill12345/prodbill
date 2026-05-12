@@ -1,5 +1,6 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { z } from "zod";
 
 const AgentSchema = z.object({
@@ -56,25 +57,21 @@ export async function DELETE(
   try {
     const user = await requireAuth("devis:edit");
     const { id } = await params;
+    const db = scopedPrisma(user.companyId);
 
-    const existing = await prisma.agent.findFirst({
-      where: { id, companyId: user.companyId },
-    });
+    const existing = await db.agent.findFirst({ where: { id } });
     if (!existing) {
       return Response.json({ error: "Agent introuvable" }, { status: 404 });
     }
 
-    // Détacher les lignes liées avant suppression.
-    // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma(user.companyId).
-    // Risque actuel quasi nul (l'agent appartient à 1 tenant, ses lignes
-    // nécessairement aussi via la FK + l'ownership check ci-dessus), mais le
-    // helper rendrait l'isolation garantie par construction.
-    await prisma.devisLigne.updateMany({
+    // Détacher les lignes liées avant suppression (scopedPrisma garantit
+    // que le updateMany ne touche que les lignes du tenant actif).
+    await db.devisLigne.updateMany({
       where: { agentId: id },
       data: { agentId: null },
     });
 
-    await prisma.agent.delete({ where: { id } });
+    await db.agent.delete({ where: { id } });
     return Response.json({ success: true });
   } catch (err) {
     return handleAuthError(err);
