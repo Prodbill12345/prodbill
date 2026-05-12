@@ -465,10 +465,12 @@ async function importDevis(
           totalApresRemise: totaux.totalHt,
           sections: {
             create: lignesData.sections.map((section, sIdx) => ({
+              companyId,
               titre: section.nom,
               ordre: sIdx,
               lignes: {
                 create: section.lignes.map((ligne, lIdx) => ({
+                  companyId,
                   libelle: ligne.libelle,
                   tag: normalizeTag(ligne.tag),
                   quantite: ligne.quantite,
@@ -528,10 +530,12 @@ async function importDevis(
       totalApresRemise: totaux.totalHt,
       sections: {
         create: data.sections.map((section, sIdx) => ({
+          companyId,
           titre: section.nom,
           ordre: sIdx,
           lignes: {
             create: section.lignes.map((ligne, lIdx) => ({
+              companyId,
               libelle: ligne.libelle,
               tag: normalizeTag(ligne.tag),
               quantite: ligne.quantite,
@@ -586,8 +590,11 @@ async function importFacture(
     return { fichier: fileName, type: "facture", statut: "erreur", message: "Numéro de facture non extrait" };
   }
 
-  // Skip si numéro déjà en base
-  const existing = await prisma.facture.findUnique({ where: { numero: data.numero }, select: { id: true } });
+  // Skip si numéro déjà en base (unicité scopée par tenant — Phase 1).
+  const existing = await prisma.facture.findUnique({
+    where: { companyId_numero: { companyId, numero: data.numero } },
+    select: { id: true },
+  });
   if (existing) {
     log("⏭ ", `Skip facture ${data.numero} (déjà en base)`);
     return { fichier: fileName, type: "facture", statut: "skip", numero: data.numero, client: data.client.nom, message: "Numéro déjà en base" };

@@ -821,15 +821,18 @@ async function main() {
           }
 
           // Persistance des sections & lignes pré-construites en mémoire.
+          // Phase 1 multi-tenant : companyId injecté sur les 2 nested levels.
           await prisma.devisSection.deleteMany({ where: { devisId } });
           for (const sec of sectionsDraft) {
             await prisma.devisSection.create({
               data: {
+                companyId: company.id,
                 devisId,
                 titre: sec.titre,
                 ordre: sec.ordre,
                 lignes: {
                   create: sec.lignes.map((l, k) => ({
+                    companyId: company.id,
                     libelle: l.libelle,
                     tag: l.tag,
                     quantite: 1,
@@ -961,8 +964,10 @@ async function main() {
           tauxFg:         factBreakdown?.tauxFg         ?? 0,
           tauxMarge:      factBreakdown?.tauxMarge      ?? 0,
         };
+        // Phase 1 multi-tenant : numero est désormais unique scopé par tenant
+        // via @@unique([companyId, numero]). On utilise la clé composée.
         await prisma.facture.upsert({
-          where: { numero: noFacture },
+          where: { companyId_numero: { companyId: company.id, numero: noFacture } },
           create: { numero: noFacture, ...factureData },
           update: factureData,
         });

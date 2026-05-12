@@ -412,6 +412,7 @@ async function main() {
         where: { companyId: company.id, numero },
         select: {
           id: true,
+          companyId: true,
           sections: {
             orderBy: { ordre: "asc" },
             select: {
@@ -518,16 +519,19 @@ async function main() {
         await prisma.devisSection.deleteMany({ where: { devisId: devis.id } });
       }
 
-      // Créer les sections et lignes filtrées
+      // Créer les sections et lignes filtrées.
+      // Phase 1 multi-tenant : companyId injecté sur les nested writes.
       await prisma.devis.update({
         where: { id: devis.id },
         data: {
           sections: {
             create: parsed.map((section, sIdx) => ({
+              companyId: devis.companyId,
               titre: section.nom,
               ordre: sIdx,
               lignes: {
                 create: section.lignes.map((ligne, lIdx) => ({
+                  companyId: devis.companyId,
                   libelle: ligne.libelle,
                   tag: ligne.tag,
                   quantite: ligne.quantite,
@@ -619,8 +623,10 @@ async function main() {
         continue;
       }
 
-      // 4. Upsert facture
-      const existing = await prisma.facture.findUnique({ where: { numero } });
+      // 4. Upsert facture (unicité scopée par tenant — Phase 1)
+      const existing = await prisma.facture.findUnique({
+        where: { companyId_numero: { companyId: company.id, numero } },
+      });
 
       if (existing && !FORCE) {
         console.log(`⏭  Facture ${numero} — déjà en base (${existing.statut})`);
@@ -648,7 +654,7 @@ async function main() {
       };
 
       await prisma.facture.upsert({
-        where:  { numero },
+        where:  { companyId_numero: { companyId: company.id, numero } },
         create: data,
         update: {
           totalHt:       data.totalHt,

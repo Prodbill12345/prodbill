@@ -450,10 +450,12 @@ async function main() {
         dateValidite,
         sections: {
           create: tpl.sections.map((s, sIdx) => ({
+            companyId: company.id,
             titre: s.titre,
             ordre: sIdx,
             lignes: {
               create: s.lignes.map((l, lIdx) => ({
+                companyId: company.id,
                 libelle: l.libelle,
                 tag: l.tag,
                 quantite: l.quantite,
@@ -547,6 +549,7 @@ async function main() {
     if (config.statut === "PAYEE" && datePaiement) {
       await prisma.paiement.create({
         data: {
+          companyId: company.id,
           factureId: facture.id,
           montant: montantFact,
           date: datePaiement,
