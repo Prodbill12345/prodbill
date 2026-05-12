@@ -315,7 +315,7 @@ model Facture {
   devisId   String?
   devis     Devis?  @relation(fields: [devisId], references: [id])
 
-  numero String        @unique // "25-0042-A1", "25-0042-S1", "AV-25-0042"
+  numero String // "25-0042-A1", "25-0042-S1", "AV-25-0042" — unicité scopée par tenant
   type   FactureType
   statut FactureStatut @default(BROUILLON)
 
@@ -380,6 +380,7 @@ model Facture {
   relances  Relance[]
   auditLogs AuditLog[]
 
+  @@unique([companyId, numero])
   @@index([companyId])
   @@index([clientId])
   @@index([devisId])
@@ -418,10 +419,11 @@ model BDC {
   companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
-  numero    String   @unique // "BDC-25-0042"
+  numero    String   // "BDC-25-0042" — unicité scopée par tenant (cf. @@unique)
   pdfUrl    String?
   createdAt DateTime @default(now())
 
+  @@unique([companyId, numero])
   @@index([companyId])
 }
 
