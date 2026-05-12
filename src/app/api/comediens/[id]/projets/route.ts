@@ -1,5 +1,5 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 
 export async function GET(
   _req: Request,
@@ -8,10 +8,13 @@ export async function GET(
   try {
     const user = await requireAuth("devis:read");
     const { id } = await params;
+    const db = scopedPrisma(user.companyId);
 
-    // Vérifier que ce comédien appartient à la société
-    const comedien = await prisma.comedien.findFirst({
-      where: { id, companyId: user.companyId },
+    // Vérifier que ce comédien appartient à la société. scoped-prisma
+    // injecte automatiquement companyId — si le comédien est d'un autre
+    // tenant, retourne null → 404.
+    const comedien = await db.comedien.findFirst({
+      where: { id },
       select: { id: true, prenom: true, nom: true, agent: { select: { id: true, nom: true, prenom: true, agence: true } } },
     });
 
@@ -19,8 +22,11 @@ export async function GET(
       return Response.json({ error: "Comédien introuvable" }, { status: 404 });
     }
 
-    // Toutes les lignes devis où ce comédien apparaît
-    const lignes = await prisma.devisLigne.findMany({
+    // Toutes les lignes du comédien — filtre direct via DevisLigne.companyId
+    // (scoped-prisma) + sécurité ceinture-bretelles : si jamais le helper
+    // est retiré, le filtre comedienId garde le scope par la FK Comedien
+    // (qui est elle-même tenant-scoped).
+    const lignes = await db.devisLigne.findMany({
       where: { comedienId: id },
       select: {
         id: true,
@@ -40,7 +46,6 @@ export async function GET(
                 statut: true,
                 dateSeance: true,
                 client: { select: { id: true, name: true } },
-                companyId: true,
               },
             },
           },
@@ -48,7 +53,8 @@ export async function GET(
       },
     });
 
-    // Filtrer par companyId (sécurité multi-tenant) et dédoublonner par devis
+    // Dédoublonner par devis (un comédien peut apparaître sur plusieurs lignes
+    // d'un même devis — multi-cachets).
     const projetsMap = new Map<string, {
       devisId: string;
       numero: string | null;
@@ -62,8 +68,6 @@ export async function GET(
 
     for (const ligne of lignes) {
       const devis = ligne.section.devis;
-      if (devis.companyId !== user.companyId) continue;
-
       const montantHt = ligne.quantite * ligne.prixUnit;
 
       if (!projetsMap.has(devis.id)) {
