@@ -136,11 +136,14 @@ export async function PUT(
           ...totaux,
           ...(input.sections && {
             sections: {
+              // Phase 1 multi-tenant : companyId injecté sur les nested
               create: input.sections.map((section) => ({
+                companyId: user.companyId,
                 titre: section.titre,
                 ordre: section.ordre,
                 lignes: {
                   create: section.lignes.map((ligne) => ({
+                    companyId: user.companyId,
                     libelle: ligne.libelle,
                     tag: ligne.tag,
                     quantite: ligne.quantite,

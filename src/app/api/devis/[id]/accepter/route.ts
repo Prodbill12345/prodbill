@@ -40,6 +40,7 @@ export async function POST(
       }),
       prisma.bDC.create({
         data: {
+          companyId: user.companyId,
           devisId: id,
           numero: bdcNumero,
         },

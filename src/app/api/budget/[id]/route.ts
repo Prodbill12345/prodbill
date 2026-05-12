@@ -37,7 +37,9 @@ export async function PUT(
         where: { id },
         data: {
           lignes: {
+            // Phase 1 multi-tenant : companyId injecté sur le nested write
             create: lignes.map((l) => ({
+              companyId: user.companyId,
               clientId: l.clientId,
               libelle: l.libelle,
               nomCommercial: l.nomCommercial ?? null,

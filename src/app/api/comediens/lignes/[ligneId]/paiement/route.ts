@@ -14,16 +14,14 @@ export async function PUT(
     const user = await requireAuth("devis:edit");
     const { ligneId } = await params;
 
-    // Vérification multi-tenant : la ligne doit appartenir à un devis de cette société
+    // Phase 1 multi-tenant : filtre direct sur companyId de la ligne
+    // (au lieu de la jointure indirecte via section.devis.companyId).
     const ligne = await prisma.devisLigne.findFirst({
-      where: { id: ligneId },
-      select: {
-        id: true,
-        section: { select: { devis: { select: { companyId: true } } } },
-      },
+      where: { id: ligneId, companyId: user.companyId },
+      select: { id: true },
     });
 
-    if (!ligne || ligne.section.devis.companyId !== user.companyId) {
+    if (!ligne) {
       return Response.json({ error: "Ligne introuvable" }, { status: 404 });
     }
 

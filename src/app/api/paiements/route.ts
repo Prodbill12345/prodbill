@@ -16,8 +16,10 @@ export async function GET() {
   try {
     const user = await requireAuth("paiement:read");
 
+    // Phase 1 multi-tenant : filtre direct sur companyId (au lieu de la
+    // jointure indirecte via facture.companyId).
     const paiements = await prisma.paiement.findMany({
-      where: { facture: { companyId: user.companyId } },
+      where: { companyId: user.companyId },
       include: {
         facture: { include: { client: { select: { name: true } } } },
       },
@@ -59,6 +61,7 @@ export async function POST(req: Request) {
 
     const paiement = await prisma.paiement.create({
       data: {
+        companyId: user.companyId,
         factureId: input.factureId,
         montant: input.montant,
         date: new Date(input.date),

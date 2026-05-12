@@ -85,9 +85,13 @@ export async function POST(req: Request) {
     };
     const { indexationsArtiste: _ia, indexationsMusique: _im, ...totaux } = calculerDevis(allLignes, taux, input.remise);
 
+    // Phase 1 multi-tenant : companyId injecté explicitement sur les nested
+    // sections + lignes (l'extension scopedPrisma ne descend pas dans les
+    // nested writes — cf. helpers scopedSection/scopedLigne).
+    const cid = user.companyId;
     const devis = await prisma.devis.create({
       data: {
-        companyId: user.companyId,
+        companyId: cid,
         clientId: input.clientId,
         objet: input.objet,
         description: input.description,
@@ -102,10 +106,12 @@ export async function POST(req: Request) {
         createdById: user.id,
         sections: {
           create: input.sections.map((section) => ({
+            companyId: cid,
             titre: section.titre,
             ordre: section.ordre,
             lignes: {
               create: section.lignes.map((ligne) => ({
+                companyId: cid,
                 libelle: ligne.libelle,
                 tag: ligne.tag,
                 quantite: ligne.quantite,
