@@ -64,7 +64,11 @@ export async function DELETE(
       return Response.json({ error: "Agent introuvable" }, { status: 404 });
     }
 
-    // Détacher les lignes liées avant suppression
+    // Détacher les lignes liées avant suppression.
+    // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma(user.companyId).
+    // Risque actuel quasi nul (l'agent appartient à 1 tenant, ses lignes
+    // nécessairement aussi via la FK + l'ownership check ci-dessus), mais le
+    // helper rendrait l'isolation garantie par construction.
     await prisma.devisLigne.updateMany({
       where: { agentId: id },
       data: { agentId: null },

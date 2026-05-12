@@ -71,6 +71,8 @@ export async function GET(req: Request) {
         include: { client: { select: { name: true, siret: true } } },
         orderBy: { dateEmission: "asc" },
       }),
+      // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma + filtre
+      // companyId direct sur Paiement (cf. /api/export/excel — même rationale).
       prisma.paiement.findMany({
         where: {
           facture: { companyId: user.companyId },

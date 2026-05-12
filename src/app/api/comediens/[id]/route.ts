@@ -46,7 +46,10 @@ export async function DELETE(
     const { id } = await params;
     const existing = await prisma.comedien.findFirst({ where: { id, companyId: user.companyId } });
     if (!existing) return Response.json({ error: "Comédien introuvable" }, { status: 404 });
-    // Détacher les lignes avant suppression
+    // Détacher les lignes avant suppression.
+    // TODO Phase 1.5 defense-in-depth : passer en scopedPrisma(user.companyId).
+    // Même rationale que /api/agents/[id] DELETE : FK + ownership protègent
+    // déjà ; helper ajouterait la garantie au niveau extension Prisma.
     await prisma.devisLigne.updateMany({ where: { comedienId: id }, data: { comedienId: null } });
     await prisma.comedien.delete({ where: { id } });
     return Response.json({ success: true });
