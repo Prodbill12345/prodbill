@@ -107,6 +107,13 @@ model Company {
   budgets    BudgetPrevisionnel[]
   agents     Agent[]
   comediens  Comedien[]
+  relances   Relance[]
+  // Phase 1 multi-tenant : scope direct sur les 5 tables liées
+  sections     DevisSection[]
+  lignes       DevisLigne[]
+  bdcs         BDC[]
+  paiements    Paiement[]
+  budgetLignes BudgetLigne[]
 }
 
 // ─────────────────────────────────────────────
@@ -134,6 +141,10 @@ model User {
   email     String
   name      String
   role      Role     @default(STAGIAIRE)
+  // TODO Phase 2 — Membership N-N : cette relation 1-N est temporaire.
+  // Elle bloque le cas "comptable externe accédant à plusieurs workspaces".
+  // À refactorer en table de jointure { userId, companyId, role } alignée
+  // sur Clerk Organizations (auth() → orgId → Company.clerkOrgId).
   companyId String
   company   Company  @relation(fields: [companyId], references: [id])
   createdAt DateTime @default(now())
@@ -248,12 +259,17 @@ model DevisSection {
   devisId String
   devis   Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
 
+  // Phase 1 multi-tenant : companyId direct (en plus du scope indirect via devisId)
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   titre String
   ordre Int
 
   lignes DevisLigne[]
 
   @@index([devisId])
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────
@@ -264,6 +280,10 @@ model DevisLigne {
   id        String       @id @default(cuid())
   sectionId String
   section   DevisSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  // Phase 1 multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 
   libelle        String
   tag            LigneTag
@@ -279,6 +299,7 @@ model DevisLigne {
   ordre          Int
 
   @@index([sectionId])
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────
@@ -373,6 +394,7 @@ model Relance {
   factureId   String
   facture     Facture     @relation(fields: [factureId], references: [id], onDelete: Cascade)
   companyId   String
+  company     Company     @relation(fields: [companyId], references: [id])
   type        RelanceType
   sentAt      DateTime    @default(now())
   sentTo      String      // email destinataire
@@ -392,9 +414,15 @@ model BDC {
   devisId String @unique
   devis   Devis  @relation(fields: [devisId], references: [id])
 
+  // Phase 1 multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   numero    String   @unique // "BDC-25-0042"
   pdfUrl    String?
   createdAt DateTime @default(now())
+
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────
@@ -406,6 +434,10 @@ model Paiement {
   factureId String
   facture   Facture @relation(fields: [factureId], references: [id])
 
+  // Phase 1 multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   montant   Float
   date      DateTime
   reference String?  // Référence bancaire
@@ -415,6 +447,7 @@ model Paiement {
   createdAt DateTime @default(now())
 
   @@index([factureId])
+  @@index([companyId])
 }
 
 // ─────────────────────────────────────────────
@@ -552,6 +585,11 @@ model BudgetLigne {
   budget              BudgetPrevisionnel @relation(fields: [budgetId], references: [id], onDelete: Cascade)
   clientId            String
   client              Client             @relation(fields: [clientId], references: [id])
+
+  // Phase 1 multi-tenant
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   libelle             String
   nomCommercial       String?
   montantPrevisionnel Float
@@ -559,4 +597,5 @@ model BudgetLigne {
   updatedAt           DateTime           @updatedAt
 
   @@index([budgetId])
+  @@index([companyId])
 }
