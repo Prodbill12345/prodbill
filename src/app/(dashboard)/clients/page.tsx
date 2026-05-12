@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 
@@ -10,8 +11,8 @@ export default async function ClientsPage() {
   const user = await prisma.user.findUnique({ where: { clerkId } });
   if (!user) return null;
 
-  const clients = await prisma.client.findMany({
-    where: { companyId: user.companyId },
+  const db = scopedPrisma(user.companyId);
+  const clients = await db.client.findMany({
     include: {
       _count: { select: { devis: true, factures: true } },
     },

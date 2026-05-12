@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { redirect } from "next/navigation";
 import { ComediensClient } from "@/components/comediens/ComediensClient";
 
@@ -12,9 +13,9 @@ export default async function ComediensPage() {
   const user = await prisma.user.findUnique({ where: { clerkId } });
   if (!user) redirect("/sign-in");
 
+  const db = scopedPrisma(user.companyId);
   const [comediens, agents] = await Promise.all([
-    prisma.comedien.findMany({
-      where: { companyId: user.companyId },
+    db.comedien.findMany({
       include: {
         agent: { select: { id: true, nom: true, prenom: true, agence: true } },
         lignes: {
@@ -27,8 +28,7 @@ export default async function ComediensPage() {
       },
       orderBy: [{ nom: "asc" }, { prenom: "asc" }],
     }),
-    prisma.agent.findMany({
-      where: { companyId: user.companyId },
+    db.agent.findMany({
       select: { id: true, nom: true, prenom: true, agence: true },
       orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),

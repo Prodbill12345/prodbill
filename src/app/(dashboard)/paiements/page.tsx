@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
@@ -26,10 +27,10 @@ export default async function PaiementsPage() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const db = scopedPrisma(user.companyId);
   const [facturesRaw, paiementsRecents] = await Promise.all([
-    prisma.facture.findMany({
+    db.facture.findMany({
       where: {
-        companyId: user.companyId,
         statut: { not: "BROUILLON" },
         type: { not: "AVOIR" },
       },
@@ -39,8 +40,7 @@ export default async function PaiementsPage() {
       },
       orderBy: [{ dateEcheance: "asc" }, { createdAt: "desc" }],
     }),
-    prisma.paiement.findMany({
-      where: { facture: { companyId: user.companyId } },
+    db.paiement.findMany({
       include: {
         facture: { include: { client: { select: { name: true } } } },
       },

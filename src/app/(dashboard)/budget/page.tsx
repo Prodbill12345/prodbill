@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { redirect } from "next/navigation";
 import { BudgetClient } from "@/components/budget/BudgetClient";
 
@@ -14,9 +14,10 @@ export default async function BudgetPage() {
   }
 
   const annee = new Date().getFullYear();
+  const db = scopedPrisma(user.companyId);
 
   const [budget, devis, factures, clients, agents, comediens] = await Promise.all([
-    prisma.budgetPrevisionnel.findUnique({
+    db.budgetPrevisionnel.findUnique({
       where: { companyId_annee: { companyId: user.companyId, annee } },
       include: {
         lignes: {
@@ -25,8 +26,7 @@ export default async function BudgetPage() {
         },
       },
     }),
-    prisma.devis.findMany({
-      where: { companyId: user.companyId },
+    db.devis.findMany({
       include: {
         client: { select: { id: true, name: true } },
         sections: {
@@ -35,9 +35,8 @@ export default async function BudgetPage() {
       },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.facture.findMany({
+    db.facture.findMany({
       where: {
-        companyId: user.companyId,
         statut: { in: ["PAYEE", "PAYEE_PARTIEL"] },
         dateEmission: {
           gte: new Date(annee, 0, 1),
@@ -46,18 +45,15 @@ export default async function BudgetPage() {
       },
       select: { clientId: true, totalHt: true },
     }),
-    prisma.client.findMany({
-      where: { companyId: user.companyId },
+    db.client.findMany({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    prisma.agent.findMany({
-      where: { companyId: user.companyId },
+    db.agent.findMany({
       select: { id: true, nom: true, prenom: true, agence: true, tauxCommission: true },
       orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),
-    prisma.comedien.findMany({
-      where: { companyId: user.companyId },
+    db.comedien.findMany({
       select: { id: true, prenom: true, nom: true, agentId: true },
       orderBy: [{ nom: "asc" }, { prenom: "asc" }],
     }),

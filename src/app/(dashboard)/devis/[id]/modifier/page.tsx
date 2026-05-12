@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -20,8 +21,9 @@ export default async function ModifierDevisPage({
   });
   if (!user) redirect("/sign-in");
 
-  const devis = await prisma.devis.findFirst({
-    where: { id, companyId: user.companyId },
+  const db = scopedPrisma(user.companyId);
+  const devis = await db.devis.findFirst({
+    where: { id },
     include: {
       sections: {
         include: { lignes: { orderBy: { ordre: "asc" } } },
@@ -33,17 +35,14 @@ export default async function ModifierDevisPage({
   if (!devis) notFound();
 
   const [clients, agents, comediens] = await Promise.all([
-    prisma.client.findMany({
-      where: { companyId: user.companyId },
+    db.client.findMany({
       orderBy: { name: "asc" },
     }),
-    prisma.agent.findMany({
-      where: { companyId: user.companyId },
+    db.agent.findMany({
       select: { id: true, nom: true, prenom: true, agence: true },
       orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),
-    prisma.comedien.findMany({
-      where: { companyId: user.companyId },
+    db.comedien.findMany({
       select: { id: true, prenom: true, nom: true },
       orderBy: [{ nom: "asc" }, { prenom: "asc" }],
     }),

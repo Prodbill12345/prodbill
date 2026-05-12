@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import Link from "next/link";
 import { Plus, FileText } from "lucide-react";
 import { DevisListClient } from "@/components/devis/DevisListClient";
@@ -11,8 +12,8 @@ export default async function DevisPage() {
   const user = await prisma.user.findUnique({ where: { clerkId } });
   if (!user) return null;
 
-  const devis = await prisma.devis.findMany({
-    where: { companyId: user.companyId },
+  const db = scopedPrisma(user.companyId);
+  const devis = await db.devis.findMany({
     include: { client: { select: { name: true } } },
     orderBy: { updatedAt: "desc" },
   });

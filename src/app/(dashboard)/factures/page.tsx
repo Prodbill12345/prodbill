@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { formatEuros } from "@/lib/calculations";
 import { Receipt, TrendingUp, Clock } from "lucide-react";
 import { FacturesListClient } from "@/components/factures/FacturesListClient";
@@ -11,8 +12,8 @@ export default async function FacturesPage() {
   const user = await prisma.user.findUnique({ where: { clerkId } });
   if (!user) return null;
 
-  const factures = await prisma.facture.findMany({
-    where: { companyId: user.companyId },
+  const db = scopedPrisma(user.companyId);
+  const factures = await db.facture.findMany({
     include: {
       client: { select: { name: true } },
       paiements: true,

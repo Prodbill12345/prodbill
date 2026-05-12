@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { scopedPrisma } from "@/lib/scoped-prisma";
 import { formatEuros } from "@/lib/calculations";
 import {
   DEVIS_STATUT_COLORS,
@@ -50,6 +51,9 @@ export default async function DashboardPage() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOf6Months = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
+  // Phase 1.5 multi-tenant : helper scopedPrisma injecte companyId
+  // automatiquement sur chaque query. Plus de filtre manuel à oublier.
+  const db = scopedPrisma(user.companyId);
   const [
     devisEnvoyes,
     facturesEnCours,
@@ -58,35 +62,26 @@ export default async function DashboardPage() {
     recentFactures,
     facturesPayees6Mois,
   ] = await Promise.all([
-    prisma.devis.count({ where: { companyId: user.companyId, statut: "ENVOYE" } }),
-    prisma.facture.findMany({
-      where: {
-        companyId: user.companyId,
-        statut: { in: ["EMISE", "PAYEE_PARTIEL", "EN_RETARD"] },
-      },
+    db.devis.count({ where: { statut: "ENVOYE" } }),
+    db.facture.findMany({
+      where: { statut: { in: ["EMISE", "PAYEE_PARTIEL", "EN_RETARD"] } },
       include: { paiements: true },
     }),
-    prisma.facture.count({
-      where: { companyId: user.companyId, statut: "EN_RETARD" },
-    }),
-    prisma.devis.findMany({
-      where: { companyId: user.companyId },
+    db.facture.count({ where: { statut: "EN_RETARD" } }),
+    db.devis.findMany({
       include: { client: true },
       orderBy: { updatedAt: "desc" },
       take: 4,
     }),
-    prisma.facture.findMany({
-      where: { companyId: user.companyId },
+    db.facture.findMany({
       include: { client: true },
       orderBy: { updatedAt: "desc" },
       take: 4,
     }),
-    // CA encaissé : on s'appuie directement sur les factures PAYEE avec
-    // une dateReglement renseignée (la table Paiement n'est pas alimentée
-    // par l'import historique).
-    prisma.facture.findMany({
+    // CA encaissé : factures PAYEE avec dateReglement renseignée
+    // (Paiement n'est pas alimentée par l'import historique).
+    db.facture.findMany({
       where: {
-        companyId: user.companyId,
         statut: "PAYEE",
         dateReglement: { gte: startOf6Months, not: null },
       },
