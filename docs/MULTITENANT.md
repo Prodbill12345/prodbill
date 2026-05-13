@@ -138,3 +138,62 @@ Le `User.companyId` actuel limite chaque user à un seul workspace. Pour le cas 
 - UI : ajouter un switcher d'organisation Clerk
 
 Le `TODO Phase 2` est documenté sur `User.companyId` dans `prisma/schema.prisma`.
+
+## Admin tools — super-admin instance ProdBill
+
+### Accès et whitelist
+
+Les pages `/admin/*` sont protégées par `requireAdmin()` (`src/lib/admin.ts`). La whitelist provient de la variable d'env **`ADMIN_EMAILS`** (liste séparée par virgules, comparaison insensible à la casse).
+
+```env
+# .env.local + Vercel (Production + Preview + Development)
+ADMIN_EMAILS=roselaine.touati@live.fr,autre@exemple.fr
+```
+
+**Non-whitelisté → `notFound()`** (404 Next.js, pas 403). L'objectif est de ne pas révéler l'existence de la route admin aux utilisateurs non autorisés.
+
+### Pages disponibles
+
+| Route | Contenu |
+|---|---|
+| `/admin/workspaces` | Tableau dense : nom, SIRET, date création, nb users/devis/factures, CA payé, CA en attente |
+| `/admin/workspaces/[id]` | Détail Company : configuration, utilisateurs, AuditLog récents, stats |
+
+L'entrée d'accès est un lien `Admin` (icône `Shield`, rouge subtil) ajouté en bas de la `Sidebar` du dashboard — visible **uniquement** si `actor.realEmail ∈ ADMIN_EMAILS`. Le layout admin a son propre header sombre (slate-950) pour signaler le contexte super-admin.
+
+### Mode impersonation
+
+#### Cas d'usage
+Permettre à un super-admin de consulter et agir dans un workspace tiers sans toucher à la BD (debug, support, audit).
+
+#### Mécanique
+1. Click sur **`⇄ Impersonate`** dans la liste des workspaces → `POST /api/admin/impersonate/start { companyId }`
+2. Le serveur :
+   - Vérifie `realEmail ∈ ADMIN_EMAILS`
+   - Pioche un utilisateur cible dans la Company (priorité `role=ADMIN`, sinon premier user)
+   - Pose un cookie **httpOnly** `prodbill_impersonate` (`sameSite=lax`, `secure` en prod, `maxAge=1h`) contenant `{ realClerkId, realEmail, impersonatedUserId, impersonatedCompanyId, startedAt }`
+   - Écrit `AuditLog(action=START_IMPERSONATION)` dans la Company impersonée avec `details: { impersonatedBy, impersonatedByClerkId, targetUserId, ... }`
+3. Au prochain SSR, `getCurrentUser()` (`src/lib/auth-context.ts`) :
+   - Lit le cookie
+   - Re-valide que la session Clerk active correspond au `realClerkId` du cookie
+   - Re-valide que l'email Clerk est toujours dans `ADMIN_EMAILS`
+   - Retourne le **user impersoné** → toutes les pages dashboard (et `scopedPrisma(user.companyId)`) basculent sur les données de la Company cible
+4. Le banner rouge `<ImpersonationBanner>` s'affiche en haut du dashboard (`sticky top-0 z-50 bg-red-600`) avec le nom de la company, du user cible, et un bouton `Quitter le mode`
+5. Le `<title>` HTML est préfixé `👑 IMPERSONATION — …` via `generateMetadata()` (cf. `src/app/(dashboard)/layout.tsx`)
+6. Click sur `Quitter le mode` → `POST /api/admin/impersonate/exit` → AuditLog `EXIT_IMPERSONATION` + cookie supprimé → redirect `/admin/workspaces`
+
+#### Cohérence SSR vs API routes
+- **SSR pages** (`(dashboard)/*`) utilisent `getCurrentUser()` → respectent l'impersonation
+- **API routes** utilisent `requireAuth()` (`src/lib/auth.ts`) → également patché pour respecter l'impersonation. Les writes pendant l'impersonation se font donc dans le workspace cible, pas dans celui de l'admin.
+
+#### Audit
+Tout START / EXIT est tracé dans `AuditLog`. La ligne porte le `userId` cible (FK valide) et `details.impersonatedBy = email-admin` pour identification.
+
+> **Limite Phase 1** : les `AuditLog` écrits *pendant* l'impersonation (création de devis, modif client…) portent le `userId` de la cible mais n'incluent pas systématiquement `details.impersonatedBy`. À étendre Phase 2 si nécessaire (hook au niveau de `prisma.auditLog.create`).
+
+### Defense-in-depth
+
+- Cookie **httpOnly** : non accessible depuis JS, donc immunisé XSS pour exfiltration
+- Re-validation server-side à chaque SSR : un cookie volé est inutilisable si l'email Clerk associé n'est plus dans `ADMIN_EMAILS`
+- Le cookie expire après **1h** (auto-clear)
+- L'API `exit` accepte aussi un caller non-admin et supprime simplement le cookie (utile si l'email a été retiré d'`ADMIN_EMAILS` pendant la session)
