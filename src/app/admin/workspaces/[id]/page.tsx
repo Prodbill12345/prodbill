@@ -38,47 +38,72 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
   const company = await prisma.company.findUnique({ where: { id } });
   if (!company) notFound();
 
-  const [users, auditLogs, devisCount, factureCount, paiementAgg, factureAgg, clientsCount] =
-    await Promise.all([
-      prisma.user.findMany({
-        where: { companyId: id },
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          clerkId: true,
-          createdAt: true,
-        },
-      }),
-      prisma.auditLog.findMany({
-        where: { companyId: id },
-        orderBy: { createdAt: "desc" },
-        take: 20,
-        select: {
-          id: true,
-          action: true,
-          entityType: true,
-          entityId: true,
-          userName: true,
-          createdAt: true,
-          details: true,
-        },
-      }),
-      prisma.devis.count({ where: { companyId: id } }),
-      prisma.facture.count({ where: { companyId: id } }),
-      prisma.paiement.aggregate({ where: { companyId: id }, _sum: { montant: true } }),
-      prisma.facture.aggregate({
-        where: { companyId: id, statut: { in: ["EMISE", "PAYEE_PARTIEL", "EN_RETARD"] } },
-        _sum: { totalTtc: true },
-      }),
-      prisma.client.count({ where: { companyId: id } }),
-    ]);
+  const [
+    users,
+    auditLogs,
+    devisCount,
+    factureCount,
+    clientsCount,
+    fullyPaidAgg,
+    partialPaiementsAgg,
+    partialFacturesAgg,
+    openAgg,
+  ] = await Promise.all([
+    prisma.user.findMany({
+      where: { companyId: id },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        clerkId: true,
+        createdAt: true,
+      },
+    }),
+    prisma.auditLog.findMany({
+      where: { companyId: id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      select: {
+        id: true,
+        action: true,
+        entityType: true,
+        entityId: true,
+        userName: true,
+        createdAt: true,
+        details: true,
+      },
+    }),
+    prisma.devis.count({ where: { companyId: id } }),
+    prisma.facture.count({ where: { companyId: id } }),
+    prisma.client.count({ where: { companyId: id } }),
+    // Voir page liste : strategie hybride statut Facture + Paiements lies.
+    prisma.facture.aggregate({
+      where: { companyId: id, statut: "PAYEE" },
+      _sum: { totalTtc: true },
+    }),
+    prisma.paiement.aggregate({
+      where: { companyId: id, facture: { statut: "PAYEE_PARTIEL" } },
+      _sum: { montant: true },
+    }),
+    prisma.facture.aggregate({
+      where: { companyId: id, statut: "PAYEE_PARTIEL" },
+      _sum: { totalTtc: true },
+    }),
+    prisma.facture.aggregate({
+      where: { companyId: id, statut: { in: ["EMISE", "EN_RETARD"] } },
+      _sum: { totalTtc: true },
+    }),
+  ]);
 
-  const caPaye = Number(paiementAgg._sum.montant ?? 0);
-  const caEmiseNonReglee = Number(factureAgg._sum.totalTtc ?? 0);
-  const caEnAttente = Math.max(0, caEmiseNonReglee - caPaye);
+  const fullyPaid = Number(fullyPaidAgg._sum.totalTtc ?? 0);
+  const partialPaiements = Number(partialPaiementsAgg._sum.montant ?? 0);
+  const partialFactures = Number(partialFacturesAgg._sum.totalTtc ?? 0);
+  const openTtc = Number(openAgg._sum.totalTtc ?? 0);
+
+  const caPaye = fullyPaid + partialPaiements;
+  const caEnAttente = openTtc + Math.max(0, partialFactures - partialPaiements);
 
   return (
     <div className="space-y-6">

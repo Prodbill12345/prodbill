@@ -56,30 +56,58 @@ async function fetchWorkspaces(): Promise<WorkspaceRow[]> {
     },
   });
 
-  // Une seule passe d'agrégation pour les paiements par company
-  const paiementAgg = await prisma.paiement.groupBy({
-    by: ["companyId"],
-    _sum: { montant: true },
-  });
-  const paidByCompany = new Map(
-    paiementAgg.map((p) => [p.companyId, Number(p._sum.montant ?? 0)])
-  );
+  // ─── Calcul CA payé / en attente — strategie hybride ─────────────────────
+  // Le statut Facture est la source de vérité prioritaire (les imports
+  // historiques marquent PAYEE sans créer de Paiement). Les Paiements ne
+  // comptent que pour les PAYEE_PARTIEL (règlements en cours).
+  //
+  //   PAYEE          → totalTtc dans caPaye
+  //   PAYEE_PARTIEL  → Σ Paiement.montant lies dans caPaye
+  //                    (totalTtc − Σ Paiement) dans caEnAttente
+  //   EMISE/EN_RETARD→ totalTtc dans caEnAttente
+  //   BROUILLON/ANNULEE → ignore
+  const [fullyPaidAgg, partialPaiementsAgg, partialFacturesAgg, openAgg] =
+    await Promise.all([
+      prisma.facture.groupBy({
+        by: ["companyId"],
+        where: { statut: "PAYEE" },
+        _sum: { totalTtc: true },
+      }),
+      prisma.paiement.groupBy({
+        by: ["companyId"],
+        where: { facture: { statut: "PAYEE_PARTIEL" } },
+        _sum: { montant: true },
+      }),
+      prisma.facture.groupBy({
+        by: ["companyId"],
+        where: { statut: "PAYEE_PARTIEL" },
+        _sum: { totalTtc: true },
+      }),
+      prisma.facture.groupBy({
+        by: ["companyId"],
+        where: { statut: { in: ["EMISE", "EN_RETARD"] } },
+        _sum: { totalTtc: true },
+      }),
+    ]);
 
-  // CA "en attente" = Σ totalTtc des factures non clôturées (EMISE | PAYEE_PARTIEL
-  // | EN_RETARD) moins les paiements déjà reçus sur ce périmètre. Approximation
-  // Phase 1 ; un calcul exact nécessiterait de joindre Paiement.factureId.
-  const enAttenteAgg = await prisma.facture.groupBy({
-    by: ["companyId"],
-    where: { statut: { in: ["EMISE", "PAYEE_PARTIEL", "EN_RETARD"] } },
-    _sum: { totalTtc: true },
-  });
-  const emiseByCompany = new Map(
-    enAttenteAgg.map((f) => [f.companyId, Number(f._sum.totalTtc ?? 0)])
+  const fullyPaid = new Map(
+    fullyPaidAgg.map((r) => [r.companyId, Number(r._sum.totalTtc ?? 0)])
+  );
+  const partialPaiements = new Map(
+    partialPaiementsAgg.map((r) => [r.companyId, Number(r._sum.montant ?? 0)])
+  );
+  const partialFactures = new Map(
+    partialFacturesAgg.map((r) => [r.companyId, Number(r._sum.totalTtc ?? 0)])
+  );
+  const open = new Map(
+    openAgg.map((r) => [r.companyId, Number(r._sum.totalTtc ?? 0)])
   );
 
   return companies.map((c) => {
-    const paye = paidByCompany.get(c.id) ?? 0;
-    const emise = emiseByCompany.get(c.id) ?? 0;
+    const fp = fullyPaid.get(c.id) ?? 0;
+    const pp = partialPaiements.get(c.id) ?? 0;
+    const pf = partialFactures.get(c.id) ?? 0;
+    const op = open.get(c.id) ?? 0;
     return {
       id: c.id,
       name: c.name,
@@ -89,8 +117,8 @@ async function fetchWorkspaces(): Promise<WorkspaceRow[]> {
       nbUsers: c._count.users,
       nbDevis: c._count.devis,
       nbFactures: c._count.factures,
-      caPaye: paye,
-      caEnAttente: Math.max(0, emise - paye),
+      caPaye: fp + pp,
+      caEnAttente: op + Math.max(0, pf - pp),
     };
   });
 }
