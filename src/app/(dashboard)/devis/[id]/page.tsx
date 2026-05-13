@@ -200,9 +200,11 @@ export default async function DevisDetailPage({
                   </div>
                 ))}
               <div className="border-t border-slate-100 pt-2 mt-2 space-y-1.5">
+                {/* TOTAL HT = HT net après remise et co-production (base TVA).
+                    Identique à totalHt si pas de remise ni coproduction. */}
                 <div className="flex justify-between font-semibold">
                   <span>TOTAL HT</span>
-                  <span>{formatEuros(devis.totalHt)}</span>
+                  <span>{formatEuros(devis.totalApresRemise)}</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>TVA {(devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ","))}%</span>

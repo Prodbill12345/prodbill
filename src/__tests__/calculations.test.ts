@@ -95,4 +95,47 @@ describe("calculerDevis", () => {
     const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0.15, tauxMarge: 0 });
     expect(result.fraisGeneraux).toBe(150); // 1000 × 15%
   });
+
+  /**
+   * Sémantique remise — figée pour éviter régression d'affichage.
+   *
+   * Convention : totalHt reste le BRUT (avant remise). C'est
+   * totalApresRemise (= totalHt - remise) qui est utilisé comme
+   * base TVA et affiché en tant que "TOTAL HT" sur la fiche
+   * devis et le PDF.
+   */
+  test("remise : totalHt reste brut, totalApresRemise est le net taxable", () => {
+    const lignes: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 7420 },
+    ];
+    const result = calculerDevis(
+      lignes,
+      { ...tauxRef, tauxCsComedien: 0, tauxCsTech: 0, tauxFg: 0.05, tauxMarge: 0.15 },
+      1820
+    );
+
+    expect(result.sousTotal).toBe(7420);
+    expect(result.fraisGeneraux).toBe(371); // 7420 × 5%
+    expect(result.marge).toBe(1113); // 7420 × 15%
+    // totalHt = sousTotal + FG + marge = 7420 + 371 + 1113 = 8904 (BRUT)
+    expect(result.totalHt).toBe(8904);
+    expect(result.remise).toBe(1820);
+    // totalApresRemise = totalHt - remise = 8904 - 1820 = 7084 (NET)
+    expect(result.totalApresRemise).toBe(7084);
+    // TVA assise sur le NET, pas sur le brut
+    expect(result.tva).toBe(1416.8); // 7084 × 20%
+    expect(result.totalTtc).toBe(8500.8); // 7084 + 1416.80
+  });
+
+  test("remise nulle : totalApresRemise === totalHt", () => {
+    const lignes: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 1000 },
+    ];
+    const result = calculerDevis(
+      lignes,
+      { ...tauxRef, tauxCsComedien: 0, tauxCsTech: 0, tauxFg: 0, tauxMarge: 0 }
+    );
+    expect(result.remise).toBe(0);
+    expect(result.totalApresRemise).toBe(result.totalHt);
+  });
 });

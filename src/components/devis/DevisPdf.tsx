@@ -449,9 +449,13 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
 
                 <View style={s.totDivider} />
 
+                {/* TOTAL HT = HT net après remise et co-production (base TVA).
+                    totalApresRemise est calculé par calculerDevis() et
+                    correspond à totalHt - remise - coproduction. Sur les devis
+                    sans remise ni coproduction, totalApresRemise === totalHt. */}
                 <View style={s.totRow}>
                   <Text style={s.totHtLabel}>TOTAL HT</Text>
-                  <Text style={s.totHtValue}>{euros(devis.totalHt)}</Text>
+                  <Text style={s.totHtValue}>{euros(devis.totalApresRemise)}</Text>
                 </View>
                 <View style={s.totRow}>
                   <Text style={s.totLabel}>TVA {devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ",")} %</Text>
