@@ -1,6 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { getCurrentUser } from "@/lib/auth-context";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
@@ -18,10 +17,7 @@ function calculerPenalites(resteAPayer: number, joursRetard: number): number {
 }
 
 export default async function PaiementsPage() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return null;
-
-  const user = await prisma.user.findUnique({ where: { clerkId } });
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const now = new Date();

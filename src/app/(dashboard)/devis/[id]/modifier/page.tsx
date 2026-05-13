@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -12,14 +12,12 @@ export default async function ModifierDevisPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { userId: clerkId } = await auth();
-  if (!clerkId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    include: { company: true },
-  });
+  const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
+  const company = await prisma.company.findUnique({
+    where: { id: user.companyId },
+  });
+  if (!company) redirect("/sign-in");
 
   const db = scopedPrisma(user.companyId);
   const devis = await db.devis.findFirst({
@@ -49,10 +47,10 @@ export default async function ModifierDevisPage({
   ]);
 
   const defaultTaux = {
-    tauxCsComedien: user.company.defaultTauxCsComedien,
-    tauxCsTech: user.company.defaultTauxCsTech,
-    tauxFg: user.company.defaultTauxFg,
-    tauxMarge: user.company.defaultTauxMarge,
+    tauxCsComedien: company.defaultTauxCsComedien,
+    tauxCsTech: company.defaultTauxCsTech,
+    tauxFg: company.defaultTauxFg,
+    tauxMarge: company.defaultTauxMarge,
   };
 
   const initialData = {

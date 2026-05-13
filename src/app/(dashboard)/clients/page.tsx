@@ -1,14 +1,10 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { getCurrentUser } from "@/lib/auth-context";
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 
 export default async function ClientsPage() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return null;
-
-  const user = await prisma.user.findUnique({ where: { clerkId } });
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const db = scopedPrisma(user.companyId);

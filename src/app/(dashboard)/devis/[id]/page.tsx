@@ -1,6 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, FileDown, Send, CheckCircle, Receipt } from "lucide-react";
@@ -15,10 +14,7 @@ export default async function DevisDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { userId: clerkId } = await auth();
-  if (!clerkId) redirect("/sign-in");
-
-  const user = await prisma.user.findUnique({ where: { clerkId } });
+  const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
   const db = scopedPrisma(user.companyId);

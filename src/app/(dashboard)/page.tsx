@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { getCurrentUser } from "@/lib/auth-context";
 import { formatEuros } from "@/lib/calculations";
 import {
   DEVIS_STATUT_COLORS,
@@ -26,15 +26,12 @@ import { CaChart, type MonthData } from "@/components/dashboard/CaChart";
 const MOIS_FR = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
 
 export default async function DashboardPage() {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) return null;
+  const user = await getCurrentUser();
+  const company = user
+    ? await prisma.company.findUnique({ where: { id: user.companyId } })
+    : null;
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    include: { company: true },
-  });
-
-  if (!user) {
+  if (!user || !company) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
@@ -157,7 +154,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             Bonjour,{" "}
-            <span className="text-blue-600">{user.company.name}</span>{" "}
+            <span className="text-blue-600">{company.name}</span>{" "}
             👋
           </h1>
           <p className="text-sm text-slate-400 mt-0.5 capitalize">
