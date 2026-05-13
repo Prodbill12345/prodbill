@@ -584,15 +584,18 @@ async function commit(d: WorkspaceData, logoPath?: string): Promise<void> {
 
     // 4. Invitation Clerk au Owner (best-effort — pas de rollback si échec ici,
     // la Company est créée, l'invitation peut être renvoyée manuellement).
+    // IMPORTANT : redirectUrl doit pointer vers /sign-up de l'app ProdBill.
+    // Si on passe undefined, Clerk retombe sur l'URL par défaut de l'instance
+    // (dashboard.clerk.com), ce qui envoie le client au mauvais endroit.
+    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://prodbill.vercel.app";
     try {
       const invitation = await clerk.invitations.createInvitation({
         emailAddress: owner.email,
-        redirectUrl: process.env.NEXT_PUBLIC_APP_URL
-          ? `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?org=${org.id}`
-          : undefined,
+        redirectUrl: `${appBaseUrl}/sign-up`,
         publicMetadata: { companyId: result.company.id, role: "ADMIN", clerkOrgId: org.id },
       });
       console.log(`  ✓ Invitation Clerk envoyée à ${owner.email} (id=${invitation.id})`);
+      console.log(`    → redirectUrl : ${appBaseUrl}/sign-up`);
     } catch (e) {
       console.log(`  ${C_YELLOW}⚠${C_RESET} Échec invitation Clerk : ${(e as Error).message}`);
       console.log(`    → Inviter manuellement ${owner.email} depuis le dashboard Clerk pour l'org ${org.slug}`);
@@ -611,8 +614,7 @@ async function commit(d: WorkspaceData, logoPath?: string): Promise<void> {
     kv("Préfixe facture",   d.prefixeFacture || "—");
     kv("Counters initialisés", `${d.numeroDepartDevis > 0 ? "devis" : ""}${d.numeroDepartDevis > 0 && d.numeroDepartFacture > 0 ? " + " : ""}${d.numeroDepartFacture > 0 ? "facture" : ""}`);
     console.log();
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://prodbill.fr";
-    kv("URL de connexion", `${baseUrl}/sign-in`);
+    kv("URL de connexion", `${appBaseUrl}/sign-in`);
     kv("Owner notifié", owner.email);
     console.log();
   } catch (err) {
