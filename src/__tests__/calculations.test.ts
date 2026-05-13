@@ -138,4 +138,42 @@ describe("calculerDevis", () => {
     expect(result.remise).toBe(0);
     expect(result.totalApresRemise).toBe(result.totalHt);
   });
+
+  /**
+   * Convention d'affichage TOTAL HT — Devis ET Facture.
+   *
+   * Côté Devis : on affiche `totalApresRemise` (stocké).
+   * Côté Facture : pas de champ totalApresRemise — on calcule
+   *   `displayTotalHt = totalHt - remise` au moment du rendu
+   *   (cf. FacturePdf.tsx + fiche facture).
+   *
+   * Les deux doivent donner le même résultat pour des données
+   * équivalentes Devis ↔ Facture.
+   */
+  test("affichage TOTAL HT : Devis.totalApresRemise === Facture(totalHt - remise) pour data equivalente", () => {
+    const lignes: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 7420 },
+    ];
+    const result = calculerDevis(
+      lignes,
+      { ...tauxRef, tauxCsComedien: 0, tauxCsTech: 0, tauxFg: 0.05, tauxMarge: 0.15 },
+      1820
+    );
+
+    // Simulation d'une Facture qui hériterait des mêmes valeurs
+    // (snapshot identique au Devis source) :
+    const facture = {
+      totalHt: result.totalHt, // 8904 (BRUT)
+      remise: result.remise,   // 1820
+      tva: result.tva,         // 1416.80
+      totalTtc: result.totalTtc, // 8500.80
+    };
+
+    const factureDisplayHt = facture.totalHt - facture.remise;
+    expect(factureDisplayHt).toBe(result.totalApresRemise);
+    expect(factureDisplayHt).toBe(7084);
+
+    // La TVA stockée correspond bien à 20 % de l'HT affiché
+    expect(facture.tva).toBeCloseTo(factureDisplayHt * 0.2, 2);
+  });
 });

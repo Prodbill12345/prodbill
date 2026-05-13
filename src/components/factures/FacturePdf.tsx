@@ -285,7 +285,11 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
     ligneDescription = isAvoir ? "Avoir" : "Prestation";
   }
 
-  const absHt = Math.abs(facture.totalHt);
+  // TOTAL HT affiche = base TVA = totalHt - remise (parite avec DevisPdf).
+  // Sur les factures sans remise, totalHtNet === totalHt → aucune regression.
+  // tva et totalTtc sont stockes calcules sur ce meme net.
+  const totalHtNet = facture.totalHt - facture.remise;
+  const absHt = Math.abs(totalHtNet);
   const absTva = Math.abs(facture.tva);
   const absTtc = Math.abs(facture.totalTtc);
 

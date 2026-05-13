@@ -80,6 +80,10 @@ export default async function FactureDetailPage({
   const totalPaye = facture.paiements.reduce((s, p) => s + p.montant, 0);
   const resteAPayer = facture.totalTtc - totalPaye;
   const isAvoir = facture.type === "AVOIR";
+  // TOTAL HT affiche = base TVA = totalHt - remise (parite avec DevisPdf
+  // et le fix du commit 335b713 cote Devis). Sur facture sans remise,
+  // totalHtNet === totalHt → aucune regression.
+  const totalHtNet = facture.totalHt - facture.remise;
   const isRetard =
     facture.statut === "EN_RETARD" ||
     (["EMISE", "PAYEE_PARTIEL"].includes(facture.statut) &&
@@ -283,8 +287,8 @@ export default async function FactureDetailPage({
                     </td>
                     <td className="px-5 py-4 text-sm text-right tabular-nums font-medium text-slate-900">
                       {isAvoir
-                        ? `- ${formatEuros(Math.abs(facture.totalHt))}`
-                        : formatEuros(facture.totalHt)}
+                        ? `- ${formatEuros(Math.abs(totalHtNet))}`
+                        : formatEuros(totalHtNet)}
                     </td>
                   </tr>
                 </tbody>
@@ -394,8 +398,8 @@ export default async function FactureDetailPage({
                 <span>{isAvoir ? "Avoir HT" : "Total HT"}</span>
                 <span className="tabular-nums">
                   {isAvoir
-                    ? `- ${formatEuros(Math.abs(facture.totalHt))}`
-                    : formatEuros(facture.totalHt)}
+                    ? `- ${formatEuros(Math.abs(totalHtNet))}`
+                    : formatEuros(totalHtNet)}
                 </span>
               </div>
               <div className="flex justify-between">
