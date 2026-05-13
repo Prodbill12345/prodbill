@@ -10,6 +10,14 @@ import { calculerDevis, calculerLigne } from "@/lib/calculations";
 import { TotauxPanel } from "./TotauxPanel";
 import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import type { Client } from "@/types";
+import { InputPct } from "@/components/forms/InputPct";
+import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
+
+// Convention : la DB stocke les taux en DÉCIMAL (0..1). Le form state
+// les manipule en POURCENTAGE (0..100). Conversions :
+//  - Au mount  : decimalToPct(initialData.tauxX ?? defaultTaux.tauxX)
+//  - Au submit : pctToDecimal(formData.tauxX)
+//  - Au calcul live : pctToDecimal(parsePctInput(watched.tauxX) ?? defaultTauxPct)
 
 const TAGS = ["ARTISTE", "TECHNICIEN_HCS", "STUDIO", "MUSIQUE"] as const;
 
@@ -36,10 +44,11 @@ const DevisFormSchema = z.object({
   nomProjet: z.string().optional(),
   refDevis: z.string().optional(),
   annee: z.coerce.number().int().min(2000).max(2100).optional(),
-  tauxCsComedien: z.coerce.number().min(0).max(1),
-  tauxCsTech: z.coerce.number().min(0).max(1),
-  tauxFg: z.coerce.number().min(0).max(1),
-  tauxMarge: z.coerce.number().min(0).max(1),
+  // Pourcentages (0..100) côté UI — converti en décimal au submit
+  tauxCsComedien: z.coerce.number().min(0).max(100),
+  tauxCsTech: z.coerce.number().min(0).max(100),
+  tauxFg: z.coerce.number().min(0).max(100),
+  tauxMarge: z.coerce.number().min(0).max(100),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
   notes: z.string().optional(),
@@ -137,10 +146,10 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
           nomProjet: initialData.nomProjet ?? undefined,
           refDevis: initialData.refDevis ?? undefined,
           annee: initialData.annee ?? undefined,
-          tauxCsComedien: initialData.tauxCsComedien,
-          tauxCsTech: initialData.tauxCsTech,
-          tauxFg: initialData.tauxFg,
-          tauxMarge: initialData.tauxMarge,
+          tauxCsComedien: decimalToPct(initialData.tauxCsComedien),
+          tauxCsTech: decimalToPct(initialData.tauxCsTech),
+          tauxFg: decimalToPct(initialData.tauxFg),
+          tauxMarge: decimalToPct(initialData.tauxMarge),
           dateValidite: initialData.dateValidite ?? undefined,
           dateSeance: initialData.dateSeance ?? undefined,
           notes: initialData.notes ?? undefined,
@@ -155,10 +164,10 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
           })),
         }
       : {
-          tauxCsComedien: defaultTaux.tauxCsComedien,
-          tauxCsTech: defaultTaux.tauxCsTech,
-          tauxFg: defaultTaux.tauxFg,
-          tauxMarge: defaultTaux.tauxMarge,
+          tauxCsComedien: decimalToPct(defaultTaux.tauxCsComedien),
+          tauxCsTech: decimalToPct(defaultTaux.tauxCsTech),
+          tauxFg: decimalToPct(defaultTaux.tauxFg),
+          tauxMarge: decimalToPct(defaultTaux.tauxMarge),
           notes: "Conditions de paiement : Paiement à 45 jours. Pénalités de retard : 15% par an exigibles à 45 jours. Indemnité forfaitaire de recouvrement : 40 € (art. D. 441-6 C. com.)",
           sections: [{ titre: "", lignes: [] }],
         },
@@ -182,11 +191,14 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
     }))
   ) ?? [];
 
+  // Live compute : form state en %, calculerDevis attend des décimaux.
+  // parsePctInput retourne null si la saisie est vide/invalide → on
+  // retombe alors sur le défaut Company (converti en %).
   const taux = {
-    tauxCsComedien: Number(watchedValues.tauxCsComedien) || defaultTaux.tauxCsComedien,
-    tauxCsTech: Number(watchedValues.tauxCsTech) || defaultTaux.tauxCsTech,
-    tauxFg: Number(watchedValues.tauxFg) || defaultTaux.tauxFg,
-    tauxMarge: Number(watchedValues.tauxMarge) || defaultTaux.tauxMarge,
+    tauxCsComedien: pctToDecimal(parsePctInput(watchedValues.tauxCsComedien) ?? decimalToPct(defaultTaux.tauxCsComedien)),
+    tauxCsTech:     pctToDecimal(parsePctInput(watchedValues.tauxCsTech)     ?? decimalToPct(defaultTaux.tauxCsTech)),
+    tauxFg:         pctToDecimal(parsePctInput(watchedValues.tauxFg)         ?? decimalToPct(defaultTaux.tauxFg)),
+    tauxMarge:      pctToDecimal(parsePctInput(watchedValues.tauxMarge)      ?? decimalToPct(defaultTaux.tauxMarge)),
   };
 
   const remiseValue = Number(watchedValues.remise) || 0;
@@ -224,10 +236,11 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
           name: templateName.trim(),
           description: templateDesc.trim() || undefined,
           isShared: templateShared,
-          tauxCsComedien: Number(watchedValues.tauxCsComedien) || defaultTaux.tauxCsComedien,
-          tauxCsTech: Number(watchedValues.tauxCsTech) || defaultTaux.tauxCsTech,
-          tauxFg: Number(watchedValues.tauxFg) || defaultTaux.tauxFg,
-          tauxMarge: Number(watchedValues.tauxMarge) || defaultTaux.tauxMarge,
+          // Template stocke les taux en DÉCIMAL (cohérent avec la DB)
+          tauxCsComedien: pctToDecimal(parsePctInput(watchedValues.tauxCsComedien) ?? decimalToPct(defaultTaux.tauxCsComedien)),
+          tauxCsTech:     pctToDecimal(parsePctInput(watchedValues.tauxCsTech)     ?? decimalToPct(defaultTaux.tauxCsTech)),
+          tauxFg:         pctToDecimal(parsePctInput(watchedValues.tauxFg)         ?? decimalToPct(defaultTaux.tauxFg)),
+          tauxMarge:      pctToDecimal(parsePctInput(watchedValues.tauxMarge)      ?? decimalToPct(defaultTaux.tauxMarge)),
           sections,
         }),
       });
@@ -263,12 +276,22 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
         })),
       }));
 
+      // Conversion UI (%) → API (décimal) avant POST/PUT
+      const payload = {
+        ...data,
+        tauxCsComedien: pctToDecimal(data.tauxCsComedien),
+        tauxCsTech: pctToDecimal(data.tauxCsTech),
+        tauxFg: pctToDecimal(data.tauxFg),
+        tauxMarge: pctToDecimal(data.tauxMarge),
+        sections,
+      };
+
       if (devisId) {
         // Mode édition — PUT
         const res = await fetch(`/api/devis/${devisId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, sections }),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -282,7 +305,7 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
         const res = await fetch("/api/devis", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, sections }),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -449,24 +472,17 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
                 <label className="block text-xs font-medium text-slate-500 mb-1">
                   {label}
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="1"
-                    {...register(name)}
-                    className="w-full pl-3 pr-7 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                    ×
-                  </span>
-                </div>
+                <InputPct
+                  {...register(name, {
+                    setValueAs: (v) => parsePctInput(v) ?? 0,
+                  })}
+                  invalid={!!errors[name]}
+                />
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-400 mt-2">
-            Saisir en décimal : 0.57 = 57%, 0.05 = 5%
+          <p className="text-xs text-slate-500 mt-2">
+            ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
           </p>
         </div>
 

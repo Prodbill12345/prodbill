@@ -5,6 +5,41 @@ priorité estimée. Mettre à jour le sprint d'affectation quand on tranche.
 
 ---
 
+## Sprint 2 — Verrou métier devis (facture émise)
+
+Aujourd'hui, `PUT /api/devis/[id]` accepte une modification sur tout devis,
+quel que soit son statut (`BROUILLON`, `ENVOYE`, `ACCEPTE`, `REFUSE`,
+`EXPIRE`) et qu'une facture ait été émise ou non depuis ce devis. Le
+commentaire ligne 82 du fichier route dit "est éditable" mais ne vérifie
+rien.
+
+Cas réel discuté : Vanda doit pouvoir corriger un devis `ACCEPTE` qui
+n'a pas encore été facturé (typo, ajustement client). C'est pourquoi on
+ne lock pas sur le statut seul.
+
+À étudier en Sprint 2 :
+
+- Verrou si `devis.factures.some(f => f.statut !== "BROUILLON")` → renvoyer
+  409 Conflict avec message clair côté UI
+- Permettre uniquement la modification des champs "safe" (objet, notes,
+  refDevis, nomProjet, annee) si une facture est émise ; bloquer les
+  changements de lignes/taux/remise qui altèreraient la cohérence
+  facture ↔ devis (cf. TODO immuabilité art. 289 CGI déjà tagué dans
+  `prisma/schema.prisma`)
+- Alternative plus stricte : dupliquer les lignes en `FactureSection` /
+  `FactureLigne` au moment de l'émission, comme indiqué dans le TODO
+  schema, pour découpler définitivement
+
+### Acceptance criteria
+
+- Devis sans facture : éditable comme aujourd'hui (zéro régression)
+- Devis avec ≥ 1 facture émise : champs critiques (sections, taux,
+  remise) refusés en PUT → 409 + UI affiche un bandeau "Ce devis a
+  généré une facture, modifications limitées"
+- Tests intégration couvrant les 2 cas
+
+---
+
 ## Sprint 3 ou 4 — Hardening des envois email (Resend)
 
 Issu de l'audit lecture seule effectué le 2026-05-13. Conclusions :

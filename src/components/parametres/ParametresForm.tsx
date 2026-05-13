@@ -7,7 +7,11 @@ import { z } from "zod";
 import { Loader2, Save, Lock, Upload, X } from "lucide-react";
 import Image from "next/image";
 import type { Company, Role } from "@/types";
+import { InputPct } from "@/components/forms/InputPct";
+import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
 
+// Les taux sont saisis et validés en POURCENTAGE (0..100) côté UI.
+// Conversion en décimal (0..1) au moment de l'envoi à l'API (onSubmit).
 const ParametresSchema = z.object({
   name: z.string().min(1, "Nom requis"),
   siret: z.string().min(14, "SIRET invalide"),
@@ -22,10 +26,10 @@ const ParametresSchema = z.object({
   bic: z.string().min(1, "BIC requis"),
   primaryColor: z.string().default("#3B82F6"),
   conditionsPaiement: z.string().min(1, "Conditions de paiement requises"),
-  defaultTauxFg: z.coerce.number().min(0).max(1),
-  defaultTauxMarge: z.coerce.number().min(0).max(1),
-  defaultTauxCsComedien: z.coerce.number().min(0).max(1),
-  defaultTauxCsTech: z.coerce.number().min(0).max(1),
+  defaultTauxFg: z.coerce.number().min(0).max(100),
+  defaultTauxMarge: z.coerce.number().min(0).max(100),
+  defaultTauxCsComedien: z.coerce.number().min(0).max(100),
+  defaultTauxCsTech: z.coerce.number().min(0).max(100),
 });
 
 type ParametresData = z.infer<typeof ParametresSchema>;
@@ -66,10 +70,10 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
       bic: company.bic,
       primaryColor: company.primaryColor,
       conditionsPaiement: company.conditionsPaiement,
-      defaultTauxFg: company.defaultTauxFg,
-      defaultTauxMarge: company.defaultTauxMarge,
-      defaultTauxCsComedien: company.defaultTauxCsComedien,
-      defaultTauxCsTech: company.defaultTauxCsTech,
+      defaultTauxFg: decimalToPct(company.defaultTauxFg),
+      defaultTauxMarge: decimalToPct(company.defaultTauxMarge),
+      defaultTauxCsComedien: decimalToPct(company.defaultTauxCsComedien),
+      defaultTauxCsTech: decimalToPct(company.defaultTauxCsTech),
     },
   });
 
@@ -127,10 +131,18 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
     if (!canEdit) return;
     setSaving(true);
     try {
+      // Conversion UI (pourcentage) → DB (décimal) avant envoi
+      const payload = {
+        ...data,
+        defaultTauxFg: pctToDecimal(data.defaultTauxFg),
+        defaultTauxMarge: pctToDecimal(data.defaultTauxMarge),
+        defaultTauxCsComedien: pctToDecimal(data.defaultTauxCsComedien),
+        defaultTauxCsTech: pctToDecimal(data.defaultTauxCsTech),
+      };
       const res = await fetch("/api/company", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -388,27 +400,19 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
               <label className="block text-xs font-medium text-slate-500 mb-1">
                 {label}
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1"
-                  {...register(name)}
-                  disabled={!canEdit}
-                  className={`w-full pl-3 pr-7 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    !canEdit
-                      ? "bg-slate-50 text-slate-500 cursor-not-allowed"
-                      : ""
-                  }`}
-                />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                  ×
-                </span>
-              </div>
+              <InputPct
+                {...register(name, {
+                  setValueAs: (v) => parsePctInput(v) ?? 0,
+                })}
+                disabled={!canEdit}
+                invalid={!!errors[name]}
+              />
             </div>
           ))}
         </div>
+        <p className="text-xs text-slate-500">
+          ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
+        </p>
       </div>
 
       {/* Personnalisation */}
