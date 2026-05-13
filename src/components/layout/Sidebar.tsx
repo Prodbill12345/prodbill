@@ -18,8 +18,13 @@ import {
   BarChart3,
   Mic2,
   Smile,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface SidebarProps {
+  isAdmin?: boolean;
+}
 
 type NavItem = {
   href: string;
@@ -101,7 +106,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ isAdmin = false }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -193,6 +198,22 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-3 py-4 border-t border-slate-800/50 space-y-0.5">
+        {isAdmin && (
+          <Link
+            href="/admin/workspaces"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium group",
+              pathname.startsWith("/admin")
+                ? "bg-red-950/40 text-red-200"
+                : "text-slate-400 hover:text-red-200 hover:bg-red-950/30"
+            )}
+          >
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-red-900/40 group-hover:bg-red-900/60 transition-colors shrink-0">
+              <Shield className="w-4 h-4 text-red-300" strokeWidth={2.5} />
+            </div>
+            <span>Admin</span>
+          </Link>
+        )}
         <Link
           href="/parametres"
           className={cn(
