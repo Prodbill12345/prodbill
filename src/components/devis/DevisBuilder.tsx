@@ -49,6 +49,7 @@ const DevisFormSchema = z.object({
   tauxCsTech: z.coerce.number().min(0).max(100),
   tauxFg: z.coerce.number().min(0).max(100),
   tauxMarge: z.coerce.number().min(0).max(100),
+  dateEmission: z.string().optional(),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
   notes: z.string().optional(),
@@ -93,6 +94,7 @@ interface DevisInitialData {
   tauxCsTech: number;
   tauxFg: number;
   tauxMarge: number;
+  dateEmission?: string | null;
   dateValidite?: string | null;
   dateSeance?: string | null;
   notes?: string | null;
@@ -188,6 +190,7 @@ export function DevisBuilder({
           tauxCsTech: decimalToPct(initialData.tauxCsTech),
           tauxFg: decimalToPct(initialData.tauxFg),
           tauxMarge: decimalToPct(initialData.tauxMarge),
+          dateEmission: initialData.dateEmission ?? undefined,
           dateValidite: initialData.dateValidite ?? undefined,
           dateSeance: initialData.dateSeance ?? undefined,
           notes: initialData.notes ?? undefined,
@@ -206,6 +209,10 @@ export function DevisBuilder({
           tauxCsTech: decimalToPct(defaultTaux.tauxCsTech),
           tauxFg: decimalToPct(defaultTaux.tauxFg),
           tauxMarge: decimalToPct(defaultTaux.tauxMarge),
+          // Pré-remplit la date d'émission à aujourd'hui pour les nouveaux
+          // devis. Vanda peut la modifier (cas typique : devis du 1er du
+          // mois saisi le 3).
+          dateEmission: new Date().toISOString().slice(0, 10),
           notes: "Conditions de paiement : Paiement à 45 jours. Pénalités de retard : 15% par an exigibles à 45 jours. Indemnité forfaitaire de recouvrement : 40 € (art. D. 441-6 C. com.)",
           sections: [{ titre: "", lignes: [] }],
         },
@@ -449,6 +456,17 @@ export function DevisBuilder({
               {errors.clientId && (
                 <p className="text-red-500 text-xs mt-1">{errors.clientId.message}</p>
               )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Date d&apos;émission
+              </label>
+              <input
+                type="date"
+                {...register("dateEmission")}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
             <div>

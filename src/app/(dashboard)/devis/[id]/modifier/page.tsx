@@ -63,6 +63,9 @@ export default async function ModifierDevisPage({
     tauxCsTech: devis.tauxCsTech,
     tauxFg: devis.tauxFg,
     tauxMarge: devis.tauxMarge,
+    dateEmission: devis.dateEmission
+      ? devis.dateEmission.toISOString().slice(0, 10)
+      : null,
     dateValidite: devis.dateValidite
       ? devis.dateValidite.toISOString().slice(0, 10)
       : null,

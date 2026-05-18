@@ -34,6 +34,7 @@ const UpdateDevisSchema = z.object({
   tauxFg: z.number().min(0).max(1).optional(),
   tauxMarge: z.number().min(0).max(1).optional(),
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
+  dateEmission: z.string().nullable().optional(),
   dateValidite: z.string().nullable().optional(),
   dateSeance: z.string().nullable().optional(),
   notes: z.string().optional(),
@@ -126,6 +127,9 @@ export async function PUT(
           ...(input.tauxCsTech !== undefined && { tauxCsTech: input.tauxCsTech }),
           ...(input.tauxFg !== undefined && { tauxFg: input.tauxFg }),
           ...(input.tauxMarge !== undefined && { tauxMarge: input.tauxMarge }),
+          ...(input.dateEmission !== undefined && {
+            dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
+          }),
           ...(input.dateValidite !== undefined && {
             dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,
           }),

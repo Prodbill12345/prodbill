@@ -13,6 +13,7 @@ import {
 import { FactureActions } from "@/components/factures/FactureActions";
 import { FactureBdcField } from "@/components/factures/FactureBdcField";
 import { FactureDateReglementField } from "@/components/factures/FactureDateReglementField";
+import { FactureDateEmissionField } from "@/components/factures/FactureDateEmissionField";
 
 const RELANCE_LABELS: Record<string, string> = {
   ENVOI: "Envoi facture",
@@ -180,6 +181,11 @@ export default async function FactureDetailPage({
               factureId={facture.id}
               initialValue={facture.numeroBdc}
               isLocked={!!facture.emiseAt}
+            />
+            <FactureDateEmissionField
+              factureId={facture.id}
+              initialValue={facture.dateEmission}
+              statut={facture.statut}
             />
             <FactureDateReglementField
               factureId={facture.id}

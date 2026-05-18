@@ -29,18 +29,54 @@ export async function PUT(
     // numeroBdc : normalement verrouillé après émission, mais on autorise la correction
     // de données importées (emiseAt peut être null pour les imports CSV)
 
-    const facture = await prisma.facture.update({
-      where: { id },
-      data: {
-        ...(input.numeroBdc !== undefined && { numeroBdc: input.numeroBdc }),
-        ...(input.dateReglement !== undefined && {
-          dateReglement: input.dateReglement ? new Date(input.dateReglement) : null,
-        }),
-        ...(input.numero !== undefined && { numero: input.numero }),
-        ...(input.dateEmission !== undefined && {
-          dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
-        }),
-      },
+    // Détection d'une modif de dateEmission post-émission pour AuditLog.
+    // Comparaison sur les valeurs ISO YYYY-MM-DD (`toInputValue` UI) pour
+    // ne pas se faire piéger par l'heure interne ou le TZ.
+    const newDateEmissionIso = input.dateEmission ?? null;
+    const existingDateEmissionIso = existing.dateEmission
+      ? existing.dateEmission.toISOString().slice(0, 10)
+      : null;
+    const dateEmissionChanged =
+      input.dateEmission !== undefined &&
+      newDateEmissionIso !== existingDateEmissionIso;
+    const isPostEmission = existing.statut !== "BROUILLON";
+
+    const facture = await prisma.$transaction(async (tx) => {
+      const updated = await tx.facture.update({
+        where: { id },
+        data: {
+          ...(input.numeroBdc !== undefined && { numeroBdc: input.numeroBdc }),
+          ...(input.dateReglement !== undefined && {
+            dateReglement: input.dateReglement ? new Date(input.dateReglement) : null,
+          }),
+          ...(input.numero !== undefined && { numero: input.numero }),
+          ...(input.dateEmission !== undefined && {
+            dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
+          }),
+        },
+      });
+
+      if (dateEmissionChanged && isPostEmission) {
+        await tx.auditLog.create({
+          data: {
+            companyId: user.companyId,
+            userId: user.id,
+            userName: user.email,
+            action: "FACTURE_DATE_EMISSION_MODIFIED",
+            entityType: "Facture",
+            entityId: id,
+            factureId: id,
+            details: {
+              statut: existing.statut,
+              before: existingDateEmissionIso,
+              after: newDateEmissionIso,
+              warning: "Modification post-émission — art. 289 CGI (immutabilité)",
+            },
+          },
+        });
+      }
+
+      return updated;
     });
 
     return Response.json({ data: facture });

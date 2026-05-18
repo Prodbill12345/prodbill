@@ -34,6 +34,8 @@ const CreateDevisSchema = z.object({
   tauxFg: z.number().min(0).max(1).default(0.05),
   tauxMarge: z.number().min(0).max(1).default(0.15),
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
+  // Toutes les dates sont envoyées par <input type="date"> au format "YYYY-MM-DD"
+  dateEmission: z.string().optional(),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
   notes: z.string().optional(),
@@ -101,6 +103,7 @@ export async function POST(req: Request) {
         annee: input.annee,
         ...taux,
         ...totaux,
+        dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
         dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,
         dateSeance: input.dateSeance ? new Date(input.dateSeance) : null,
         notes: input.notes,
