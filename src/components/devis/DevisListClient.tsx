@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useTransition } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS } from "@/types";
 import type { DevisStatut } from "@prisma/client";
+import {
+  filterDevis,
+  filtersToParams,
+  paramsToFilters,
+  type DevisFilters,
+} from "@/lib/devis-filters";
+import { DevisFiltersBar } from "./DevisFilters";
 
 interface DevisRow {
   id: string;
@@ -16,80 +24,51 @@ interface DevisRow {
   statut: DevisStatut;
   totalTtc: number;
   updatedAt: Date;
+  dateEmission: Date | null;
   client: { name: string };
+  bdc?: { numero: string } | null;
 }
 
-const ANNEES = [2023, 2024, 2025, 2026, 2027];
+interface DevisListClientProps {
+  devis: DevisRow[];
+  availableYears: number[];
+}
 
-export function DevisListClient({ devis }: { devis: DevisRow[] }) {
-  const [filterAnnee, setFilterAnnee] = useState("");
-  const [filterNumero, setFilterNumero] = useState("");
-  const [filterClient, setFilterClient] = useState("");
-  const [filterStatut, setFilterStatut] = useState("");
+export function DevisListClient({ devis, availableYears }: DevisListClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
 
-  const filtered = devis.filter((d) => {
-    if (filterAnnee && String(d.annee ?? "") !== filterAnnee) return false;
-    if (filterNumero && !(d.numero ?? "").toLowerCase().includes(filterNumero.toLowerCase())) return false;
-    if (filterClient && !d.client.name.toLowerCase().includes(filterClient.toLowerCase())) return false;
-    if (filterStatut && d.statut !== filterStatut) return false;
-    return true;
-  });
+  // Filtres dérivés de l'URL (source de vérité)
+  const filters: DevisFilters = useMemo(
+    () => paramsToFilters(searchParams),
+    [searchParams]
+  );
 
-  const hasFilters = filterAnnee || filterNumero || filterClient || filterStatut;
+  function setFilters(next: DevisFilters) {
+    const params = filtersToParams(next);
+    const qs = params.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    // replace pour ne pas polluer l'historique navigateur à chaque
+    // frappe ; scroll: false pour ne pas remonter en haut de page.
+    startTransition(() => {
+      router.replace(url, { scroll: false });
+    });
+  }
+
+  const filtered = useMemo(() => filterDevis(devis, filters), [devis, filters]);
+  const hasFilters = Object.keys(filtersToParams(filters).toString() ? filters : {}).length > 0;
 
   return (
     <div className="space-y-4">
-      {/* Barre de filtres */}
-      <div className="bg-white rounded-xl border border-slate-100 px-4 py-3 flex gap-3 items-center flex-wrap shadow-sm">
-        <select
-          value={filterAnnee}
-          onChange={(e) => setFilterAnnee(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Toutes les années</option>
-          {ANNEES.map((y) => <option key={y} value={y}>{y}</option>)}
-        </select>
-
-        <input
-          type="text"
-          placeholder="N° devis…"
-          value={filterNumero}
-          onChange={(e) => setFilterNumero(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-36"
-        />
-
-        <input
-          type="text"
-          placeholder="Client…"
-          value={filterClient}
-          onChange={(e) => setFilterClient(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
-        />
-
-        <select
-          value={filterStatut}
-          onChange={(e) => setFilterStatut(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Tous les statuts</option>
-          {(Object.entries(DEVIS_STATUT_LABELS) as [DevisStatut, string][]).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
-
-        {hasFilters && (
-          <button
-            onClick={() => { setFilterAnnee(""); setFilterNumero(""); setFilterClient(""); setFilterStatut(""); }}
-            className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
-          >
-            Réinitialiser
-          </button>
-        )}
-
-        <span className="text-xs text-slate-400 ml-auto">
-          {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
-        </span>
-      </div>
+      <DevisFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        availableYears={availableYears}
+        totalCount={devis.length}
+        filteredCount={filtered.length}
+      />
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -127,9 +106,9 @@ export function DevisListClient({ devis }: { devis: DevisRow[] }) {
                   <td className="px-5 py-4 text-sm text-slate-600">{d.client.name}</td>
                   <td className="px-5 py-4 text-sm text-slate-500 max-w-xs truncate">{d.objet}</td>
                   <td className="px-5 py-4 text-sm text-slate-400 text-center tabular-nums">
-                    {d.annee ?? <span className="text-slate-300">—</span>}
+                    {d.annee ?? (d.dateEmission?.getUTCFullYear() ?? <span className="text-slate-300">—</span>)}
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-400">{formatDate(d.updatedAt)}</td>
+                  <td className="px-5 py-4 text-sm text-slate-400">{formatDate(d.dateEmission ?? d.updatedAt)}</td>
                   <td className="px-5 py-4 text-sm font-semibold text-slate-900 text-right tabular-nums">
                     {formatEuros(d.totalTtc)}
                   </td>

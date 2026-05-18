@@ -37,6 +37,45 @@ ni infirmer côté data.
 
 ---
 
+## Sprint 3 — Filtres /devis : filtre "Type" + persistance localStorage
+
+Issus du SPRINT 2 (filtres /devis) — items reportés :
+
+### Filtre par "Type" (à clarifier avec Vanda)
+
+Vanda a demandé un filtre "Type" mais le `LigneTag`
+(`ARTISTE / TECHNICIEN_HCS / STUDIO / MUSIQUE / AGENT`) est un attribut
+des **lignes**, pas du devis. Avant d'implémenter, clarifier avec elle
+ce qu'elle entend par "Type" :
+
+- Peut-être : "devis qui contient au moins une voix-off" → filtre sur
+  `devis.lignes.some(tag === "ARTISTE")`
+- Peut-être : "devis avec studio uniquement" → filtre sur composition
+  des lignes
+- Peut-être : un champ métier complètement autre (catégorie projet ?)
+
+Si l'implémentation est validée, deux options techniques :
+- Option A : ajouter `include: { sections: { include: { lignes: { select: { tag: true } } } } }` côté server SSR → payload ~3-5× plus gros
+- Option B : pré-calculer côté serveur un champ dérivé `devis._hasTags: LigneTag[]` envoyé minimaliste au client
+
+### Persistance localStorage des filtres
+
+Aujourd'hui les filtres sont dans l'URL (cf. SPRINT 2). Si Vanda quitte
+et revient, ses filtres sont perdus sauf si elle a bookmarkée la vue.
+
+À ajouter : storage des derniers filtres dans `localStorage` (clé
+`prodbill:devis-filters` scopée par companyId), restauré au mount si
+l'URL n'en contient pas. Effet de bord à éviter : ne pas mélanger les
+filtres de Caleson et NONNA en cas d'impersonation — utiliser
+`prodbill:devis-filters:${companyId}` comme clé.
+
+Acceptance criteria :
+- URL > localStorage (l'URL reste source de vérité prioritaire)
+- Reset explicite : `clearAll()` vide aussi le localStorage
+- Indicateur subtil "filtres restaurés depuis ta dernière session" au mount
+
+---
+
 ## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
 
 Quand l'utilisateur sélectionne un comédien dans le dropdown d'une ligne

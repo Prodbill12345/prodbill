@@ -10,9 +10,22 @@ export default async function DevisPage() {
 
   const db = scopedPrisma(user.companyId);
   const devis = await db.devis.findMany({
-    include: { client: { select: { name: true } } },
+    include: {
+      client: { select: { name: true } },
+      bdc: { select: { numero: true } },
+    },
     orderBy: { updatedAt: "desc" },
   });
+
+  // Années disponibles pour le filtre — basées sur Devis.annee (saisi) en
+  // priorité, sinon year(dateEmission). Cf. src/lib/devis-filters.ts.
+  const availableYears = Array.from(
+    new Set(
+      devis
+        .map((d) => d.annee ?? d.dateEmission?.getUTCFullYear() ?? null)
+        .filter((y): y is number => y !== null)
+    )
+  ).sort((a, b) => b - a);
 
   return (
     <div className="space-y-6">
@@ -51,7 +64,7 @@ export default async function DevisPage() {
           </Link>
         </div>
       ) : (
-        <DevisListClient devis={devis} />
+        <DevisListClient devis={devis} availableYears={availableYears} />
       )}
     </div>
   );
