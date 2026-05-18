@@ -3,7 +3,7 @@
  * Valider impérativement avant toute modification de calculations.ts
  */
 
-import { calculerDevis } from "../lib/calculations";
+import { calculerDevis, calculerLigne } from "../lib/calculations";
 import type { LigneInput, TauxConfig } from "../types";
 
 describe("calculerDevis", () => {
@@ -125,6 +125,59 @@ describe("calculerDevis", () => {
     // TVA assise sur le NET, pas sur le brut
     expect(result.tva).toBe(1416.8); // 7084 × 20%
     expect(result.totalTtc).toBe(8500.8); // 7084 + 1416.80
+  });
+
+  /**
+   * Cas P.U. HT à 0€ — "ligne offerte" (Vanda Caleson #75).
+   *
+   * La Réalisation est souvent à 0€ chez Caleson : Vanda veut la
+   * faire apparaître au client pour qu'il voie le prix qu'elle
+   * offre. Le calcul doit gérer ça proprement.
+   */
+  test("ligne à P.U. 0€ → total ligne 0, n'impacte pas les autres", () => {
+    const lignes: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 1000 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 0 }, // Réalisation offerte
+    ];
+    const result = calculerDevis(
+      lignes,
+      { ...tauxRef, tauxCsComedien: 0, tauxCsTech: 0, tauxFg: 0.05, tauxMarge: 0.15 }
+    );
+    expect(result.sousTotal).toBe(1000); // 1000 + 0
+    expect(result.fraisGeneraux).toBe(50);
+    expect(result.marge).toBe(150);
+    expect(result.totalHt).toBe(1200);
+  });
+
+  test("toutes lignes à 0€ → totalHt 0, totalTtc 0 (cas edge légitime)", () => {
+    const lignes: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 0 },
+      { tag: "STUDIO", quantite: 2, prixUnit: 0 },
+    ];
+    const result = calculerDevis(lignes, tauxRef);
+    expect(result.sousTotal).toBe(0);
+    expect(result.totalHt).toBe(0);
+    expect(result.tva).toBe(0);
+    expect(result.totalTtc).toBe(0);
+  });
+
+  test("ligne ARTISTE à 0€ → CS Comédien 0 (cohérent)", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 0 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 500 },
+    ];
+    const result = calculerDevis(
+      lignes,
+      { ...tauxRef, tauxCsTech: 0, tauxFg: 0, tauxMarge: 0 }
+    );
+    expect(result.csComedien).toBe(0); // 0 × 57% = 0
+    expect(result.sousTotal).toBe(500);
+    expect(result.totalHt).toBe(500);
+  });
+
+  test("ligne à 0€ avec quantite > 1 → reste 0", () => {
+    expect(calculerLigne(5, 0)).toBe(0);
+    expect(calculerLigne(100, 0)).toBe(0);
   });
 
   test("remise nulle : totalApresRemise === totalHt", () => {

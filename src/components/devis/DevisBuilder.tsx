@@ -1078,14 +1078,25 @@ function SectionBlock({
                   className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="text-sm text-right tabular-nums text-slate-600 font-medium">
-                  {total === 0 ? (
-                    <span className="text-slate-300">—</span>
-                  ) : (
-                    new Intl.NumberFormat("fr-FR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(total)
-                  )}
+                  {/*
+                    Affiche "0,00 €" si l'utilisateur a explicitement saisi
+                    une valeur (y compris 0 — cas "ligne offerte" Réalisation,
+                    cf. Vanda ligne #75). N'affiche "—" QUE si le P.U. est
+                    encore vide/non saisi pour ne pas polluer la saisie initiale.
+                  */}
+                  {(() => {
+                    const puRaw = ligne.prixUnit as unknown;
+                    const puHasValue =
+                      puRaw !== undefined && puRaw !== null && puRaw !== "";
+                    return puHasValue ? (
+                      new Intl.NumberFormat("fr-FR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }).format(total)
+                    ) : (
+                      <span className="text-slate-300">—</span>
+                    );
+                  })()}
                 </span>
                 <button
                   type="button"
