@@ -86,6 +86,19 @@ export function handleAuthError(error: unknown): Response {
   if (error instanceof ForbiddenError) {
     return Response.json({ error: error.message }, { status: 403 });
   }
+  // Prisma P2003 = Foreign key constraint violated. Typiquement déclenché
+  // quand un FK optionnel reçoit "" au lieu de null (cf. BUG #3 :
+  // <select> HTML envoie "" pour l'option par défaut). On renvoie 400
+  // plutôt que 500 — c'est une donnée client invalide, pas un crash serveur.
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2003"
+  ) {
+    console.error("Prisma P2003 (FK violation) :", error);
+    return Response.json({ error: "Référence invalide (FK)" }, { status: 400 });
+  }
   console.error(error);
   return Response.json({ error: "Erreur serveur" }, { status: 500 });
 }

@@ -1,6 +1,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculerDevis } from "@/lib/calculations";
+import { optionalFkId } from "@/lib/zod-helpers";
 import { z } from "zod";
 
 const LigneSchema = z.object({
@@ -9,8 +10,8 @@ const LigneSchema = z.object({
   quantite: z.number().positive(),
   prixUnit: z.number().min(0),
   tauxIndexation: z.number().min(0).max(100).default(0),
-  comedienId: z.string().optional(),
-  agentId: z.string().optional(),
+  comedienId: optionalFkId,
+  agentId: optionalFkId,
   ordre: z.number().int(),
 });
 

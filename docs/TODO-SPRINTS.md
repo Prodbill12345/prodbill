@@ -5,6 +5,26 @@ priorité estimée. Mettre à jour le sprint d'affectation quand on tranche.
 
 ---
 
+## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
+
+Quand l'utilisateur sélectionne un comédien dans le dropdown d'une ligne
+ARTISTE, et que ce comédien a un agent associé (`comedien.agentId !== null`),
+auto-pré-sélectionner le même agent dans le dropdown agent de la ligne.
+
+Cas edge à gérer :
+- Comédien sans agent (« à son compte ») → laisser le dropdown agent vide,
+  ne pas auto-sélectionner. C'est le cas validé par le BUG #3 (commit
+  `fix(devis): convertit "" en null/undefined pour comedienId et agentId`).
+- L'utilisateur modifie manuellement l'agent après auto-sélection → respecter
+  son choix, ne pas l'écraser au prochain re-render.
+- Changement de comédien → mettre à jour l'agent en conséquence, sauf si
+  l'utilisateur a explicitement modifié manuellement (flag interne).
+
+Implémentation possible : `useEffect` sur `watch(comedienId)` qui setValue
+l'agent correspondant, gated par un état `agentManuallySet`.
+
+---
+
 ## Sprint 2 — Verrou métier devis (facture émise)
 
 Aujourd'hui, `PUT /api/devis/[id]` accepte une modification sur tout devis,

@@ -270,6 +270,12 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
         ordre: si,
         lignes: s.lignes.map((l, li) => ({
           ...l,
+          // `<select>` HTML envoie "" pour l'option par défaut "Associer un agent
+          // (optionnel)" / "Comédien (optionnel)". On convertit en null pour ne pas
+          // faire planter Prisma sur une violation FK (P2003) côté API. Cas typique :
+          // artiste à son compte sans agent → dropdown agent reste à "".
+          comedienId: l.comedienId || null,
+          agentId: l.agentId || null,
           quantite: Number(l.quantite),
           prixUnit: Number(l.prixUnit),
           ordre: li,
