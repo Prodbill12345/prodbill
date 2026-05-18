@@ -34,9 +34,11 @@ export function slugify(input: string | null | undefined): string {
 }
 
 /**
- * Filename pour un PDF de devis.
- *   - Si numéro existe : `${numero}_${slug(objet)}.pdf`
- *   - Sinon (brouillon) : `devis-brouillon-{id8}_${slug(objet)}.pdf`
+ * Filename pour un PDF de devis. Format demandé par Vanda :
+ * "DEVIS_{numero}_{objet}.pdf".
+ *
+ *   - Avec numéro : `DEVIS_${numero}_${slug(objet)}.pdf`
+ *   - Brouillon (sans numéro) : `DEVIS_BROUILLON_${slug(objet)}.pdf`
  */
 export function devisPdfFilename(devis: {
   id: string;
@@ -45,27 +47,27 @@ export function devisPdfFilename(devis: {
 }): string {
   const objetSlug = slugify(devis.objet);
   if (devis.numero) {
-    return `${devis.numero}_${objetSlug}.pdf`;
+    const safeNumero = devis.numero.replace(FS_INVALID_CHARS, "-");
+    return `DEVIS_${safeNumero}_${objetSlug}.pdf`;
   }
-  return `devis-brouillon-${devis.id.slice(0, 8)}_${objetSlug}.pdf`;
+  return `DEVIS_BROUILLON_${objetSlug}.pdf`;
 }
 
 /**
- * Filename pour un PDF de facture. L'objet provient du devis source
+ * Filename pour un PDF de facture. Format demandé par Vanda :
+ * "FACTURE_{numero}_{objet}.pdf". L'objet provient du devis source
  * (Facture n'a pas de champ `objet` propre).
- *   - Avec devis lié : `${numero}_${slug(devis.objet)}.pdf`
- *   - Sans devis lié : `${numero}.pdf` (ex avoir manuel)
+ *
+ *   - Avec devis lié : `FACTURE_${numero}_${slug(devis.objet)}.pdf`
+ *   - Sans devis lié (ex avoir manuel) : `FACTURE_${numero}.pdf`
  */
 export function facturePdfFilename(facture: {
   numero: string;
   devis?: { objet: string } | null;
 }): string {
-  // Le numéro peut contenir "/" sur certaines conventions (legacy).
-  // On le slugifie aussi par sécurité — la plupart des numéros
-  // restent inchangés (ex "FAC-2026-0001" → "FAC-2026-0001").
   const safeNumero = facture.numero.replace(FS_INVALID_CHARS, "-");
   if (facture.devis?.objet) {
-    return `${safeNumero}_${slugify(facture.devis.objet)}.pdf`;
+    return `FACTURE_${safeNumero}_${slugify(facture.devis.objet)}.pdf`;
   }
-  return `${safeNumero}.pdf`;
+  return `FACTURE_${safeNumero}.pdf`;
 }

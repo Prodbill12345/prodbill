@@ -46,51 +46,63 @@ describe("slugify", () => {
   });
 });
 
-describe("devisPdfFilename", () => {
+describe("devisPdfFilename (préfixe DEVIS_)", () => {
   test("devis avec numéro et objet K-LINE", () => {
     expect(
       devisPdfFilename({ id: "abc", numero: "DEV-2026-26089", objet: "K-LINE" })
-    ).toBe("DEV-2026-26089_K-LINE.pdf");
+    ).toBe("DEVIS_DEV-2026-26089_K-LINE.pdf");
+  });
+
+  test("devis avec numéro court (26261) et objet CANDIA +", () => {
+    expect(
+      devisPdfFilename({ id: "abc", numero: "26261", objet: "CANDIA +" })
+    ).toBe("DEVIS_26261_CANDIA_+.pdf");
   });
 
   test("devis avec objet accentué", () => {
     expect(
       devisPdfFilename({ id: "abc", numero: "26089", objet: "Spot TV été 2026" })
-    ).toBe("26089_Spot_TV_ete_2026.pdf");
+    ).toBe("DEVIS_26089_Spot_TV_ete_2026.pdf");
   });
 
-  test("devis brouillon (sans numéro)", () => {
+  test("devis brouillon (sans numéro) — format lisible", () => {
     expect(
       devisPdfFilename({ id: "cmp1abcdef12345", numero: null, objet: "Test" })
-    ).toBe("devis-brouillon-cmp1abcd_Test.pdf");
+    ).toBe("DEVIS_BROUILLON_Test.pdf");
   });
 
   test("devis avec objet vide → 'untitled'", () => {
     expect(
       devisPdfFilename({ id: "abc", numero: "26000", objet: "" })
-    ).toBe("26000_untitled.pdf");
+    ).toBe("DEVIS_26000_untitled.pdf");
   });
 });
 
-describe("facturePdfFilename", () => {
+describe("facturePdfFilename (préfixe FACTURE_)", () => {
   test("facture avec devis lié et objet", () => {
     expect(
       facturePdfFilename({
         numero: "FAC-2026-26051",
         devis: { objet: "K-LINE" },
       })
-    ).toBe("FAC-2026-26051_K-LINE.pdf");
+    ).toBe("FACTURE_FAC-2026-26051_K-LINE.pdf");
+  });
+
+  test("facture numéro court", () => {
+    expect(
+      facturePdfFilename({ numero: "26051", devis: { objet: "K-LINE" } })
+    ).toBe("FACTURE_26051_K-LINE.pdf");
   });
 
   test("facture sans devis lié (avoir manuel)", () => {
     expect(
       facturePdfFilename({ numero: "AV-2026-0001", devis: null })
-    ).toBe("AV-2026-0001.pdf");
+    ).toBe("FACTURE_AV-2026-0001.pdf");
   });
 
   test("facture avec / dans le numéro (legacy) — sanitize", () => {
     expect(
       facturePdfFilename({ numero: "25/0042-A1", devis: null })
-    ).toBe("25-0042-A1.pdf");
+    ).toBe("FACTURE_25-0042-A1.pdf");
   });
 });
