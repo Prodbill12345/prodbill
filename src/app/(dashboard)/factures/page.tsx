@@ -13,9 +13,21 @@ export default async function FacturesPage() {
     include: {
       client: { select: { name: true } },
       paiements: true,
+      // Pour la recherche libre : matche aussi numéro + objet du devis source
+      devis: { select: { numero: true, objet: true } },
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Années disponibles pour le filtre — basées sur year(dateEmission).
+  // Pas de champ `annee` sur Facture (contrairement à Devis).
+  const availableYears = Array.from(
+    new Set(
+      factures
+        .map((f) => (f.dateEmission ? f.dateEmission.getUTCFullYear() : null))
+        .filter((y): y is number => y !== null)
+    )
+  ).sort((a, b) => b - a);
 
   const totalHtEmis = factures
     .filter((f) => f.statut !== "ANNULEE" && f.statut !== "BROUILLON")
@@ -72,7 +84,7 @@ export default async function FacturesPage() {
           <p className="text-slate-400 text-sm">Les factures sont générées depuis les devis acceptés</p>
         </div>
       ) : (
-        <FacturesListClient factures={factures} />
+        <FacturesListClient factures={factures} availableYears={availableYears} />
       )}
     </div>
   );

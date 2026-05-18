@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useTransition } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, AlertCircle } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { FACTURE_STATUT_COLORS, FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
 import type { FactureStatut, FactureType } from "@prisma/client";
+import {
+  filterFactures,
+  filtersToParams,
+  paramsToFilters,
+  type FacturesFilters,
+} from "@/lib/factures-filters";
+import { FacturesFiltersBar } from "./FacturesFilters";
 
 interface FactureRow {
   id: string;
@@ -20,93 +28,44 @@ interface FactureRow {
   totalTtc: number;
   client: { name: string };
   paiements: { montant: number }[];
+  devis?: { numero: string | null; objet: string } | null;
 }
 
-const ANNEES = [2023, 2024, 2025, 2026, 2027];
-
-function getAnnee(f: FactureRow): number | null {
-  return f.dateEmission ? new Date(f.dateEmission).getFullYear() : null;
+interface FacturesListClientProps {
+  factures: FactureRow[];
+  availableYears: number[];
 }
 
-export function FacturesListClient({ factures }: { factures: FactureRow[] }) {
-  const [filterAnnee, setFilterAnnee] = useState("");
-  const [filterNumero, setFilterNumero] = useState("");
-  const [filterBdc, setFilterBdc] = useState("");
-  const [filterClient, setFilterClient] = useState("");
-  const [filterStatut, setFilterStatut] = useState("");
+export function FacturesListClient({ factures, availableYears }: FacturesListClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
 
-  const filtered = factures.filter((f) => {
-    if (filterAnnee && String(getAnnee(f) ?? "") !== filterAnnee) return false;
-    if (filterNumero && !f.numero.toLowerCase().includes(filterNumero.toLowerCase())) return false;
-    if (filterBdc && !(f.numeroBdc ?? "").toLowerCase().includes(filterBdc.toLowerCase())) return false;
-    if (filterClient && !f.client.name.toLowerCase().includes(filterClient.toLowerCase())) return false;
-    if (filterStatut && f.statut !== filterStatut) return false;
-    return true;
-  });
+  const filters: FacturesFilters = useMemo(
+    () => paramsToFilters(searchParams),
+    [searchParams]
+  );
 
-  const hasFilters = filterAnnee || filterNumero || filterBdc || filterClient || filterStatut;
+  function setFilters(next: FacturesFilters) {
+    const qs = filtersToParams(next).toString();
+    startTransition(() => {
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    });
+  }
+
+  const filtered = useMemo(() => filterFactures(factures, filters), [factures, filters]);
+  const hasFilters = filtersToParams(filters).toString() !== "";
 
   return (
     <div className="space-y-4">
-      {/* Barre de filtres */}
-      <div className="bg-white rounded-xl border border-slate-100 px-4 py-3 flex gap-3 items-center flex-wrap shadow-sm">
-        <select
-          value={filterAnnee}
-          onChange={(e) => setFilterAnnee(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          <option value="">Toutes les années</option>
-          {ANNEES.map((y) => <option key={y} value={y}>{y}</option>)}
-        </select>
-
-        <input
-          type="text"
-          placeholder="N° facture…"
-          value={filterNumero}
-          onChange={(e) => setFilterNumero(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-36"
-        />
-
-        <input
-          type="text"
-          placeholder="N° BDC…"
-          value={filterBdc}
-          onChange={(e) => setFilterBdc(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-36"
-        />
-
-        <input
-          type="text"
-          placeholder="Client…"
-          value={filterClient}
-          onChange={(e) => setFilterClient(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48"
-        />
-
-        <select
-          value={filterStatut}
-          onChange={(e) => setFilterStatut(e.target.value)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          <option value="">Tous les statuts</option>
-          {(Object.entries(FACTURE_STATUT_LABELS) as [FactureStatut, string][]).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
-
-        {hasFilters && (
-          <button
-            onClick={() => { setFilterAnnee(""); setFilterNumero(""); setFilterBdc(""); setFilterClient(""); setFilterStatut(""); }}
-            className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
-          >
-            Réinitialiser
-          </button>
-        )}
-
-        <span className="text-xs text-slate-400 ml-auto">
-          {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
-        </span>
-      </div>
+      <FacturesFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        availableYears={availableYears}
+        totalCount={factures.length}
+        filteredCount={filtered.length}
+      />
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -139,7 +98,7 @@ export function FacturesListClient({ factures }: { factures: FactureRow[] }) {
                 const isRetard =
                   f.statut === "EN_RETARD" ||
                   (f.statut === "EMISE" && f.dateEcheance && new Date(f.dateEcheance) < new Date());
-                const annee = getAnnee(f);
+                const annee = f.dateEmission ? f.dateEmission.getUTCFullYear() : null;
 
                 return (
                   <tr
