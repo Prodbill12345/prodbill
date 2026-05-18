@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
+import { isHistoricalImport } from "@/lib/historical-import";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -106,6 +107,10 @@ export default async function ModifierDevisPage({
         defaultTaux={defaultTaux}
         devisId={id}
         initialData={initialData}
+        historicalImportWarning={isHistoricalImport(
+          { createdAt: devis.createdAt, updatedAt: devis.updatedAt },
+          { name: company.name }
+        )}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2, AlertTriangle } from "lucide-react";
 import { calculerDevis, calculerLigne } from "@/lib/calculations";
 import { TotauxPanel } from "./TotauxPanel";
 import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
@@ -113,9 +113,23 @@ interface DevisBuilderProps {
   /** Présent en mode édition */
   devisId?: string;
   initialData?: DevisInitialData;
+  /**
+   * True si le devis est un import historique Caleson non encore
+   * réparé (cf. `src/lib/historical-import.ts` + BUG #4). Déclenche
+   * l'affichage du banner orange en haut du formulaire.
+   */
+  historicalImportWarning?: boolean;
 }
 
-export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux, devisId, initialData }: DevisBuilderProps) {
+export function DevisBuilder({
+  clients,
+  agents = [],
+  comediens = [],
+  defaultTaux,
+  devisId,
+  initialData,
+  historicalImportWarning = false,
+}: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -335,6 +349,43 @@ export function DevisBuilder({ clients, agents = [], comediens = [], defaultTaux
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="grid grid-cols-3 gap-6">
+      {/* Garde-fou : devis Caleson import historique non encore réparé.
+          Voir src/lib/historical-import.ts + BUG #4. Non bloquant. */}
+      {historicalImportWarning && (
+        <div className="col-span-3 sticky top-0 z-30 bg-amber-50 border border-amber-300 rounded-xl px-5 py-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="w-5 h-5 text-amber-600 shrink-0 mt-0.5"
+              strokeWidth={2}
+            />
+            <div className="flex-1 text-sm text-amber-900">
+              <p className="font-semibold mb-1">
+                Devis issu de l&apos;import historique
+              </p>
+              <p className="text-amber-800 leading-relaxed">
+                Ce devis a été importé depuis votre ancien système et n&apos;a
+                jamais été modifié depuis. Ses composantes FG / Marge peuvent
+                ne pas correspondre aux taux affichés. Avant toute
+                modification :
+              </p>
+              <ul className="list-disc ml-5 mt-2 space-y-0.5 text-amber-800">
+                <li>
+                  Vérifie que les taux FG et Marge correspondent bien au PDF
+                  d&apos;origine
+                </li>
+                <li>
+                  Si non, contacte le support pour rectifier en base
+                </li>
+                <li>
+                  En attendant, <strong>ne pas enregistrer</strong> pour
+                  éviter de corrompre les totaux du devis
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Colonne principale (2/3) */}
       <div className="col-span-2 space-y-5">
         {/* En-tête du devis */}
