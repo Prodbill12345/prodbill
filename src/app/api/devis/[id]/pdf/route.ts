@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { DevisPdf } from "@/components/devis/DevisPdf";
 import { getNextDevisNumero } from "@/lib/numbering";
+import { devisPdfFilename } from "@/lib/pdf-filename";
 import React from "react";
 
 // @react-pdf/renderer requires Node.js runtime (not Edge)
@@ -59,9 +60,11 @@ export async function GET(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mainBuffer = await renderToBuffer(React.createElement(DevisPdf, { devis }) as any);
 
-    const filename = devis.numero
-      ? `devis-${devis.numero}.pdf`
-      : `devis-brouillon-${devis.id.slice(0, 8)}.pdf`;
+    const filename = devisPdfFilename({
+      id: devis.id,
+      numero: devis.numero,
+      objet: devis.objet,
+    });
 
     if (docIds.length === 0) {
       return new Response(new Uint8Array(mainBuffer), {

@@ -4,6 +4,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
+import { facturePdfFilename } from "@/lib/pdf-filename";
 import React from "react";
 
 export async function GET(
@@ -75,7 +76,10 @@ export async function GET(
       React.createElement(FacturePdf, { facture: factureWithLogo }) as never
     );
 
-    const filename = `facture-${facture.numero.replace(/\//g, "-")}.pdf`;
+    const filename = facturePdfFilename({
+      numero: facture.numero,
+      devis: facture.devis ? { objet: facture.devis.objet } : null,
+    });
 
     if (docIds.length === 0) {
       return new Response(new Uint8Array(mainBuffer), {
