@@ -12,6 +12,7 @@
  */
 
 import type { FactureStatut, FactureType } from "@prisma/client";
+import type { SortAccessor, SortState } from "./list-sort";
 
 export interface FacturesFilters {
   q?: string;                    // recherche libre
@@ -176,6 +177,56 @@ export function paramsToFilters(
 
   return f;
 }
+
+// ─── Tri ──────────────────────────────────────────────────────────────────────
+
+export const FACTURE_SORT_KEYS = [
+  "numero",
+  "client",
+  "type",
+  "annee",
+  "numeroBdc",
+  "dateEmission",
+  "dateEcheance",
+  "dateReglement",
+  "totalTtc",
+  "statut",
+] as const;
+export type FactureSortKey = typeof FACTURE_SORT_KEYS[number];
+
+// Ordre métier : BROUILLON → EMISE → EN_RETARD → PAYEE_PARTIEL → PAYEE → ANNULEE
+const FACTURE_STATUT_ORDER: Record<FactureStatut, number> = {
+  BROUILLON: 1,
+  EMISE: 2,
+  EN_RETARD: 3,
+  PAYEE_PARTIEL: 4,
+  PAYEE: 5,
+  ANNULEE: 6,
+};
+// Ordre métier : ACOMPTE → SOLDE → AVOIR
+const FACTURE_TYPE_ORDER: Record<FactureType, number> = {
+  ACOMPTE: 1,
+  SOLDE: 2,
+  AVOIR: 3,
+};
+
+export const FACTURE_SORT_ACCESSORS: Record<FactureSortKey, SortAccessor<FactureFilterable>> = {
+  numero: (f) => f.numero,
+  client: (f) => f.client.name,
+  type: (f) => FACTURE_TYPE_ORDER[f.type],
+  annee: (f) => (f.dateEmission ? f.dateEmission.getUTCFullYear() : null),
+  numeroBdc: (f) => f.numeroBdc,
+  dateEmission: (f) => f.dateEmission,
+  dateEcheance: (f) => f.dateEcheance,
+  dateReglement: (f) => f.dateReglement,
+  totalTtc: (f) => f.totalTtc,
+  statut: (f) => FACTURE_STATUT_ORDER[f.statut] ?? 999,
+};
+
+export const FACTURE_DEFAULT_SORT: SortState<FactureSortKey> = {
+  key: "dateEmission",
+  order: "desc",
+};
 
 export function hasActiveFilters(f: FacturesFilters): boolean {
   return Boolean(

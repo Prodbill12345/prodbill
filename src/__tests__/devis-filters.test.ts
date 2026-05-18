@@ -3,9 +3,13 @@ import {
   filtersToParams,
   paramsToFilters,
   hasActiveFilters,
+  DEVIS_SORT_ACCESSORS,
+  DEVIS_DEFAULT_SORT,
+  DEVIS_SORT_KEYS,
   type DevisFilterable,
   type DevisFilters,
 } from "../lib/devis-filters";
+import { sortBy } from "../lib/list-sort";
 
 // Helper : crée un devis test
 function devis(over: Partial<DevisFilterable> = {}): DevisFilterable {
@@ -237,6 +241,60 @@ describe("filterDevis — effacement / aucun filtre", () => {
         totalTtcMax: undefined,
       })
     ).toHaveLength(2);
+  });
+});
+
+describe("DEVIS_SORT_ACCESSORS — intégration avec sortBy", () => {
+  const list: DevisFilterable[] = [
+    devis({ numero: "26001", totalTtc: 5000, statut: "ACCEPTE", client: { name: "Bob" }, dateEmission: new Date("2026-03-15Z") }),
+    devis({ numero: "26100", totalTtc:  500, statut: "BROUILLON", client: { name: "alice" }, dateEmission: new Date("2026-05-01Z") }),
+    devis({ numero: "26010", totalTtc:50000, statut: "REFUSE", client: { name: "Charlie" }, dateEmission: new Date("2026-01-10Z") }),
+  ];
+
+  test("toutes les clés DEVIS_SORT_KEYS ont un accessor", () => {
+    for (const k of DEVIS_SORT_KEYS) {
+      expect(typeof DEVIS_SORT_ACCESSORS[k]).toBe("function");
+    }
+  });
+
+  test("tri ASC par totalTtc", () => {
+    const out = sortBy(list, { key: "totalTtc", order: "asc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out.map((d) => d.numero)).toEqual(["26100", "26001", "26010"]);
+  });
+
+  test("tri DESC par totalTtc", () => {
+    const out = sortBy(list, { key: "totalTtc", order: "desc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out.map((d) => d.numero)).toEqual(["26010", "26001", "26100"]);
+  });
+
+  test("tri par client (localeCompare insensible casse)", () => {
+    const out = sortBy(list, { key: "client", order: "asc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out.map((d) => d.client.name)).toEqual(["alice", "Bob", "Charlie"]);
+  });
+
+  test("tri par statut suit l'ordre métier (BROUILLON → ENVOYE → ACCEPTE → REFUSE → EXPIRE)", () => {
+    const out = sortBy(list, { key: "statut", order: "asc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out.map((d) => d.statut)).toEqual(["BROUILLON", "ACCEPTE", "REFUSE"]);
+  });
+
+  test("default sort = dateEmission desc (le plus récent en premier)", () => {
+    const out = sortBy(list, null, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out.map((d) => d.numero)).toEqual(["26100", "26001", "26010"]);
+  });
+
+  test("combinaison filter + sort", () => {
+    const filtered = filterDevis(list, { statut: "REFUSE" });
+    const sorted = sortBy(filtered, { key: "totalTtc", order: "asc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(sorted.map((d) => d.numero)).toEqual(["26010"]);
+  });
+
+  test("tri sur dateEmission avec brouillon (null) — null en dernier en ASC", () => {
+    const withBrouillon = [
+      ...list,
+      devis({ numero: "BR", dateEmission: null, statut: "BROUILLON" }),
+    ];
+    const out = sortBy(withBrouillon, { key: "dateEmission", order: "asc" }, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT);
+    expect(out[out.length - 1].numero).toBe("BR");
   });
 });
 

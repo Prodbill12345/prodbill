@@ -3,7 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS } from "@/types";
@@ -12,8 +12,19 @@ import {
   filterDevis,
   filtersToParams,
   paramsToFilters,
+  DEVIS_SORT_ACCESSORS,
+  DEVIS_SORT_KEYS,
+  DEVIS_DEFAULT_SORT,
   type DevisFilters,
+  type DevisSortKey,
 } from "@/lib/devis-filters";
+import {
+  sortBy,
+  paramsToSort,
+  sortToParams,
+  nextSortState,
+  type SortState,
+} from "@/lib/list-sort";
 import { DevisFiltersBar } from "./DevisFilters";
 
 interface DevisRow {
@@ -40,25 +51,39 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  // Filtres dérivés de l'URL (source de vérité)
   const filters: DevisFilters = useMemo(
     () => paramsToFilters(searchParams),
     [searchParams]
   );
+  const sort: SortState<DevisSortKey> | null = useMemo(
+    () => paramsToSort(searchParams, DEVIS_SORT_KEYS),
+    [searchParams]
+  );
 
-  function setFilters(next: DevisFilters) {
-    const params = filtersToParams(next);
-    const qs = params.toString();
-    const url = qs ? `${pathname}?${qs}` : pathname;
-    // replace pour ne pas polluer l'historique navigateur à chaque
-    // frappe ; scroll: false pour ne pas remonter en haut de page.
+  function pushParams(nextFilters: DevisFilters, nextSort: SortState<DevisSortKey> | null) {
+    const fp = filtersToParams(nextFilters);
+    const sp = sortToParams(nextSort);
+    sp.forEach((v, k) => fp.set(k, v));
+    const qs = fp.toString();
     startTransition(() => {
-      router.replace(url, { scroll: false });
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   }
 
+  function setFilters(next: DevisFilters) {
+    pushParams(next, sort);
+  }
+
+  function handleSortClick(key: DevisSortKey) {
+    pushParams(filters, nextSortState(sort, key));
+  }
+
   const filtered = useMemo(() => filterDevis(devis, filters), [devis, filters]);
-  const hasFilters = Object.keys(filtersToParams(filters).toString() ? filters : {}).length > 0;
+  const sorted = useMemo(
+    () => sortBy(filtered, sort, DEVIS_SORT_ACCESSORS, DEVIS_DEFAULT_SORT),
+    [filtered, sort]
+  );
+  const hasFilters = filtersToParams(filters).toString() !== "";
 
   return (
     <div className="space-y-4">
@@ -67,33 +92,32 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
         onChange={setFilters}
         availableYears={availableYears}
         totalCount={devis.length}
-        filteredCount={filtered.length}
+        filteredCount={sorted.length}
       />
 
-      {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/60">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Référence</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Objet</th>
-              <th className="text-center px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Année</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Total TTC</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
+              <SortableTh label="Référence" sortKey="numero" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Client" sortKey="client" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Objet" sortKey="objet" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Année" sortKey="annee" sort={sort} onClick={handleSortClick} align="center" />
+              <SortableTh label="Date" sortKey="dateEmission" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Total TTC" sortKey="totalTtc" sort={sort} onClick={handleSortClick} align="right" />
+              <SortableTh label="Statut" sortKey="statut" sort={sort} onClick={handleSortClick} />
               <th className="w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {filtered.length === 0 ? (
+            {sorted.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-5 py-10 text-center text-sm text-slate-400">
                   {hasFilters ? "Aucun devis correspondant aux filtres" : "Aucun devis"}
                 </td>
               </tr>
             ) : (
-              filtered.map((d) => (
+              sorted.map((d) => (
                 <tr key={d.id} className="hover:bg-blue-50/30 transition-colors group">
                   <td className="px-5 py-4">
                     <Link
@@ -127,5 +151,41 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
         </table>
       </div>
     </div>
+  );
+}
+
+function SortableTh({
+  label,
+  sortKey,
+  sort,
+  onClick,
+  align = "left",
+}: {
+  label: string;
+  sortKey: DevisSortKey;
+  sort: SortState<DevisSortKey> | null;
+  onClick: (key: DevisSortKey) => void;
+  align?: "left" | "center" | "right";
+}) {
+  const isActive = sort?.key === sortKey;
+  const dir = isActive ? sort.order : null;
+  const alignCls = align === "center" ? "justify-center" : align === "right" ? "justify-end" : "justify-start";
+  const thAlign = align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
+
+  return (
+    <th className={`${thAlign} px-5 py-3.5 text-xs font-semibold uppercase tracking-wider`}>
+      <button
+        type="button"
+        onClick={() => onClick(sortKey)}
+        className={`inline-flex items-center gap-1.5 ${alignCls} ${
+          isActive ? "text-blue-700" : "text-slate-400 hover:text-slate-700"
+        } transition-colors cursor-pointer`}
+      >
+        <span>{label}</span>
+        {dir === "asc" && <ArrowUp className="w-3 h-3" />}
+        {dir === "desc" && <ArrowDown className="w-3 h-3" />}
+        {!dir && <ArrowUpDown className="w-3 h-3 opacity-30 group-hover:opacity-60" />}
+      </button>
+    </th>
   );
 }

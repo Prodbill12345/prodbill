@@ -3,7 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { ChevronRight, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { FACTURE_STATUT_COLORS, FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
@@ -12,8 +12,19 @@ import {
   filterFactures,
   filtersToParams,
   paramsToFilters,
+  FACTURE_SORT_ACCESSORS,
+  FACTURE_SORT_KEYS,
+  FACTURE_DEFAULT_SORT,
   type FacturesFilters,
+  type FactureSortKey,
 } from "@/lib/factures-filters";
+import {
+  sortBy,
+  paramsToSort,
+  sortToParams,
+  nextSortState,
+  type SortState,
+} from "@/lib/list-sort";
 import { FacturesFiltersBar } from "./FacturesFilters";
 
 interface FactureRow {
@@ -46,15 +57,34 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
     () => paramsToFilters(searchParams),
     [searchParams]
   );
+  const sort: SortState<FactureSortKey> | null = useMemo(
+    () => paramsToSort(searchParams, FACTURE_SORT_KEYS),
+    [searchParams]
+  );
 
-  function setFilters(next: FacturesFilters) {
-    const qs = filtersToParams(next).toString();
+  function pushParams(nextFilters: FacturesFilters, nextSort: SortState<FactureSortKey> | null) {
+    const fp = filtersToParams(nextFilters);
+    const sp = sortToParams(nextSort);
+    sp.forEach((v, k) => fp.set(k, v));
+    const qs = fp.toString();
     startTransition(() => {
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   }
 
+  function setFilters(next: FacturesFilters) {
+    pushParams(next, sort);
+  }
+
+  function handleSortClick(key: FactureSortKey) {
+    pushParams(filters, nextSortState(sort, key));
+  }
+
   const filtered = useMemo(() => filterFactures(factures, filters), [factures, filters]);
+  const sorted = useMemo(
+    () => sortBy(filtered, sort, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT),
+    [filtered, sort]
+  );
   const hasFilters = filtersToParams(filters).toString() !== "";
 
   return (
@@ -64,36 +94,35 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
         onChange={setFilters}
         availableYears={availableYears}
         totalCount={factures.length}
-        filteredCount={filtered.length}
+        filteredCount={sorted.length}
       />
 
-      {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/60">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Numéro</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</th>
-              <th className="text-center px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Année</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">BDC</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Émise le</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Échéance</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date règlement</th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Total TTC</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
+              <SortableTh label="Numéro" sortKey="numero" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Client" sortKey="client" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Type" sortKey="type" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Année" sortKey="annee" sort={sort} onClick={handleSortClick} align="center" />
+              <SortableTh label="BDC" sortKey="numeroBdc" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Émise le" sortKey="dateEmission" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Échéance" sortKey="dateEcheance" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Date règlement" sortKey="dateReglement" sort={sort} onClick={handleSortClick} />
+              <SortableTh label="Total TTC" sortKey="totalTtc" sort={sort} onClick={handleSortClick} align="right" />
+              <SortableTh label="Statut" sortKey="statut" sort={sort} onClick={handleSortClick} />
               <th className="w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {filtered.length === 0 ? (
+            {sorted.length === 0 ? (
               <tr>
                 <td colSpan={11} className="px-5 py-10 text-center text-sm text-slate-400">
                   {hasFilters ? "Aucune facture correspondant aux filtres" : "Aucune facture"}
                 </td>
               </tr>
             ) : (
-              filtered.map((f) => {
+              sorted.map((f) => {
                 const totalPaye = f.paiements.reduce((s, p) => s + p.montant, 0);
                 const isRetard =
                   f.statut === "EN_RETARD" ||
@@ -151,5 +180,41 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
         </table>
       </div>
     </div>
+  );
+}
+
+function SortableTh({
+  label,
+  sortKey,
+  sort,
+  onClick,
+  align = "left",
+}: {
+  label: string;
+  sortKey: FactureSortKey;
+  sort: SortState<FactureSortKey> | null;
+  onClick: (key: FactureSortKey) => void;
+  align?: "left" | "center" | "right";
+}) {
+  const isActive = sort?.key === sortKey;
+  const dir = isActive ? sort.order : null;
+  const alignCls = align === "center" ? "justify-center" : align === "right" ? "justify-end" : "justify-start";
+  const thAlign = align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
+
+  return (
+    <th className={`${thAlign} px-5 py-3.5 text-xs font-semibold uppercase tracking-wider`}>
+      <button
+        type="button"
+        onClick={() => onClick(sortKey)}
+        className={`inline-flex items-center gap-1.5 ${alignCls} ${
+          isActive ? "text-emerald-700" : "text-slate-400 hover:text-slate-700"
+        } transition-colors cursor-pointer`}
+      >
+        <span>{label}</span>
+        {dir === "asc" && <ArrowUp className="w-3 h-3" />}
+        {dir === "desc" && <ArrowDown className="w-3 h-3" />}
+        {!dir && <ArrowUpDown className="w-3 h-3 opacity-30" />}
+      </button>
+    </th>
   );
 }

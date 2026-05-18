@@ -20,6 +20,7 @@
  */
 
 import type { DevisStatut } from "@prisma/client";
+import type { SortAccessor, SortState } from "./list-sort";
 
 export interface DevisFilters {
   q?: string;                 // recherche libre (numéro + client + objet)
@@ -156,6 +157,44 @@ export function paramsToFilters(p: URLSearchParams | { get: (k: string) => strin
  * `true` si au moins un filtre est actif. Utile pour afficher /
  * cacher le bouton "Effacer tous les filtres".
  */
+// ─── Tri ──────────────────────────────────────────────────────────────────────
+
+export const DEVIS_SORT_KEYS = [
+  "numero",
+  "client",
+  "objet",
+  "annee",
+  "dateEmission",
+  "totalTtc",
+  "statut",
+] as const;
+export type DevisSortKey = typeof DEVIS_SORT_KEYS[number];
+
+// Ordre métier : BROUILLON → ENVOYE → ACCEPTE → REFUSE → EXPIRE
+const DEVIS_STATUT_ORDER: Record<DevisStatut, number> = {
+  BROUILLON: 1,
+  ENVOYE: 2,
+  ACCEPTE: 3,
+  REFUSE: 4,
+  EXPIRE: 5,
+};
+
+export const DEVIS_SORT_ACCESSORS: Record<DevisSortKey, SortAccessor<DevisFilterable>> = {
+  numero: (d) => d.numero ?? "",
+  client: (d) => d.client.name,
+  objet: (d) => d.objet,
+  // Annee : champ saisi prioritaire, sinon year(dateEmission) — cf. filterDevis
+  annee: (d) => d.annee ?? d.dateEmission?.getUTCFullYear() ?? null,
+  dateEmission: (d) => d.dateEmission,
+  totalTtc: (d) => d.totalTtc,
+  statut: (d) => DEVIS_STATUT_ORDER[d.statut] ?? 999,
+};
+
+export const DEVIS_DEFAULT_SORT: SortState<DevisSortKey> = {
+  key: "dateEmission",
+  order: "desc",
+};
+
 export function hasActiveFilters(f: DevisFilters): boolean {
   return Boolean(
     (f.q && f.q.trim()) ||

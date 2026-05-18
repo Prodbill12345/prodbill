@@ -3,9 +3,13 @@ import {
   filtersToParams,
   paramsToFilters,
   hasActiveFilters,
+  FACTURE_SORT_ACCESSORS,
+  FACTURE_DEFAULT_SORT,
+  FACTURE_SORT_KEYS,
   type FactureFilterable,
   type FacturesFilters,
 } from "../lib/factures-filters";
+import { sortBy } from "../lib/list-sort";
 
 function facture(over: Partial<FactureFilterable> = {}): FactureFilterable {
   return {
@@ -291,6 +295,55 @@ describe("filterFactures — effacement", () => {
 
   test("filters={} → toutes", () => {
     expect(filterFactures(list, {})).toHaveLength(2);
+  });
+});
+
+describe("FACTURE_SORT_ACCESSORS — intégration avec sortBy", () => {
+  const list: FactureFilterable[] = [
+    facture({ numero: "FAC-01", type: "SOLDE",   totalTtc:  5000, statut: "EMISE",          dateEmission: new Date("2026-03-15Z"), dateReglement: null }),
+    facture({ numero: "FAC-02", type: "ACOMPTE", totalTtc:  2500, statut: "PAYEE_PARTIEL", dateEmission: new Date("2026-04-10Z"), dateReglement: new Date("2026-04-20Z") }),
+    facture({ numero: "FAC-03", type: "AVOIR",   totalTtc:  -800, statut: "ANNULEE",        dateEmission: new Date("2026-01-05Z"), dateReglement: null }),
+    facture({ numero: "FAC-04", type: "SOLDE",   totalTtc: 10000, statut: "PAYEE",          dateEmission: new Date("2026-02-20Z"), dateReglement: new Date("2026-03-15Z") }),
+  ];
+
+  test("toutes les clés FACTURE_SORT_KEYS ont un accessor", () => {
+    for (const k of FACTURE_SORT_KEYS) {
+      expect(typeof FACTURE_SORT_ACCESSORS[k]).toBe("function");
+    }
+  });
+
+  test("tri par type suit l'ordre métier ACOMPTE → SOLDE → AVOIR", () => {
+    const out = sortBy(list, { key: "type", order: "asc" }, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    expect(out.map((f) => f.type)).toEqual(["ACOMPTE", "SOLDE", "SOLDE", "AVOIR"]);
+  });
+
+  test("tri par statut suit l'ordre métier (BROUILLON → EMISE → EN_RETARD → PAYEE_PARTIEL → PAYEE → ANNULEE)", () => {
+    const out = sortBy(list, { key: "statut", order: "asc" }, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    expect(out.map((f) => f.statut)).toEqual(["EMISE", "PAYEE_PARTIEL", "PAYEE", "ANNULEE"]);
+  });
+
+  test("tri par dateReglement ASC : null en dernier (factures non réglées)", () => {
+    const out = sortBy(list, { key: "dateReglement", order: "asc" }, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    // FAC-04 (15 mars), FAC-02 (20 avril), puis FAC-01 et FAC-03 (null)
+    expect(out.slice(0, 2).map((f) => f.numero)).toEqual(["FAC-04", "FAC-02"]);
+    expect(out.slice(2).every((f) => f.dateReglement === null)).toBe(true);
+  });
+
+  test("tri par dateReglement DESC : null toujours en dernier (convention prévisible)", () => {
+    const out = sortBy(list, { key: "dateReglement", order: "desc" }, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    expect(out.slice(0, 2).map((f) => f.numero)).toEqual(["FAC-02", "FAC-04"]);
+    expect(out.slice(2).every((f) => f.dateReglement === null)).toBe(true);
+  });
+
+  test("default sort = dateEmission desc", () => {
+    const out = sortBy(list, null, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    expect(out.map((f) => f.numero)).toEqual(["FAC-02", "FAC-01", "FAC-04", "FAC-03"]);
+  });
+
+  test("combinaison filter + sort", () => {
+    const filtered = filterFactures(list, { type: "SOLDE" });
+    const sorted = sortBy(filtered, { key: "totalTtc", order: "desc" }, FACTURE_SORT_ACCESSORS, FACTURE_DEFAULT_SORT);
+    expect(sorted.map((f) => f.numero)).toEqual(["FAC-04", "FAC-01"]);
   });
 });
 
