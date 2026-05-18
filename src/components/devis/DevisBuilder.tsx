@@ -58,6 +58,30 @@ const DevisFormSchema = z.object({
 
 type DevisFormData = z.infer<typeof DevisFormSchema>;
 
+/**
+ * Lit le corps JSON d'une réponse 4xx/5xx et formate un message utile :
+ *   - { error: "...", details: [{path: [...], message: "..."}] } (Zod)
+ *     → "Données invalides : sections[0].titre — Required, ..."
+ *   - { error: "..." } → "..."
+ * TODO Sprint 3 : remplacer par un toast propre avec scroll vers le champ.
+ */
+async function formatErrorMessage(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    const base = body?.error ?? `HTTP ${res.status}`;
+    if (Array.isArray(body?.details) && body.details.length > 0) {
+      const issues = (body.details as Array<{ path: (string | number)[]; message: string }>)
+        .slice(0, 5)
+        .map((i) => `${(i.path ?? []).join(".") || "(root)"} — ${i.message}`)
+        .join("\n• ");
+      return `${base} :\n• ${issues}${body.details.length > 5 ? `\n…et ${body.details.length - 5} autres` : ""}`;
+    }
+    return base;
+  } catch {
+    return `Erreur HTTP ${res.status}`;
+  }
+}
+
 interface DevisInitialData {
   clientId: string;
   objet: string;
@@ -284,12 +308,14 @@ export function DevisBuilder({
         ordre: si,
         lignes: s.lignes.map((l, li) => ({
           ...l,
-          // `<select>` HTML envoie "" pour l'option par défaut "Associer un agent
-          // (optionnel)" / "Comédien (optionnel)". On convertit en null pour ne pas
-          // faire planter Prisma sur une violation FK (P2003) côté API. Cas typique :
-          // artiste à son compte sans agent → dropdown agent reste à "".
-          comedienId: l.comedienId || null,
-          agentId: l.agentId || null,
+          // `<select>` HTML envoie "" pour l'option par défaut. On convertit
+          // toute valeur falsy ("", null, undefined) en `undefined` pour que
+          // optionalFkId côté API la transforme proprement en undefined puis
+          // en null Prisma au mapping `?? null`. Envoyer `null` direct est
+          // rejeté par le schema Zod (z.string().optional() n'accepte que
+          // string|undefined). Voir BUG #3 + régression devis existants.
+          comedienId: l.comedienId || undefined,
+          agentId: l.agentId || undefined,
           quantite: Number(l.quantite),
           prixUnit: Number(l.prixUnit),
           ordre: li,
@@ -314,8 +340,7 @@ export function DevisBuilder({
           body: JSON.stringify(payload),
         });
         if (!res.ok) {
-          const err = await res.json();
-          alert(err.error ?? "Erreur");
+          alert(await formatErrorMessage(res));
           return;
         }
         router.push(`/devis/${devisId}`);
@@ -328,8 +353,7 @@ export function DevisBuilder({
           body: JSON.stringify(payload),
         });
         if (!res.ok) {
-          const err = await res.json();
-          alert(err.error ?? "Erreur");
+          alert(await formatErrorMessage(res));
           return;
         }
         const { data: devis } = await res.json();

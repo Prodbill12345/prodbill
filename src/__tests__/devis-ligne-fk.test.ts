@@ -39,6 +39,17 @@ describe("optionalFkId (Zod transform pour FK optionnelle)", () => {
     // un autre helper.
     expect(optionalFkId.parse("  ")).toBe("  ");
   });
+
+  /**
+   * Régression : null doit aussi être accepté et transformé en undefined.
+   * Sans ce hardening, l'onSubmit `l.agentId || null` qui envoyait null
+   * direct sur les devis existants (lignes avec agentId/comedienId DB null)
+   * provoquait un 400 "Données invalides" sur PUT /api/devis/[id].
+   * Voir régression BUG #3 — cas Caleson devis 26261.
+   */
+  test("null → undefined (régression BUG #3)", () => {
+    expect(optionalFkId.parse(null)).toBeUndefined();
+  });
 });
 
 describe("Régression BUG #3 — LigneSchema simulé", () => {
@@ -117,5 +128,57 @@ describe("Régression BUG #3 — LigneSchema simulé", () => {
     };
     expect(mapped.comedienId).toBeNull();
     expect(mapped.agentId).toBeNull();
+  });
+
+  /**
+   * Régression : reproduit le scénario complet du devis 26261 Caleson.
+   * Le form charge des lignes existantes avec agentId=null (DB), bascule
+   * le form state en undefined (via initialData `?? undefined`), puis le
+   * <select> registered avec defaultValue=undefined affiche son option
+   * "" → form state lit "" → onSubmit faisait `"" || null = null` →
+   * 400. Après le fix : `"" || undefined = undefined` → optionalFkId
+   * accepte → mapping `?? null` → Prisma null. Chaîne complète OK.
+   */
+  test("scénario PUT 26261 : ligne avec agentId=null (DB) save sans 400", () => {
+    // Simule ce qui sort de l'onSubmit après le fix (l.agentId || undefined)
+    const payloadFromForm = {
+      libelle: "Comédien | prestation",
+      tag: "ARTISTE" as const,
+      quantite: 1,
+      prixUnit: 400,
+      comedienId: "cmp1hhxnr01j6z33xqitfd8qz",
+      agentId: undefined, // ← après "" || undefined ou null || undefined
+      ordre: 0,
+    };
+    const parsed = LigneSchema.parse(payloadFromForm);
+    expect(parsed.comedienId).toBe("cmp1hhxnr01j6z33xqitfd8qz");
+    expect(parsed.agentId).toBeUndefined();
+
+    // Le mapping `?? null` côté API donne ce qui va à Prisma :
+    const forPrisma = {
+      comedienId: parsed.comedienId ?? null,
+      agentId: parsed.agentId ?? null,
+    };
+    expect(forPrisma.comedienId).toBe("cmp1hhxnr01j6z33xqitfd8qz");
+    expect(forPrisma.agentId).toBeNull();
+  });
+
+  /**
+   * Test direct du fail antérieur : si le payload contenait `null`
+   * (cas où l'onSubmit était cassé), maintenant ça passe grâce au
+   * hardening `optionalFkId` qui accepte null en plus de "".
+   */
+  test("résistance au null direct dans le payload (défense en profondeur)", () => {
+    const parsed = LigneSchema.parse({
+      libelle: "L",
+      tag: "ARTISTE" as const,
+      quantite: 1,
+      prixUnit: 0,
+      comedienId: null,
+      agentId: null,
+      ordre: 0,
+    });
+    expect(parsed.comedienId).toBeUndefined();
+    expect(parsed.agentId).toBeUndefined();
   });
 });
