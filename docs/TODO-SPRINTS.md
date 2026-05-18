@@ -5,6 +5,38 @@ priorité estimée. Mettre à jour le sprint d'affectation quand on tranche.
 
 ---
 
+## Sprint 2 — AuditLog DEVIS_UPDATED + FACTURE_UPDATED
+
+Aujourd'hui les modifs de Devis et Facture ne sont **pas** tracées dans
+`AuditLog`. Conséquence : impossible de répondre à « quelles valeurs avait
+ce devis hier ? ». Le seul historique disponible est `createdAt`/`updatedAt`
+qui dit *quand* sans dire *quoi*.
+
+Pré-requis : ce TODO est apparu suite au BUG #4 — Vanda dit "modif titre
+cascade FG/Marge", mais sans AuditLog avant/après on ne peut ni confirmer
+ni infirmer côté data.
+
+À ajouter Sprint 2 :
+
+- `POST /api/devis` → AuditLog `action=DEVIS_CREE` avec
+  `details: { snapshot: { taux, totaux, sectionsCount } }`
+- `PUT /api/devis/[id]` → AuditLog `action=DEVIS_UPDATED` avec
+  `details: { before: { tauxFg, tauxMarge, totalHt, sectionsCount }, after: { ... }, changedFields: [...] }`
+- `DELETE /api/devis/[id]` → AuditLog `action=DEVIS_SUPPRIME`
+- Symétrique sur Facture (`FACTURE_EMISE`, `FACTURE_UPDATED`)
+- Permet aussi le rollback automatisé si bug d'écrasement futur
+
+### Acceptance criteria
+
+- Tout PUT sur Devis crée 1 ligne AuditLog avec before/after sur les
+  champs critiques (taux, totaux, sectionsCount)
+- Le diff est lisible : la liste `changedFields` permet de filtrer
+  rapidement les vraies modifs
+- Pas de double-log pour les opérations admin déjà loguées (impersonation,
+  scripts de repair)
+
+---
+
 ## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
 
 Quand l'utilisateur sélectionne un comédien dans le dropdown d'une ligne
