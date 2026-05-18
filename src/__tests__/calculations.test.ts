@@ -88,6 +88,51 @@ describe("calculerDevis", () => {
     expect(result.totalTtc).toBe(0);
   });
 
+  /**
+   * Tests TVA personnalisable (FIX 2). Le param tauxTvaPct accepte un
+   * pourcentage entier. Valeur par défaut 20 garantit la rétrocompat.
+   */
+  describe("tauxTvaPct paramétrable", () => {
+    const studioOnly: LigneInput[] = [
+      { tag: "STUDIO", quantite: 1, prixUnit: 1000 },
+    ];
+    const tauxZero = { ...tauxRef, tauxCsComedien: 0, tauxCsTech: 0, tauxFg: 0, tauxMarge: 0 };
+
+    test("défaut 20% (rétrocompat avec ancien comportement)", () => {
+      const r = calculerDevis(studioOnly, tauxZero);
+      expect(r.totalHt).toBe(1000);
+      expect(r.tva).toBe(200);
+      expect(r.totalTtc).toBe(1200);
+    });
+
+    test("10% (cas SACEM)", () => {
+      const r = calculerDevis(studioOnly, tauxZero, 0, 10);
+      expect(r.tva).toBe(100);
+      expect(r.totalTtc).toBe(1100);
+    });
+
+    test("5.5% (super-réduit, livre/spectacle vivant)", () => {
+      const r = calculerDevis(studioOnly, tauxZero, 0, 5.5);
+      expect(r.tva).toBe(55);
+      expect(r.totalTtc).toBe(1055);
+    });
+
+    test('0% (TVA non applicable) → tva=0 et totalTtc=totalApresRemise', () => {
+      const r = calculerDevis(studioOnly, tauxZero, 0, 0);
+      expect(r.tva).toBe(0);
+      expect(r.totalApresRemise).toBe(1000);
+      expect(r.totalTtc).toBe(1000); // === totalApresRemise
+    });
+
+    test("TVA 0% avec remise : totalTtc = totalHt - remise", () => {
+      const r = calculerDevis(studioOnly, tauxZero, 100, 0);
+      expect(r.totalHt).toBe(1000);
+      expect(r.totalApresRemise).toBe(900);
+      expect(r.tva).toBe(0);
+      expect(r.totalTtc).toBe(900);
+    });
+  });
+
   test("frais generaux 15%", () => {
     const lignes: LigneInput[] = [
       { tag: "STUDIO", quantite: 1, prixUnit: 1000 },

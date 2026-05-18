@@ -232,6 +232,11 @@ model Devis {
   coproduction     Float @default(0) // Apport en industrie (montant déductible)
   totalApresRemise Float @default(0)
   tauxTva          Float @default(20) // Taux TVA appliqué (%) — 20, 10, 5.5, 0…
+  // Mention légale custom affichée sur le PDF UNIQUEMENT si tauxTva = 0.
+  // Défaut côté UI : "Art. 293 B du CGI" (franchise en base). Modifiable
+  // par l'utilisateur (étranger UE = "Art. 196 directive 2006/112/CE",
+  // hors UE = "Art. 262 ter du CGI", etc.). NULL si TVA appliquée.
+  tvaMention       String?
   tva              Float @default(0)
   totalTtc         Float @default(0)
 
@@ -334,6 +339,9 @@ model Facture {
   // Montants
   totalHt  Float
   tauxTva  Float @default(20) // Taux TVA appliqué (%) — 20, 10, 5.5, 0… (snapshot)
+  // Snapshot de la mention TVA custom du devis source, affichée sur le PDF
+  // facture uniquement si tauxTva = 0. NULL si TVA appliquée.
+  tvaMention String?
   tva      Float
   totalTtc Float
 

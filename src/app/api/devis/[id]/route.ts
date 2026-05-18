@@ -33,6 +33,10 @@ const UpdateDevisSchema = z.object({
   tauxCsTech: z.number().min(0).max(1).optional(),
   tauxFg: z.number().min(0).max(1).optional(),
   tauxMarge: z.number().min(0).max(1).optional(),
+  // TVA personnalisable (FIX 2). Pourcentage entier 0..100.
+  tauxTva: z.number().min(0).max(100).optional(),
+  // Mention légale TVA (utile uniquement si tauxTva=0)
+  tvaMention: z.string().nullable().optional(),
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
   dateEmission: z.string().nullable().optional(),
   dateValidite: z.string().nullable().optional(),
@@ -104,7 +108,13 @@ export async function PUT(
         tauxMarge: input.tauxMarge ?? existing.tauxMarge,
       };
       const remise = input.remise ?? existing.remise;
-      const { indexationsArtiste: _ia, indexationsMusique: _im, ...totauxPrisma } = calculerDevis(allLignes, taux, remise);
+      const tauxTva = input.tauxTva ?? existing.tauxTva;
+      const { indexationsArtiste: _ia, indexationsMusique: _im, ...totauxPrisma } = calculerDevis(
+        allLignes,
+        taux,
+        remise,
+        tauxTva
+      );
       totaux = totauxPrisma;
     }
 
@@ -127,6 +137,12 @@ export async function PUT(
           ...(input.tauxCsTech !== undefined && { tauxCsTech: input.tauxCsTech }),
           ...(input.tauxFg !== undefined && { tauxFg: input.tauxFg }),
           ...(input.tauxMarge !== undefined && { tauxMarge: input.tauxMarge }),
+          ...(input.tauxTva !== undefined && { tauxTva: input.tauxTva }),
+          // tvaMention : forcé à null si TVA != 0 (cleanup automatique
+          // quand l'utilisateur quitte le mode "TVA non applicable")
+          ...(input.tauxTva !== undefined && {
+            tvaMention: input.tauxTva === 0 ? input.tvaMention ?? null : null,
+          }),
           ...(input.dateEmission !== undefined && {
             dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
           }),

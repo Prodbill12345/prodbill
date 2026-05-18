@@ -517,12 +517,19 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     {isAvoir ? `- ${euros(absHt)}` : euros(absHt)}
                   </Text>
                 </View>
-                <View style={s.totRow}>
-                  <Text style={s.totLabel}>TVA {facture.tauxTva % 1 === 0 ? facture.tauxTva.toFixed(0) : String(facture.tauxTva).replace(".", ",")} %</Text>
-                  <Text style={s.totValue}>
-                    {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
-                  </Text>
-                </View>
+                {facture.tauxTva === 0 ? (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>TVA non applicable</Text>
+                    <Text style={s.totValue}>—</Text>
+                  </View>
+                ) : (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>TVA {facture.tauxTva % 1 === 0 ? facture.tauxTva.toFixed(0) : String(facture.tauxTva).replace(".", ",")} %</Text>
+                    <Text style={s.totValue}>
+                      {isAvoir ? `- ${euros(absTva)}` : euros(absTva)}
+                    </Text>
+                  </View>
+                )}
                 <View style={isAvoir ? s.totTtcRowAvoir : s.totTtcRow}>
                   <Text style={s.totTtcLabel}>
                     {isAvoir ? "MONTANT DE L'AVOIR TTC" : "TOTAL TTC"}
@@ -531,6 +538,14 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     {isAvoir ? `- ${euros(absTtc)}` : euros(absTtc)}
                   </Text>
                 </View>
+                {/* Mention légale TVA — visible uniquement si TVA=0 */}
+                {facture.tauxTva === 0 && (
+                  <View style={[s.totRow, { marginTop: 4 }]}>
+                    <Text style={[s.totLabel, { fontStyle: "italic", fontSize: 8 }]}>
+                      {facture.tvaMention || "Art. 293 B du CGI"}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           );

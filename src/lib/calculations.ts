@@ -21,7 +21,22 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: number = 0): CalculResult {
+/**
+ * Calcule les totaux d'un devis.
+ *
+ * @param lignes      Lignes du devis (tag, quantité, prixUnit, indexation)
+ * @param taux        Taux CS / FG / Marge (en décimal 0..1)
+ * @param remise      Remise exceptionnelle (€, déductible du HT)
+ * @param tauxTvaPct  Taux TVA en POURCENTAGE entier (20, 10, 5.5, 0).
+ *                    Défaut : 20 pour rétrocompat avec les appels existants.
+ *                    Si 0 → tva = 0 et totalTtc = totalApresRemise.
+ */
+export function calculerDevis(
+  lignes: LigneInput[],
+  taux: TauxConfig,
+  remise: number = 0,
+  tauxTvaPct: number = 20
+): CalculResult {
   // 1. Indexations annuelles par type (brutes, pour précision)
   const indexationsArtiste_raw = lignes
     .filter((l) => l.tag === "ARTISTE")
@@ -73,8 +88,10 @@ export function calculerDevis(lignes: LigneInput[], taux: TauxConfig, remise: nu
   const remiseArrondie = round2(remise);
   const totalApresRemise = round2(totalHt - remiseArrondie);
 
-  // 10. TVA et TTC calculés sur le total après remise
-  const tva = round2(totalApresRemise * 0.2);
+  // 10. TVA et TTC calculés sur le total après remise au taux spécifié.
+  // tauxTvaPct = 0 → tva = 0 et totalTtc = totalApresRemise (cas
+  // "TVA non applicable" : franchise en base, export hors UE, etc.)
+  const tva = round2(totalApresRemise * (tauxTvaPct / 100));
   const totalTtc = round2(totalApresRemise + tva);
 
   return {

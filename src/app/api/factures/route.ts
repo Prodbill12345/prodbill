@@ -108,6 +108,9 @@ export async function POST(req: Request) {
         type: input.type,
         totalHt,
         tauxTva,
+        // Snapshot de la mention TVA du devis source — utile uniquement
+        // si tauxTva=0 (sinon null en DB sur le devis = null ici)
+        tvaMention: devis.tvaMention,
         tva,
         totalTtc,
         // Breakdown au prorata

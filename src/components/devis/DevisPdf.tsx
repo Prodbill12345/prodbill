@@ -457,15 +457,31 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                   <Text style={s.totHtLabel}>TOTAL HT</Text>
                   <Text style={s.totHtValue}>{euros(devis.totalApresRemise)}</Text>
                 </View>
-                <View style={s.totRow}>
-                  <Text style={s.totLabel}>TVA {devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ",")} %</Text>
-                  <Text style={s.totValue}>{euros(devis.tva)}</Text>
-                </View>
+                {devis.tauxTva === 0 ? (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>TVA non applicable</Text>
+                    <Text style={s.totValue}>—</Text>
+                  </View>
+                ) : (
+                  <View style={s.totRow}>
+                    <Text style={s.totLabel}>TVA {devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ",")} %</Text>
+                    <Text style={s.totValue}>{euros(devis.tva)}</Text>
+                  </View>
+                )}
 
                 <View style={s.totTtcRow}>
                   <Text style={s.totTtcLabel}>TOTAL TTC</Text>
                   <Text style={s.totTtcValue}>{euros(devis.totalTtc)}</Text>
                 </View>
+
+                {/* Mention légale TVA — visible uniquement si TVA=0 */}
+                {devis.tauxTva === 0 && (
+                  <View style={[s.totRow, { marginTop: 4 }]}>
+                    <Text style={[s.totLabel, { fontStyle: "italic", fontSize: 8 }]}>
+                      {devis.tvaMention || "Art. 293 B du CGI"}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           );

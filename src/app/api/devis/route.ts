@@ -33,6 +33,11 @@ const CreateDevisSchema = z.object({
   tauxCsTech: z.number().min(0).max(1).default(0.65),
   tauxFg: z.number().min(0).max(1).default(0.05),
   tauxMarge: z.number().min(0).max(1).default(0.15),
+  // TVA : pourcentage entier (20, 10, 5.5, 0…). Default 20.
+  tauxTva: z.number().min(0).max(100).default(20),
+  // Mention légale TVA — utile UNIQUEMENT si tauxTva=0 (franchise en base,
+  // export hors UE, etc.). Null sinon.
+  tvaMention: z.string().nullable().optional(),
   // <input type="date"> envoie "YYYY-MM-DD", pas un ISO datetime complet
   // Toutes les dates sont envoyées par <input type="date"> au format "YYYY-MM-DD"
   dateEmission: z.string().optional(),
@@ -86,7 +91,12 @@ export async function POST(req: Request) {
       tauxFg: input.tauxFg,
       tauxMarge: input.tauxMarge,
     };
-    const { indexationsArtiste: _ia, indexationsMusique: _im, ...totaux } = calculerDevis(allLignes, taux, input.remise);
+    const { indexationsArtiste: _ia, indexationsMusique: _im, ...totaux } = calculerDevis(
+      allLignes,
+      taux,
+      input.remise,
+      input.tauxTva
+    );
 
     // Phase 1 multi-tenant : companyId injecté explicitement sur les nested
     // sections + lignes (l'extension scopedPrisma ne descend pas dans les
@@ -103,6 +113,10 @@ export async function POST(req: Request) {
         annee: input.annee,
         ...taux,
         ...totaux,
+        tauxTva: input.tauxTva,
+        // tvaMention conservé UNIQUEMENT si TVA=0. Si TVA>0, la mention
+        // ne sert à rien et est forcée à null pour rester propre en DB.
+        tvaMention: input.tauxTva === 0 ? input.tvaMention ?? null : null,
         dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
         dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,
         dateSeance: input.dateSeance ? new Date(input.dateSeance) : null,

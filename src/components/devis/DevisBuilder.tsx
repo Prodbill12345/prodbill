@@ -49,6 +49,11 @@ const DevisFormSchema = z.object({
   tauxCsTech: z.coerce.number().min(0).max(100),
   tauxFg: z.coerce.number().min(0).max(100),
   tauxMarge: z.coerce.number().min(0).max(100),
+  // TVA : pourcentage entier (20, 10, 5.5, 0 typiquement). Coerce parce
+  // que le <select> envoie une string.
+  tauxTva: z.coerce.number().min(0).max(100),
+  // Mention légale TVA — pertinent seulement si tauxTva=0
+  tvaMention: z.string().optional(),
   dateEmission: z.string().optional(),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
@@ -94,6 +99,8 @@ interface DevisInitialData {
   tauxCsTech: number;
   tauxFg: number;
   tauxMarge: number;
+  tauxTva?: number;
+  tvaMention?: string | null;
   dateEmission?: string | null;
   dateValidite?: string | null;
   dateSeance?: string | null;
@@ -190,6 +197,8 @@ export function DevisBuilder({
           tauxCsTech: decimalToPct(initialData.tauxCsTech),
           tauxFg: decimalToPct(initialData.tauxFg),
           tauxMarge: decimalToPct(initialData.tauxMarge),
+          tauxTva: initialData.tauxTva ?? 20,
+          tvaMention: initialData.tvaMention ?? undefined,
           dateEmission: initialData.dateEmission ?? undefined,
           dateValidite: initialData.dateValidite ?? undefined,
           dateSeance: initialData.dateSeance ?? undefined,
@@ -209,6 +218,7 @@ export function DevisBuilder({
           tauxCsTech: decimalToPct(defaultTaux.tauxCsTech),
           tauxFg: decimalToPct(defaultTaux.tauxFg),
           tauxMarge: decimalToPct(defaultTaux.tauxMarge),
+          tauxTva: 20,
           // Pré-remplit la date d'émission à aujourd'hui pour les nouveaux
           // devis. Vanda peut la modifier (cas typique : devis du 1er du
           // mois saisi le 3).
@@ -560,7 +570,7 @@ export function DevisBuilder({
         {/* Taux */}
         <div className="bg-white rounded-xl border border-slate-100 p-6">
           <h3 className="font-semibold text-slate-900 mb-4">Taux appliqués</h3>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             {[
               { name: "tauxCsComedien" as const, label: "CS Comédiens" },
               { name: "tauxCsTech" as const, label: "CS Techniciens" },
@@ -579,10 +589,40 @@ export function DevisBuilder({
                 />
               </div>
             ))}
+            {/* TVA — dropdown (taux fixes, pas un input libre). Préserve la
+                valeur courante si non-standard via une 5e option dynamique. */}
+            <div>
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                TVA
+              </label>
+              <TvaDropdown
+                value={watchedValues.tauxTva ?? 20}
+                onChange={(v) => setValue("tauxTva", v, { shouldDirty: true })}
+              />
+            </div>
           </div>
           <p className="text-xs text-slate-500 mt-2">
             ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
           </p>
+
+          {/* Mention TVA conditionnelle — affichée UNIQUEMENT si TVA=0 */}
+          {Number(watchedValues.tauxTva) === 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <label className="block text-xs font-medium text-slate-500 mb-1">
+                Mention TVA (affichée sur le PDF)
+              </label>
+              <input
+                type="text"
+                {...register("tvaMention")}
+                placeholder="Art. 293 B du CGI"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-slate-400 mt-1">
+                Par défaut : <code className="bg-slate-50 px-1 rounded">Art. 293 B du CGI</code> (franchise en base).
+                Modifiable : étranger UE = <code className="bg-slate-50 px-1 rounded">Art. 196 directive 2006/112/CE</code>, etc.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Sections */}
@@ -1236,5 +1276,42 @@ function SectionBlock({
         </div>
       )}
     </div>
+  );
+}
+
+
+const STANDARD_TVA = [20, 10, 5.5, 0] as const;
+
+/**
+ * Dropdown TVA — 4 taux standard + 5e option dynamique "Autre (X%)" si
+ * la valeur courante est non-standard. Permet d'ouvrir un devis avec un
+ * taux hérité d'un import historique (ex 16.67%, 26.67% sur Caleson)
+ * sans le corrompre silencieusement.
+ */
+function TvaDropdown({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  const numValue = Number(value);
+  const isStandard = (STANDARD_TVA as readonly number[]).includes(numValue);
+  return (
+    <select
+      value={String(numValue)}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="20">20 %</option>
+      <option value="10">10 %</option>
+      <option value="5.5">5,5 %</option>
+      <option value="0">Non applicable</option>
+      {!isStandard && (
+        <option value={String(numValue)}>
+          Autre ({numValue} %)
+        </option>
+      )}
+    </select>
   );
 }
