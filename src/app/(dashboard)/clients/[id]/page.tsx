@@ -2,7 +2,7 @@ import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, FileText, Receipt, Mail, Phone, MapPin } from "lucide-react";
+import { ChevronLeft, FileText, Mail, Phone, MapPin, Pencil } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import {
@@ -69,13 +69,22 @@ export default async function ClientDetailPage({
               )}
             </div>
           </div>
-          <Link
-            href={`/devis/nouveau?clientId=${client.id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            Nouveau devis
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/clients/${client.id}/modifier`}
+              className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              Modifier
+            </Link>
+            <Link
+              href={`/devis/nouveau?clientId=${client.id}`}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              Nouveau devis
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -76,6 +76,36 @@ Acceptance criteria :
 
 ---
 
+## Sprint 3 — Snapshot client sur Facture (immutabilité légale)
+
+Le modèle `Facture` snapshot les coordonnées de la **Company émettrice**
+(`siretEmetteur`, `tvaIntraEmetteur`, `ibanEmetteur`, `adresseEmetteur`,
+etc.) mais **PAS** celles du **Client destinataire**. La facture pointe
+juste vers `clientId` via FK.
+
+Conséquence : si Vanda modifie un client (via FIX 5 ajouté en Sprint 2)
+et qu'on re-génère une facture émise pour ce client, le PDF re-rendu
+afficherait les nouvelles coordonnées au lieu des coordonnées
+historiques. Or l'art. 289 CGI exige l'immutabilité des mentions
+légales post-émission.
+
+Mitigations Phase 2 :
+
+- Soit ajouter sur `Facture` les champs `clientNameSnapshot`,
+  `clientSiretSnapshot`, `clientTvaSnapshot`, `clientAddressSnapshot`,
+  remplis au moment de l'émission, et faire que `FacturePdf` utilise
+  ces snapshots si présents (sinon fallback sur la relation `client`).
+- Soit verrouiller l'édition client si une facture EMISE existe
+  (refus côté PUT avec 409) — plus strict mais simple.
+- Soit accepter le risque et documenter pour l'utilisateur que les
+  modifications client n'impactent que les futurs documents — pour
+  les anciens, le PDF déposé sur Vercel Blob est l'unique source de
+  vérité (déjà immutable comme fichier).
+
+À discuter avec Vanda et un expert-comptable avant de trancher.
+
+---
+
 ## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
 
 Quand l'utilisateur sélectionne un comédien dans le dropdown d'une ligne

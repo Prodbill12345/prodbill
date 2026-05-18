@@ -23,9 +23,28 @@ const ClientSchema = z.object({
 
 type ClientFormData = z.infer<typeof ClientSchema>;
 
-export function ClientForm() {
+export interface ClientFormInitialData {
+  id: string;
+  name: string;
+  siret: string | null;
+  tvaIntra: string | null;
+  address: string;
+  city: string | null;
+  postalCode: string | null;
+  email: string;
+  phone: string | null;
+  notes: string | null;
+}
+
+interface ClientFormProps {
+  /** Présent en mode édition. Si absent, on est en mode création. */
+  initialData?: ClientFormInitialData;
+}
+
+export function ClientForm({ initialData }: ClientFormProps = {}) {
   const router = useRouter();
-  const [siretQuery, setSiretQuery] = useState("");
+  const isEdit = Boolean(initialData);
+  const [siretQuery, setSiretQuery] = useState(initialData?.siret ?? "");
   const [siretLoading, setSiretLoading] = useState(false);
   const [siretResult, setSiretResult] = useState<{
     status: "ok" | "closed" | "error";
@@ -40,7 +59,22 @@ export function ClientForm() {
     setValue,
     formState: { errors },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<ClientFormData>({ resolver: zodResolver(ClientSchema) as any });
+  } = useForm<ClientFormData>({
+    resolver: zodResolver(ClientSchema) as any,
+    defaultValues: initialData
+      ? {
+          name: initialData.name,
+          siret: initialData.siret ?? "",
+          tvaIntra: initialData.tvaIntra ?? "",
+          address: initialData.address,
+          city: initialData.city ?? "",
+          postalCode: initialData.postalCode ?? "",
+          email: initialData.email,
+          phone: initialData.phone ?? "",
+          notes: initialData.notes ?? "",
+        }
+      : undefined,
+  });
 
   async function lookupSiret() {
     if (!siretQuery.trim()) return;
@@ -83,15 +117,17 @@ export function ClientForm() {
   async function onSubmit(data: ClientFormData) {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/clients", {
-        method: "POST",
+      const url = isEdit ? `/api/clients/${initialData!.id}` : "/api/clients";
+      const method = isEdit ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error ?? "Erreur lors de la création");
+        alert(err.error ?? (isEdit ? "Erreur lors de la sauvegarde" : "Erreur lors de la création"));
         return;
       }
 
@@ -294,7 +330,7 @@ export function ClientForm() {
           className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-          Créer le client
+          {isEdit ? "Enregistrer les modifications" : "Créer le client"}
         </button>
       </div>
     </form>
