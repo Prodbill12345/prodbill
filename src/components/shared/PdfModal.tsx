@@ -39,6 +39,20 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
     });
   }
 
+  // Le serveur expose le nom de fichier "officiel" via le header X-Filename
+  // (URL-encoded). On le lit ici parce que l'attribut <a>.download surpasse
+  // toujours Content-Disposition côté navigateur — sans ça on perdrait
+  // le format DEVIS_/FACTURE_ généré par devisPdfFilename/facturePdfFilename.
+  function filenameFromResponse(res: Response, fallback: string): string {
+    const raw = res.headers.get("X-Filename");
+    if (!raw) return fallback;
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return fallback;
+    }
+  }
+
   async function generateFacturx() {
     setGeneratingFacturx(true);
     try {
@@ -51,7 +65,10 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = numero ? `facturx-${numero}.pdf` : "facturx.pdf";
+      a.download = filenameFromResponse(
+        res,
+        numero ? `facturx-${numero}.pdf` : "facturx.pdf"
+      );
       a.click();
       URL.revokeObjectURL(url);
       onClose();
@@ -75,7 +92,10 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
       const a = document.createElement("a");
       const label = type === "devis" ? "devis" : "facture";
       a.href = url;
-      a.download = numero ? `${label}-${numero}.pdf` : `${label}.pdf`;
+      a.download = filenameFromResponse(
+        res,
+        numero ? `${label}-${numero}.pdf` : `${label}.pdf`
+      );
       a.click();
       URL.revokeObjectURL(url);
       onClose();

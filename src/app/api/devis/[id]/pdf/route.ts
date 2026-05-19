@@ -71,6 +71,7 @@ export async function GET(
         headers: {
           "Content-Type": "application/pdf",
           "Content-Disposition": `attachment; filename="${filename}"`,
+          "X-Filename": encodeURIComponent(filename),
           "Cache-Control": "no-store",
         },
       });
@@ -105,6 +106,7 @@ export async function GET(
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        "X-Filename": encodeURIComponent(filename),
         "Cache-Control": "no-store",
       },
     });
