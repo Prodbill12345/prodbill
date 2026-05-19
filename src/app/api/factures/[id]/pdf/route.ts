@@ -44,6 +44,7 @@ export async function GET(
                       prixUnit: true,
                       total: true,
                       tauxIndexation: true,
+                      horsMarge: true,
                     },
                   },
                 },

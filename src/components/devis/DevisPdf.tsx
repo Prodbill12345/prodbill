@@ -334,6 +334,11 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                 <View key={ligne.id} style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}>
                   <View style={[s.colLib, { flexDirection: "column" }]}>
                     <Text style={s.tdText}>{ligne.libelle}</Text>
+                    {ligne.horsMarge && (
+                      <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
+                        hors marge &amp; FG
+                      </Text>
+                    )}
                   </View>
                   <Text style={[s.tdText, s.colTag]}>{TAG_LABELS[ligne.tag] ?? ligne.tag}</Text>
                   <Text style={[s.tdRight, s.colQte]}>{ligne.quantite}</Text>

@@ -7,18 +7,28 @@
  *   baseComedien  = Σ lignes ARTISTE (quantite × prixUnit) + indexations_artiste
  *   CS Artistes   = baseComedien × tauxCsComedien      [57%]
  *   CS Techniciens= Σ lignes TECHNICIEN_HCS × tauxCsTech [65%]
- *   baseMarge     = sousTotal + CS Techniciens          ⚠️ CS Artistes EXCLUS
+ *   baseMarge     = Σ lignes(!horsMarge) + Σ indexations(!horsMarge)
+ *                 + Σ CS_Tech(!horsMarge)              ⚠️ CS Artistes EXCLUS
  *   Frais généraux= baseMarge × tauxFg
  *   Marge         = baseMarge × tauxMarge
  *   TOTAL HT      = sousTotal + CS Artistes + CS Techniciens + FG + Marge
  *   TVA           = TOTAL HT × 20%
  *   TOTAL TTC     = TOTAL HT + TVA
+ *
+ * Flag `horsMarge` sur une ligne : la ligne et son indexation sont
+ * retirées du baseMarge (et la part csTech correspondante si TECH_HCS).
+ * sousTotal HT et charges sociales restent inchangés — les cotisations
+ * sont dues quoi qu'il arrive. Tickets #66 #67 #68 (Vanda).
  */
 
 import type { LigneInput, TauxConfig, CalculResult } from "@/types";
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+function indexationRaw(l: LigneInput): number {
+  return l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100);
 }
 
 /**
@@ -40,20 +50,21 @@ export function calculerDevis(
   // 1. Indexations annuelles par type (brutes, pour précision)
   const indexationsArtiste_raw = lignes
     .filter((l) => l.tag === "ARTISTE")
-    .reduce((sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0);
+    .reduce((sum, l) => sum + indexationRaw(l), 0);
 
   const indexationsMusique_raw = lignes
     .filter((l) => l.tag === "MUSIQUE")
-    .reduce((sum, l) => sum + l.quantite * l.prixUnit * ((l.tauxIndexation ?? 0) / 100), 0);
+    .reduce((sum, l) => sum + indexationRaw(l), 0);
 
-  // 2. Sous-total : base de toutes les lignes + indexations (incluses dès le départ)
+  // 2. Sous-total : base de TOUTES les lignes + TOUTES indexations.
+  // Le flag horsMarge n'affecte PAS le sousTotal : la ligne reste facturée.
   const sousTotal = round2(
     lignes.reduce((sum, l) => sum + l.quantite * l.prixUnit, 0)
     + indexationsArtiste_raw + indexationsMusique_raw
   );
 
-  // 3. Bases CS
-  // baseComedien inclut l'indexation artiste → la CS s'applique sur le montant indexé
+  // 3. Bases CS — charges sociales calculées sur TOUTES les lignes du tag
+  // (cotisation due quoi qu'il arrive, même si la ligne est horsMarge).
   const baseComedien_raw = lignes
     .filter((l) => l.tag === "ARTISTE")
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
@@ -66,8 +77,16 @@ export function calculerDevis(
   const csComedien = round2((baseComedien_raw + indexationsArtiste_raw) * taux.tauxCsComedien);
   const csTechniciens = round2(baseTech * taux.tauxCsTech);
 
-  // 5. Base marge — ⚠️ csComedien N'ENTRE PAS dans la base marge
-  const baseMarge = round2(sousTotal + csTechniciens);
+  // 5. Base marge — exclut les lignes flaggées horsMarge (et leur
+  // indexation + part csTech correspondante). csComedien jamais inclus.
+  const lignesPourMarge = lignes.filter((l) => !l.horsMarge);
+  const sousTotalMarge_raw =
+    lignesPourMarge.reduce((sum, l) => sum + l.quantite * l.prixUnit + indexationRaw(l), 0);
+  const baseTechMarge = lignesPourMarge
+    .filter((l) => l.tag === "TECHNICIEN_HCS")
+    .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
+  const csTechMarge_raw = baseTechMarge * taux.tauxCsTech;
+  const baseMarge = round2(sousTotalMarge_raw + csTechMarge_raw);
 
   // 6. Frais généraux et marge (valeurs brutes pour éviter cumuls d'arrondi)
   const fraisGeneraux_raw = baseMarge * taux.tauxFg;

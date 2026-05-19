@@ -26,6 +26,9 @@ export type FactureForPdf = Facture & {
         prixUnit: number;
         total: number;
         tauxIndexation: number;
+        // Optionnel : si le devis source a été supprimé ou si le champ
+        // n'a pas été selectionné par la route API, on retombe sur false.
+        horsMarge?: boolean;
       }>;
     }>;
   } | null;
@@ -442,7 +445,19 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                         key={l.id}
                         style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}
                       >
-                        <Text style={[s.tdText, s.colLib]}>{l.libelle}</Text>
+                        <View style={[s.colLib, { flexDirection: "column" }]}>
+                          <Text style={s.tdText}>{l.libelle}</Text>
+                          {/* Fallback robuste : horsMarge optionnel — si le
+                              devis source a été supprimé ou si le champ
+                              manque, on n'affiche simplement pas le badge.
+                              Le montant snapshoté de la facture reste
+                              correct quoi qu'il arrive. */}
+                          {l.horsMarge === true && (
+                            <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
+                              hors marge &amp; FG
+                            </Text>
+                          )}
+                        </View>
                         <Text style={[s.tdText, s.colTag]}>
                           {TAG_LABELS[l.tag] ?? l.tag}
                         </Text>

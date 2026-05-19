@@ -31,6 +31,7 @@ const LigneSchema = z.object({
   tauxIndexation: z.coerce.number().min(0).max(100).optional(),
   comedienId: z.string().optional(),
   agentId: z.string().optional(),
+  horsMarge: z.boolean().optional(),
 });
 
 const SectionSchema = z.object({
@@ -117,6 +118,7 @@ interface DevisInitialData {
       tauxIndexation?: number;
       comedienId?: string | null;
       agentId?: string | null;
+      horsMarge?: boolean;
     }[];
   }[];
 }
@@ -249,6 +251,7 @@ export function DevisBuilder({
       quantite: Number(l.quantite) || 0,
       prixUnit: Number(l.prixUnit) || 0,
       tauxIndexation: Number(l.tauxIndexation) || 0,
+      horsMarge: Boolean(l.horsMarge),
     }))
   ) ?? [];
 
@@ -1121,6 +1124,27 @@ function SectionBlock({
                       placeholder="Description de la prestation"
                       className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+                    {/* Toggle horsMarge — exclut la ligne du calcul Marge/FG.
+                        Discret par défaut, orange quand activé. Tickets #66-68. */}
+                    <label
+                      className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
+                      title="Exclure cette ligne du calcul Marge / Frais Généraux (la ligne reste facturée dans le HT). Utile pour les prestations Musique que vous ne souhaitez pas surfacturer."
+                    >
+                      <input
+                        type="checkbox"
+                        {...register(`sections.${sectionIndex}.lignes.${li}.horsMarge`)}
+                        className="w-3 h-3 cursor-pointer accent-orange-500 shrink-0"
+                      />
+                      <span
+                        className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
+                          ligne.horsMarge
+                            ? "text-orange-600"
+                            : "text-slate-300 group-hover:text-slate-500"
+                        }`}
+                      >
+                        hors marge
+                      </span>
+                    </label>
                   </div>
                   {tagValue === "ARTISTE" && comediens.length > 0 && (
                     <select

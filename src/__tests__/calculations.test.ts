@@ -274,4 +274,108 @@ describe("calculerDevis", () => {
     // La TVA stockée correspond bien à 20 % de l'HT affiché
     expect(facture.tva).toBeCloseTo(factureDisplayHt * 0.2, 2);
   });
+
+  /**
+   * Lignes horsMarge=true (tickets #66 #67 #68 — Vanda).
+   * Cas d'usage : lignes Musique exclues du calcul FG/Marge.
+   * Règle : la ligne et son indexation sont retirées du baseMarge.
+   * Les charges sociales et le sousTotal HT restent inchangés.
+   * Indépendant du tag — peut s'appliquer à n'importe quelle ligne.
+   */
+  describe("horsMarge (exclusion FG/Marge sur ligne)", () => {
+    test("MUSIQUE non flaggée : calcul identique au baseline", () => {
+      const lignes: LigneInput[] = [
+        { tag: "STUDIO",  quantite: 1, prixUnit: 1000 },
+        { tag: "MUSIQUE", quantite: 1, prixUnit: 500 }, // PAS horsMarge
+      ];
+      const result = calculerDevis(lignes, tauxRef);
+
+      expect(result.sousTotal).toBe(1500);
+      // baseMarge = 1500 + 0 (pas de csTech) = 1500
+      expect(result.baseMarge).toBe(1500);
+      expect(result.fraisGeneraux).toBe(75);   // 1500 × 5%
+      expect(result.marge).toBe(225);          // 1500 × 15%
+      expect(result.totalHt).toBe(1800);       // 1500 + 75 + 225
+    });
+
+    test("MUSIQUE flaggée : marge réduite du bon montant", () => {
+      const lignes: LigneInput[] = [
+        { tag: "STUDIO",  quantite: 1, prixUnit: 1000 },
+        { tag: "MUSIQUE", quantite: 1, prixUnit: 500, horsMarge: true },
+      ];
+      const result = calculerDevis(lignes, tauxRef);
+
+      // sousTotal HT INCHANGÉ — la musique reste facturée
+      expect(result.sousTotal).toBe(1500);
+      // baseMarge ne contient que la ligne STUDIO (1000), MUSIQUE exclue
+      expect(result.baseMarge).toBe(1000);
+      expect(result.fraisGeneraux).toBe(50);   // 1000 × 5%
+      expect(result.marge).toBe(150);          // 1000 × 15%
+      // totalHt = 1500 (sousTotal) + 50 (FG) + 150 (marge) = 1700
+      expect(result.totalHt).toBe(1700);
+    });
+
+    test("indexation d'une ligne flaggée : aussi exclue du baseMarge", () => {
+      const lignes: LigneInput[] = [
+        { tag: "ARTISTE", quantite: 1, prixUnit: 1000, tauxIndexation: 10, horsMarge: true },
+        { tag: "STUDIO",  quantite: 1, prixUnit: 500 },
+      ];
+      // Sans horsMarge, baseMarge aurait été : 1000 + 100 (idx) + 500 = 1600
+      // Avec horsMarge sur ARTISTE : on retire la ligne ET son indexation
+      // baseMarge = 500 (STUDIO seulement)
+      // CS Comédien reste calculée sur le montant indexé (cotisation due) :
+      //   csComedien = (1000 + 100) × 57% = 627
+      const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0.05, tauxMarge: 0.15 });
+
+      expect(result.sousTotal).toBe(1600);        // INCHANGÉ : 1000+100+500
+      expect(result.csComedien).toBe(627);        // 1100 × 57%, charges dues
+      expect(result.baseMarge).toBe(500);         // STUDIO uniquement
+      expect(result.fraisGeneraux).toBe(25);      // 500 × 5%
+      expect(result.marge).toBe(75);              // 500 × 15%
+    });
+
+    test("TECHNICIEN_HCS flaggé : ses CS sont exclues du baseMarge mais restent dues", () => {
+      const lignes: LigneInput[] = [
+        { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 1000, horsMarge: true },
+        { tag: "STUDIO",         quantite: 1, prixUnit: 500 },
+      ];
+      const result = calculerDevis(lignes, { ...tauxRef, tauxFg: 0.05, tauxMarge: 0.15 });
+
+      // CS Tech total : calculées sur TOUTES les lignes TECH (cotisation due)
+      expect(result.csTechniciens).toBe(650);     // 1000 × 65%
+      // sousTotal INCHANGÉ
+      expect(result.sousTotal).toBe(1500);
+      // baseMarge : STUDIO seulement (la ligne TECH ET ses CS sont exclues)
+      expect(result.baseMarge).toBe(500);
+      expect(result.fraisGeneraux).toBe(25);
+      expect(result.marge).toBe(75);
+      // totalHt = 1500 (sT) + 650 (csTech) + 25 (FG) + 75 (marge) = 2250
+      expect(result.totalHt).toBe(2250);
+    });
+
+    test("mix : plusieurs lignes flaggées et non-flaggées", () => {
+      const lignes: LigneInput[] = [
+        { tag: "ARTISTE",        quantite: 1, prixUnit: 900 },                       // dans baseMarge
+        { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 90 },                        // dans baseMarge
+        { tag: "MUSIQUE",        quantite: 1, prixUnit: 500, horsMarge: true },      // EXCLUE
+        { tag: "MUSIQUE",        quantite: 1, prixUnit: 200 },                       // dans baseMarge
+        { tag: "STUDIO",         quantite: 1, prixUnit: 1000, horsMarge: true },     // EXCLUE
+      ];
+      const result = calculerDevis(lignes, tauxRef);
+
+      // sousTotal = 900+90+500+200+1000 = 2690 (INCHANGÉ)
+      expect(result.sousTotal).toBe(2690);
+      // csComedien = 900 × 57% = 513 (toutes ARTISTE)
+      expect(result.csComedien).toBe(513);
+      // csTechniciens = 90 × 65% = 58.50 (toutes TECH, mais TECH ici non flaggée)
+      expect(result.csTechniciens).toBe(58.5);
+      // baseMarge :
+      //   lignes non-horsMarge : ARTISTE 900 + TECH 90 + MUSIQUE 200 = 1190
+      //   + csTech non-horsMarge : 58.50
+      //   = 1248.50
+      expect(result.baseMarge).toBe(1248.5);
+      expect(result.fraisGeneraux).toBe(62.43);  // 1248.50 × 5%
+      expect(result.marge).toBe(187.28);         // 1248.50 × 15%
+    });
+  });
 });

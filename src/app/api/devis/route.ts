@@ -12,6 +12,7 @@ const LigneSchema = z.object({
   tauxIndexation: z.number().min(0).max(100).default(0),
   comedienId: optionalFkId,
   agentId: optionalFkId,
+  horsMarge: z.boolean().optional().default(false),
   ordre: z.number().int(),
 });
 
@@ -138,6 +139,7 @@ export async function POST(req: Request) {
                 tauxIndexation: ligne.tauxIndexation ?? 0,
                 comedienId: ligne.comedienId ?? null,
                 agentId: ligne.agentId ?? null,
+                horsMarge: ligne.horsMarge ?? false,
                 ordre: ligne.ordre,
               })),
             },

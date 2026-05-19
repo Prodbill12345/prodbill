@@ -313,6 +313,13 @@ model DevisLigne {
   agentId        String?  // Agent voix-off direct (ARTISTE uniquement, interne)
   agent          Agent?   @relation(fields: [agentId], references: [id])
   paiementComedien Boolean @default(false) // statut paiement interne, jamais dans PDF
+  // Si true : la ligne (et son indexation) est exclue du baseMarge utilisé
+  // pour calculer Frais Généraux et Marge. Les charges sociales sur la ligne
+  // restent dues, et la ligne reste dans le sousTotal HT.
+  // Cas d'usage : lignes Musique (composition, droits) que Vanda ne veut pas
+  // surfacturer via Marge/FG. Indépendant du tag : peut s'appliquer à
+  // n'importe quel tag (ARTISTE, MUSIQUE, STUDIO, etc.).
+  horsMarge      Boolean    @default(false)
   ordre          Int
 
   @@index([sectionId])

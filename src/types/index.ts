@@ -100,6 +100,9 @@ export interface LigneInput {
   quantite: number;
   prixUnit: number;
   tauxIndexation?: number; // pourcentage, ex: 2.0 pour 2%
+  // Si true : la ligne (et son indexation) sont exclues du baseMarge
+  // utilisé pour calculer FG et Marge. CS et sousTotal HT restent inchangés.
+  horsMarge?: boolean;
 }
 
 export interface TauxConfig {
