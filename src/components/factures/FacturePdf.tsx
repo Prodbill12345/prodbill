@@ -489,11 +489,13 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     {detailRows.length > 0 && <View style={{ height: 4 }} />}
                     {detailRows.map((r) => (
                       <View key={r.label} style={s.totRow}>
-                        <Text style={s.totLabel}>{r.label}</Text>
-                        <Text style={[s.totLabel, { width: 50, textAlign: "right" }]}>
+                        <Text style={[s.totLabel, { flex: 1 }]}>{r.label}</Text>
+                        <Text style={[s.totLabel, { width: 40, textAlign: "right" }]}>
                           {pct(r.taux)}
                         </Text>
-                        <Text style={s.totValue}>{euros(r.montant)}</Text>
+                        <Text style={[s.totValue, { width: 65, textAlign: "right" }]}>
+                          {euros(r.montant)}
+                        </Text>
                       </View>
                     ))}
                     {facture.coproduction !== 0 && (
