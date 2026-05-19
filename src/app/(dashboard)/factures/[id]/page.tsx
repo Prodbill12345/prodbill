@@ -226,6 +226,31 @@ export default async function FactureDetailPage({
               factureId={facture.id}
               initialValue={facture.dateReglement}
             />
+            {/* Période d'exploitation — snapshot du devis source à
+                l'émission. Lecture seule (immuabilité légale comme le
+                reste de la facture). Ticket #69. */}
+            {(facture.periodeExploitationDebut ||
+              facture.periodeExploitationFin ||
+              facture.periodeExploitationLibelle) && (
+              <div className="mt-3 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
+                <p className="text-xs text-slate-400 leading-tight">
+                  Période d&apos;exploitation
+                </p>
+                <p className="text-sm text-slate-700 mt-0.5">
+                  {facture.periodeExploitationDebut && facture.periodeExploitationFin ? (
+                    <>
+                      du {formatDate(facture.periodeExploitationDebut)}{" "}
+                      au {formatDate(facture.periodeExploitationFin)}
+                      {facture.periodeExploitationLibelle && (
+                        <> — {facture.periodeExploitationLibelle}</>
+                      )}
+                    </>
+                  ) : (
+                    facture.periodeExploitationLibelle
+                  )}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Détail — sections/lignes lues depuis le devis lié,

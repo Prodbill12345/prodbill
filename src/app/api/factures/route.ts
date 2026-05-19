@@ -111,6 +111,13 @@ export async function POST(req: Request) {
         // Snapshot de la mention TVA du devis source — utile uniquement
         // si tauxTva=0 (sinon null en DB sur le devis = null ici)
         tvaMention: devis.tvaMention,
+        // Snapshot période d'exploitation (ticket #69). Re-snapshot à
+        // chaque facture acompte/solde — si le devis est modifié entre
+        // deux émissions, la 2e facture reflète l'état au moment de
+        // son émission. Immuable ensuite via le verrouillage EMISE.
+        periodeExploitationDebut: devis.periodeExploitationDebut,
+        periodeExploitationFin: devis.periodeExploitationFin,
+        periodeExploitationLibelle: devis.periodeExploitationLibelle,
         tva,
         totalTtc,
         // Breakdown au prorata

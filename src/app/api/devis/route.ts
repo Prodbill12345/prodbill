@@ -1,7 +1,11 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculerDevis } from "@/lib/calculations";
-import { optionalFkId } from "@/lib/zod-helpers";
+import {
+  optionalFkId,
+  periodeExploitationFields,
+  validatePeriodeExploitation,
+} from "@/lib/zod-helpers";
 import { z } from "zod";
 
 const LigneSchema = z.object({
@@ -44,10 +48,11 @@ const CreateDevisSchema = z.object({
   dateEmission: z.string().optional(),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
+  ...periodeExploitationFields,
   notes: z.string().optional(),
   remise: z.number().min(0).default(0),
   sections: z.array(SectionSchema),
-});
+}).superRefine(validatePeriodeExploitation);
 
 export async function GET() {
   try {
@@ -121,6 +126,14 @@ export async function POST(req: Request) {
         dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
         dateValidite: input.dateValidite ? new Date(input.dateValidite) : null,
         dateSeance: input.dateSeance ? new Date(input.dateSeance) : null,
+        periodeExploitationDebut: input.periodeExploitationDebut
+          ? new Date(input.periodeExploitationDebut)
+          : null,
+        periodeExploitationFin: input.periodeExploitationFin
+          ? new Date(input.periodeExploitationFin)
+          : null,
+        periodeExploitationLibelle:
+          input.periodeExploitationLibelle?.trim() || null,
         notes: input.notes,
         createdById: user.id,
         sections: {

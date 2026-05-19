@@ -1,7 +1,11 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculerDevis } from "@/lib/calculations";
-import { optionalFkId } from "@/lib/zod-helpers";
+import {
+  optionalFkId,
+  periodeExploitationFields,
+  validatePeriodeExploitation,
+} from "@/lib/zod-helpers";
 import { del } from "@vercel/blob";
 import { z } from "zod";
 
@@ -43,10 +47,11 @@ const UpdateDevisSchema = z.object({
   dateEmission: z.string().nullable().optional(),
   dateValidite: z.string().nullable().optional(),
   dateSeance: z.string().nullable().optional(),
+  ...periodeExploitationFields,
   notes: z.string().optional(),
   remise: z.number().min(0).optional(),
   sections: z.array(SectionSchema).optional(),
-});
+}).superRefine(validatePeriodeExploitation);
 
 export async function GET(
   _req: Request,
@@ -153,6 +158,20 @@ export async function PUT(
           }),
           ...(input.dateSeance !== undefined && {
             dateSeance: input.dateSeance ? new Date(input.dateSeance) : null,
+          }),
+          ...(input.periodeExploitationDebut !== undefined && {
+            periodeExploitationDebut: input.periodeExploitationDebut
+              ? new Date(input.periodeExploitationDebut)
+              : null,
+          }),
+          ...(input.periodeExploitationFin !== undefined && {
+            periodeExploitationFin: input.periodeExploitationFin
+              ? new Date(input.periodeExploitationFin)
+              : null,
+          }),
+          ...(input.periodeExploitationLibelle !== undefined && {
+            periodeExploitationLibelle:
+              input.periodeExploitationLibelle?.trim() || null,
           }),
           ...(input.notes !== undefined && { notes: input.notes }),
           ...(input.remise !== undefined && { remise: input.remise }),

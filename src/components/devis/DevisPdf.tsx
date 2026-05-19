@@ -317,6 +317,28 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
           </View>
         )}
 
+        {/* ── Période d'exploitation (ticket #69) ──────────────────
+            Affichée seulement si au moins un des 3 champs est rempli.
+            3 formats :
+              - 2 dates + libellé : "du DD/MM/YYYY au DD/MM/YYYY — Libellé"
+              - 2 dates seules    : "du DD/MM/YYYY au DD/MM/YYYY"
+              - Libellé seul      : "Libellé"
+            Le schéma Zod garantit qu'on n'a jamais une seule date orpheline. */}
+        {(devis.periodeExploitationDebut ||
+          devis.periodeExploitationFin ||
+          devis.periodeExploitationLibelle) && (
+          <View style={{ marginBottom: 16 }}>
+            <Text style={{ fontSize: 8.5, color: "#64748b", lineHeight: 1.6 }}>
+              <Text style={{ fontFamily: "Helvetica-Bold", color: "#475569" }}>
+                Période d&apos;exploitation :{" "}
+              </Text>
+              {devis.periodeExploitationDebut && devis.periodeExploitationFin
+                ? `du ${fmtDate(devis.periodeExploitationDebut)} au ${fmtDate(devis.periodeExploitationFin)}${devis.periodeExploitationLibelle ? ` — ${devis.periodeExploitationLibelle}` : ""}`
+                : devis.periodeExploitationLibelle}
+            </Text>
+          </View>
+        )}
+
         {/* ── Sections / lignes ─────────────────────────────────── */}
         {devis.sections.map((section) => (
           <View key={section.id} style={s.sectionBlock} wrap={false}>

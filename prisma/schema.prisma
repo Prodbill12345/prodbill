@@ -253,6 +253,15 @@ model Devis {
   bdcClientFilename   String?
   bdcClientUploadedAt DateTime?
 
+  // Période d'exploitation des droits cédés au client (ticket #69).
+  // Globale au devis en V1 — peut être affinée par ligne en V2 si besoin.
+  // Règles : si Fin saisie, Début doit l'être aussi (et inversement).
+  // Libellé sans dates = "à définir" autorisé. Tout null = pas de droits
+  // (ex: prestation technique seule).
+  periodeExploitationDebut    DateTime?
+  periodeExploitationFin      DateTime?
+  periodeExploitationLibelle  String?
+
   // Champs d'identification projet (libres, optionnels)
   nomProjet      String?
   refDevis       String? // Numéro de devis client (ex: DEV-2024-001)
@@ -398,6 +407,13 @@ model Facture {
 
   // Référence commande client
   numeroBdc  String?
+
+  // Période d'exploitation — snapshot recopié depuis le devis source
+  // au moment de l'émission (re-snapshot à chaque facture acompte/solde).
+  // Immuabilité après EMISE comme le reste de la facture. Ticket #69.
+  periodeExploitationDebut    DateTime?
+  periodeExploitationFin      DateTime?
+  periodeExploitationLibelle  String?
 
   // Stockage
   pdfUrl     String? // Vercel Blob

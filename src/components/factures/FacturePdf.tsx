@@ -380,6 +380,22 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
           </View>
         )}
 
+        {/* ── Période d'exploitation (snapshot du devis, ticket #69) ── */}
+        {(facture.periodeExploitationDebut ||
+          facture.periodeExploitationFin ||
+          facture.periodeExploitationLibelle) && (
+          <View style={{ marginBottom: 14 }}>
+            <Text style={{ fontSize: 8.5, color: "#64748b", lineHeight: 1.6 }}>
+              <Text style={{ fontFamily: "Helvetica-Bold", color: "#475569" }}>
+                Période d&apos;exploitation :{" "}
+              </Text>
+              {facture.periodeExploitationDebut && facture.periodeExploitationFin
+                ? `du ${fmtDate(facture.periodeExploitationDebut)} au ${fmtDate(facture.periodeExploitationFin)}${facture.periodeExploitationLibelle ? ` — ${facture.periodeExploitationLibelle}` : ""}`
+                : facture.periodeExploitationLibelle}
+            </Text>
+          </View>
+        )}
+
         {/* ── Détail des prestations ─────────────────────────────
             Sections/lignes lues depuis le devis lié, valeurs ramenées
             au prorata (ratio = facture.totalHt / devis.totalHt).

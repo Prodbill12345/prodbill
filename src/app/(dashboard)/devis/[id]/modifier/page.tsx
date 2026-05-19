@@ -74,6 +74,13 @@ export default async function ModifierDevisPage({
     dateSeance: devis.dateSeance
       ? devis.dateSeance.toISOString().slice(0, 10)
       : null,
+    periodeExploitationDebut: devis.periodeExploitationDebut
+      ? devis.periodeExploitationDebut.toISOString().slice(0, 10)
+      : null,
+    periodeExploitationFin: devis.periodeExploitationFin
+      ? devis.periodeExploitationFin.toISOString().slice(0, 10)
+      : null,
+    periodeExploitationLibelle: devis.periodeExploitationLibelle,
     notes: devis.notes,
     remise: devis.remise ?? 0,
     bdcClientUrl: devis.bdcClientUrl,

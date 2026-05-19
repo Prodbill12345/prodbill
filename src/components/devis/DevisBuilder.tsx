@@ -12,6 +12,10 @@ import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import type { Client } from "@/types";
 import { InputPct } from "@/components/forms/InputPct";
 import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
+import {
+  periodeExploitationFields,
+  validatePeriodeExploitation,
+} from "@/lib/zod-helpers";
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { BdcClientUploadField } from "./BdcClientUploadField";
 
@@ -60,10 +64,11 @@ const DevisFormSchema = z.object({
   dateEmission: z.string().optional(),
   dateValidite: z.string().optional(),
   dateSeance: z.string().optional(),
+  ...periodeExploitationFields,
   notes: z.string().optional(),
   remise: z.coerce.number().min(0).optional(),
   sections: z.array(SectionSchema).min(1, "Au moins une section"),
-});
+}).superRefine(validatePeriodeExploitation);
 
 type DevisFormData = z.infer<typeof DevisFormSchema>;
 
@@ -107,6 +112,9 @@ interface DevisInitialData {
   dateEmission?: string | null;
   dateValidite?: string | null;
   dateSeance?: string | null;
+  periodeExploitationDebut?: string | null;
+  periodeExploitationFin?: string | null;
+  periodeExploitationLibelle?: string | null;
   notes?: string | null;
   remise?: number | null;
   // BDC reçu DU client (uploadé séparément des champs form). Ticket #79.
@@ -215,6 +223,9 @@ export function DevisBuilder({
           dateEmission: initialData.dateEmission ?? undefined,
           dateValidite: initialData.dateValidite ?? undefined,
           dateSeance: initialData.dateSeance ?? undefined,
+          periodeExploitationDebut: initialData.periodeExploitationDebut ?? undefined,
+          periodeExploitationFin: initialData.periodeExploitationFin ?? undefined,
+          periodeExploitationLibelle: initialData.periodeExploitationLibelle ?? undefined,
           notes: initialData.notes ?? undefined,
           remise: initialData.remise ?? undefined,
           sections: initialData.sections.map((s) => ({
@@ -520,6 +531,60 @@ export function DevisBuilder({
                 {...register("dateSeance")}
                 className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            {/* Période d'exploitation (ticket #69). Sous-section dédiée
+                en col-span-2 avec 3 inputs en grille interne (stack mobile). */}
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Période d&apos;exploitation
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <input
+                    type="date"
+                    {...register("periodeExploitationDebut")}
+                    placeholder="Du"
+                    aria-label="Date de début d'exploitation"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-0.5">Du</p>
+                  {"periodeExploitationDebut" in errors && errors.periodeExploitationDebut && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.periodeExploitationDebut.message as string}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="date"
+                    {...register("periodeExploitationFin")}
+                    placeholder="Au"
+                    aria-label="Date de fin d'exploitation"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-0.5">Au</p>
+                  {"periodeExploitationFin" in errors && errors.periodeExploitationFin && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.periodeExploitationFin.message as string}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    {...register("periodeExploitationLibelle")}
+                    placeholder="Libellé (ex: Web Global + TV France)"
+                    maxLength={255}
+                    aria-label="Libellé de la période d'exploitation"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-slate-400 mt-0.5">Libellé (optionnel)</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 mt-1.5">
+                Optionnel — durée pendant laquelle le client peut exploiter la production.
+              </p>
             </div>
 
             <div className="col-span-2">
