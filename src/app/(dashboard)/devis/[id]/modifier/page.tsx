@@ -76,6 +76,11 @@ export default async function ModifierDevisPage({
       : null,
     notes: devis.notes,
     remise: devis.remise ?? 0,
+    bdcClientUrl: devis.bdcClientUrl,
+    bdcClientFilename: devis.bdcClientFilename,
+    bdcClientUploadedAt: devis.bdcClientUploadedAt
+      ? devis.bdcClientUploadedAt.toISOString()
+      : null,
     sections: devis.sections.map((s) => ({
       titre: s.titre,
       lignes: s.lignes.map((l) => ({
@@ -86,6 +91,7 @@ export default async function ModifierDevisPage({
         comedienId: l.comedienId,
         agentId: l.agentId,
         tauxIndexation: l.tauxIndexation ?? 0,
+        horsMarge: l.horsMarge,
       })),
     })),
   };

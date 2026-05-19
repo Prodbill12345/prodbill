@@ -246,6 +246,13 @@ model Devis {
   notes        String?
   pdfUrl       String?   // Vercel Blob URL
 
+  // BDC reçu DU client (scan/PDF). Distinct du modèle BDC (sortant,
+  // auto-généré pour le client) et du champ Facture.numeroBdc
+  // (référence texte). Ticket #79.
+  bdcClientUrl        String?
+  bdcClientFilename   String?
+  bdcClientUploadedAt DateTime?
+
   // Champs d'identification projet (libres, optionnels)
   nomProjet      String?
   refDevis       String? // Numéro de devis client (ex: DEV-2024-001)

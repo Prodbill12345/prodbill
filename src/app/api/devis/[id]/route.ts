@@ -2,6 +2,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculerDevis } from "@/lib/calculations";
 import { optionalFkId } from "@/lib/zod-helpers";
+import { del } from "@vercel/blob";
 import { z } from "zod";
 
 const LigneSchema = z.object({
@@ -222,6 +223,21 @@ export async function DELETE(
         { error: "Seuls les brouillons peuvent être supprimés" },
         { status: 403 }
       );
+    }
+
+    // Cleanup blob BDC client si présent — tolérant pour ne pas
+    // bloquer la suppression du devis (le blob peut déjà avoir
+    // disparu côté Vercel).
+    if (existing.bdcClientUrl) {
+      try {
+        await del(existing.bdcClientUrl, {
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
+      } catch (err) {
+        console.warn(
+          `[DELETE devis ${id}] del() bdcClient blob échoué: ${String(err)}`
+        );
+      }
     }
 
     await prisma.devis.delete({ where: { id } });

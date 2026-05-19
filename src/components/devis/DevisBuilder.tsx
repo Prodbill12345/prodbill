@@ -13,6 +13,7 @@ import type { Client } from "@/types";
 import { InputPct } from "@/components/forms/InputPct";
 import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
+import { BdcClientUploadField } from "./BdcClientUploadField";
 
 // Convention : la DB stocke les taux en DÉCIMAL (0..1). Le form state
 // les manipule en POURCENTAGE (0..100). Conversions :
@@ -108,6 +109,10 @@ interface DevisInitialData {
   dateSeance?: string | null;
   notes?: string | null;
   remise?: number | null;
+  // BDC reçu DU client (uploadé séparément des champs form). Ticket #79.
+  bdcClientUrl?: string | null;
+  bdcClientFilename?: string | null;
+  bdcClientUploadedAt?: string | null;
   sections: {
     titre: string;
     lignes: {
@@ -580,6 +585,23 @@ export function DevisBuilder({
                 ))}
               </select>
             </div>
+
+            {/* BDC client reçu — upload séparé du form (side-effect direct).
+                Affiché uniquement en mode édition : avant le 1er save, le
+                devis n'a pas encore d'id et la route /api/devis/[id]/bdc-client
+                ne pourrait pas y rattacher le fichier. Ticket #79. */}
+            {devisId && (
+              <div className="col-span-2">
+                <BdcClientUploadField
+                  devisId={devisId}
+                  initial={{
+                    url: initialData?.bdcClientUrl ?? null,
+                    filename: initialData?.bdcClientFilename ?? null,
+                    uploadedAt: initialData?.bdcClientUploadedAt ?? null,
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
 

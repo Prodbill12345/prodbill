@@ -2,7 +2,7 @@ import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Mail, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Mail, AlertTriangle, FileText, ExternalLink } from "lucide-react";
 import { formatEuros, formatPct } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import {
@@ -49,6 +49,9 @@ export default async function FactureDetailPage({
           numero: true,
           objet: true,
           totalHt: true,
+          bdcClientUrl: true,
+          bdcClientFilename: true,
+          bdcClientUploadedAt: true,
           sections: {
             orderBy: { ordre: "asc" },
             select: {
@@ -182,6 +185,38 @@ export default async function FactureDetailPage({
               initialValue={facture.numeroBdc}
               isLocked={!!facture.emiseAt}
             />
+            {/* BDC client reçu — fichier uploadé sur le devis source.
+                Lecture seule ici : la modif passe par /devis/[id]/modifier.
+                Ticket #79. */}
+            {facture.devis?.bdcClientUrl && (
+              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
+                <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400 leading-tight">BDC client (fichier)</p>
+                  <p
+                    className="text-sm text-slate-700 truncate"
+                    title={facture.devis.bdcClientFilename ?? ""}
+                  >
+                    {facture.devis.bdcClientFilename}
+                    {facture.devis.bdcClientUploadedAt && (
+                      <span className="ml-2 text-xs text-slate-400">
+                        · uploadé le {formatDate(facture.devis.bdcClientUploadedAt)}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <a
+                  href={facture.devis.bdcClientUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title="Ouvrir le BDC dans un nouvel onglet"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Voir
+                </a>
+              </div>
+            )}
             <FactureDateEmissionField
               factureId={facture.id}
               initialValue={facture.dateEmission}
