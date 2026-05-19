@@ -132,6 +132,9 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
       }
 
       const { data: client } = await res.json();
+      // TODO: param ?redirect=devis (posé par DevisBuilder avant le fix
+      // bug #78) n'est pas lu ici. Plus de consommateur depuis qu'on
+      // utilise ClientFormModal — à nettoyer si confirmé inutilisé.
       router.push(`/clients/${client.id}`);
       router.refresh();
     } finally {

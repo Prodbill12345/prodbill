@@ -12,6 +12,7 @@ import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import type { Client } from "@/types";
 import { InputPct } from "@/components/forms/InputPct";
 import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
+import { ClientFormModal } from "@/components/clients/ClientFormModal";
 
 // Convention : la DB stocke les taux en DÉCIMAL (0..1). Le form state
 // les manipule en POURCENTAGE (0..100). Conversions :
@@ -155,7 +156,7 @@ interface DevisBuilderProps {
 }
 
 export function DevisBuilder({
-  clients,
+  clients: initialClients,
   agents = [],
   comediens = [],
   defaultTaux,
@@ -174,6 +175,11 @@ export function DevisBuilder({
   const [expandedSections, setExpandedSections] = useState<Set<number>>(
     new Set(initialData ? initialData.sections.map((_, i) => i) : [0])
   );
+  // Liste des clients en local : on l'enrichit quand l'utilisateur crée
+  // un client via le modal, sans recharger la page (sinon le state du
+  // formulaire de devis serait perdu).
+  const [clients, setClients] = useState<Client[]>(initialClients);
+  const [showClientModal, setShowClientModal] = useState(false);
 
   const {
     register,
@@ -389,6 +395,7 @@ export function DevisBuilder({
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit(onSubmit)} onKeyDown={handleKeyDown} className="grid grid-cols-3 gap-6">
       {/* Garde-fou : devis Caleson import historique non encore réparé.
           Voir src/lib/historical-import.ts + BUG #4. Non bloquant. */}
@@ -445,7 +452,13 @@ export function DevisBuilder({
                     {...clientIdField}
                     onChange={(e) => {
                       if (e.target.value === "__nouveau__") {
-                        router.push("/clients/nouveau?redirect=devis");
+                        // Ouverture en modal pour ne pas perdre le state
+                        // du devis en cours (bug #78). Reset à "" pour
+                        // que le <select> ne reste pas bloqué sur la
+                        // valeur sentinelle pendant que le modal est
+                        // ouvert.
+                        setShowClientModal(true);
+                        e.target.value = "";
                         return;
                       }
                       clientIdField.onChange(e);
@@ -812,6 +825,18 @@ export function DevisBuilder({
         </button>
       </div>
     </form>
+    <ClientFormModal
+      open={showClientModal}
+      onClose={() => setShowClientModal(false)}
+      onCreated={(client) => {
+        setClients((prev) => [...prev, client]);
+        setValue("clientId", client.id, { shouldDirty: true, shouldValidate: true });
+        // Best-effort : revalide la liste clients côté server components
+        // (page /clients et autres consommateurs) pour rester synchro.
+        router.refresh();
+      }}
+    />
+    </>
   );
 }
 
