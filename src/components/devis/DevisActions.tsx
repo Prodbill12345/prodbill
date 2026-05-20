@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil } from "lucide-react";
+import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle } from "lucide-react";
 import type { Devis } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 
@@ -16,6 +16,33 @@ export function DevisActions({ devis }: DevisActionsProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [acomptePct, setAcomptePct] = useState(50);
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Suppression : autorisée uniquement sur BROUILLON (la route DELETE
+  // côté API applique aussi cette règle — c'est juste l'UX qui désactive
+  // le bouton pour éviter le clic inutile + tooltip explicatif).
+  const canDelete = devis.statut === "BROUILLON";
+  const deleteDisabledReason = !canDelete
+    ? "Suppression impossible — seuls les brouillons peuvent être supprimés."
+    : null;
+
+  async function deleteDevis() {
+    setLoading("delete");
+    try {
+      const res = await fetch(`/api/devis/${devis.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors de la suppression");
+        return;
+      }
+      // Redirect vers la liste — la page actuelle n'existe plus.
+      router.push("/devis");
+      router.refresh();
+    } finally {
+      setLoading(null);
+      setShowDeleteConfirm(false);
+    }
+  }
 
   async function action(endpoint: string, key: string) {
     setLoading(key);
@@ -136,6 +163,19 @@ export function DevisActions({ devis }: DevisActionsProps) {
         PDF
       </button>
 
+      {/* Bouton Supprimer — autorisé uniquement sur BROUILLON.
+          Sur autres statuts : désactivé + tooltip explicatif. */}
+      <button
+        type="button"
+        onClick={() => canDelete && setShowDeleteConfirm(true)}
+        disabled={!canDelete}
+        title={deleteDisabledReason ?? "Supprimer ce devis"}
+        className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+      >
+        <Trash2 className="w-4 h-4" />
+        Supprimer
+      </button>
+
       {showPdfModal && (
         <PdfModal
           type="devis"
@@ -143,6 +183,58 @@ export function DevisActions({ devis }: DevisActionsProps) {
           numero={devis.numero}
           onClose={() => setShowPdfModal(false)}
         />
+      )}
+
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) =>
+            e.target === e.currentTarget &&
+            loading !== "delete" &&
+            setShowDeleteConfirm(false)
+          }
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">
+                  Supprimer ce devis ?
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Êtes-vous sûr de vouloir supprimer le devis{" "}
+                  <span className="font-medium text-slate-700">
+                    {devis.numero ?? "(brouillon)"}
+                  </span>{" "}
+                  ? Cette action est définitive.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={loading === "delete"}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors disabled:opacity-40"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={deleteDevis}
+                disabled={loading === "delete"}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {loading === "delete" && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                {loading === "delete" ? "Suppression…" : "Supprimer"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
