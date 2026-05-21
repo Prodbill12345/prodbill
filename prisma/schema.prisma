@@ -117,6 +117,7 @@ model Company {
 
   users       User[]
   memberships Membership[]
+  invitations Invitation[]
   clients     Client[]
   devis       Devis[]
   factures    Facture[]
@@ -174,6 +175,47 @@ model User {
   // Phase 2 multi-user N-N (suite #69).
   memberships         Membership[] @relation("UserMemberships")
   invitedMemberships  Membership[] @relation("InvitedByMemberships")
+  invitationsSent     Invitation[] @relation("InvitationsSent")
+}
+
+// Invitation à rejoindre une Company. Phase 2 multi-user (suite #69).
+//
+// Cycle de vie :
+//   - created : token genere, mail envoye, acceptedAt/revokedAt null
+//   - accepted: acceptedAt set, on cree la Membership liee
+//   - revoked : revokedAt set (annulation par un membre)
+//   - expired : expiresAt passe (createdAt + 7j typiquement)
+//
+// Le token est aleatoire (UUID v4), porte dans le lien d'acceptation.
+// Une invitation est UTILISABLE si acceptedAt IS NULL AND revokedAt IS NULL
+// AND expiresAt > NOW.
+model Invitation {
+  id              String   @id @default(cuid())
+  email           String
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedByUserId String
+  invitedBy       User     @relation("InvitationsSent", fields: [invitedByUserId], references: [id])
+
+  // Token aleatoire UUID v4, utilise dans le lien d'acceptation. Unique
+  // globalement (pas seulement par company) pour eviter toute ambiguite
+  // au moment du clic mail.
+  token     String   @unique
+  expiresAt DateTime
+
+  // Cycle de vie (mutuellement exclusifs en pratique)
+  acceptedAt DateTime?
+  revokedAt  DateTime?
+
+  // Si acceptedAt set, on conserve l'id de la Membership creee pour audit
+  // et pour pouvoir lier les deux dans l'UI "historique des invitations".
+  acceptedMembershipId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([email])
 }
 
 // Lien N-N entre User et Company (Phase 2). Source de vérité pour l'authz

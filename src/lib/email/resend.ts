@@ -385,3 +385,27 @@ export async function sendFactureEmail(params: SendFactureEmailParams) {
     `,
   });
 }
+
+// ─── Invitation à rejoindre un workspace (Phase 2 multi-user) ───────────────
+// Les helpers purs (resolveInvitationRecipient + buildInvitationEmailPayload)
+// vivent dans ./invitation-template.ts pour être testables sans clé Resend.
+
+import {
+  resolveInvitationRecipient,
+  buildInvitationEmailPayload,
+  type InvitationEmailParams,
+} from "./invitation-template";
+
+export async function sendInvitationEmail(params: InvitationEmailParams) {
+  const recipient = resolveInvitationRecipient(params.to);
+  const { subject, html } = buildInvitationEmailPayload(params, recipient);
+
+  await resend.emails.send({
+    from: resolveFrom(params.companyName),
+    to: recipient.actualTo,
+    subject,
+    html,
+  });
+
+  return { subject, redirected: recipient.isRedirected, actualTo: recipient.actualTo };
+}
