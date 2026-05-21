@@ -5,6 +5,7 @@ import type { Permission, Role } from "@/types";
 import { PERMISSIONS } from "@/types";
 import { isAdminEmail } from "@/lib/admin";
 import { IMPERSONATE_COOKIE, type ImpersonationPayload } from "@/lib/auth-context";
+import { canAccessCompany } from "@/lib/auth/can-access-company";
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -67,6 +68,14 @@ export async function requireAuth(permission?: Permission) {
     include: { company: true },
   });
   if (!user) throw new UnauthorizedError();
+
+  // Phase 2 — vérification multi-workspace via Membership. canAccessCompany()
+  // fait l'union (Membership active OU User.companyId pour rétrocompat), donc
+  // ce check est transparent pour les users non encore backfillés. Une fois
+  // backfillés, la Membership devient source de vérité. Si un membre est
+  // révoqué (revokedAt non null), il est bloqué ici à sa prochaine API call.
+  const hasAccess = await canAccessCompany(user.id, user.companyId);
+  if (!hasAccess) throw new UnauthorizedError();
 
   if (permission && !hasPermission(user.role, permission)) {
     throw new ForbiddenError(permission);

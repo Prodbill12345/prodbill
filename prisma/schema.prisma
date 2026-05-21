@@ -19,6 +19,13 @@ enum Role {
   STAGIAIRE
 }
 
+// Rôle d'un user dans un workspace (Phase 2 multi-user N-N, ticket suite #69).
+// V1 : un seul rôle MEMBER (tous les membres ont les mêmes droits, qui peuvent
+// inviter/révoquer). V2 : on ajoutera ADMIN, VIEWER, etc. selon besoin.
+enum MembershipRole {
+  MEMBER
+}
+
 enum LigneTag {
   ARTISTE        // Remplace COMEDIEN + DROIT — CS Comédiens appliquée
   TECHNICIEN_HCS // CS Techniciens appliquée
@@ -108,13 +115,14 @@ model Company {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  users      User[]
-  clients    Client[]
-  devis      Devis[]
-  factures   Facture[]
-  counters   Counter[]
-  auditLogs  AuditLog[]
-  templates  DevisTemplate[]
+  users       User[]
+  memberships Membership[]
+  clients     Client[]
+  devis       Devis[]
+  factures    Facture[]
+  counters    Counter[]
+  auditLogs   AuditLog[]
+  templates   DevisTemplate[]
   documents  Document[]
   budgets    BudgetPrevisionnel[]
   agents     Agent[]
@@ -153,16 +161,57 @@ model User {
   email     String
   name      String
   role      Role     @default(STAGIAIRE)
-  // TODO Phase 2 — Membership N-N : cette relation 1-N est temporaire.
-  // Elle bloque le cas "comptable externe accédant à plusieurs workspaces".
-  // À refactorer en table de jointure { userId, companyId, role } alignée
-  // sur Clerk Organizations (auth() → orgId → Company.clerkOrgId).
+  // Company "par défaut" / historique du user. Conservé pour rétrocompat
+  // pendant la transition Phase 2 — l'authz multi-workspace passe par la
+  // table Membership ci-dessous. Sera supprimé en Phase 3 (V3).
   companyId String
   company   Company  @relation(fields: [companyId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   templates DevisTemplate[]
+
+  // Phase 2 multi-user N-N (suite #69).
+  memberships         Membership[] @relation("UserMemberships")
+  invitedMemberships  Membership[] @relation("InvitedByMemberships")
+}
+
+// Lien N-N entre User et Company (Phase 2). Source de vérité pour l'authz
+// multi-workspace dans ProdBill. Cohabite avec User.companyId pendant la
+// transition (fallback rétrocompat dans requireAuth()).
+//
+// Cycle de vie :
+//   - invitedAt : DateTime de l'invitation (NOW à la création)
+//   - joinedAt  : DateTime d'acceptation (NULL tant que pas accepté)
+//   - revokedAt : DateTime de révocation (soft-delete)
+//
+// Une Membership est ACTIVE si revokedAt IS NULL AND joinedAt IS NOT NULL.
+// Voir src/lib/auth/can-access-company.ts.
+model Membership {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation("UserMemberships", fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  role MembershipRole @default(MEMBER)
+
+  // Qui a invité ce membre. NULL pour les Memberships créées par le backfill
+  // des utilisateurs historiques (ils n'ont pas été invités, ils étaient là
+  // avant) ou pour le créateur original d'un workspace.
+  invitedByUserId String?
+  invitedBy       User?   @relation("InvitedByMemberships", fields: [invitedByUserId], references: [id])
+
+  invitedAt DateTime  @default(now())
+  joinedAt  DateTime?
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────
