@@ -15,6 +15,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendInvitationEmail } from "@/lib/email/resend";
+import { pendingInvitationsWhere } from "@/lib/invitations";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
@@ -29,8 +30,13 @@ export async function GET() {
   try {
     const user = await requireAuth();
 
+    // V1 : on ne retourne que les invitations PENDING (non acceptées,
+    // non révoquées, non expirées). L'historique des invitations passées
+    // pourra être exposé via un endpoint séparé ou un query param
+    // ?include=all en C3 si l'UI en a besoin. Voir helper pour les
+    // critères exacts.
     const invitations = await prisma.invitation.findMany({
-      where: { companyId: user.companyId },
+      where: pendingInvitationsWhere(user.companyId),
       include: {
         invitedBy: { select: { id: true, name: true, email: true } },
       },
@@ -66,15 +72,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Une invitation active (non expirée, non acceptée, non révoquée) existe-t-elle déjà ?
+    // 2. Une invitation pending existe-t-elle déjà pour cet email ?
+    // Réutilise le même helper que GET → cohérence garantie entre
+    // "ce que GET retourne" et "ce qui bloque une nouvelle invitation".
     const existingInvitation = await prisma.invitation.findFirst({
-      where: {
-        email: input.email,
-        companyId: user.companyId,
-        acceptedAt: null,
-        revokedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+      where: { ...pendingInvitationsWhere(user.companyId), email: input.email },
       select: { id: true, expiresAt: true },
     });
     if (existingInvitation) {

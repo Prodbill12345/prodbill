@@ -25,6 +25,7 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { checkInvitationAcceptable } from "@/lib/invitations";
 
 export async function POST(
   _req: Request,
@@ -61,24 +62,18 @@ export async function POST(
         { status: 404 }
       );
     }
-    if (invitation.acceptedAt) {
+
+    // Vérifications d'état déléguées à un helper pur (testable). Status :
+    //   - 409 Conflict si déjà acceptée (état définitif)
+    //   - 410 Gone si révoquée ou expirée
+    const acceptableCheck = checkInvitationAcceptable(invitation);
+    if (!acceptableCheck.ok) {
       return Response.json(
-        { error: "Cette invitation a déjà été acceptée." },
-        { status: 410 }
+        { error: acceptableCheck.message },
+        { status: acceptableCheck.status }
       );
     }
-    if (invitation.revokedAt) {
-      return Response.json(
-        { error: "Cette invitation a été annulée." },
-        { status: 410 }
-      );
-    }
-    if (invitation.expiresAt < new Date()) {
-      return Response.json(
-        { error: "Cette invitation a expiré." },
-        { status: 410 }
-      );
-    }
+
     if (invitation.email.toLowerCase() !== clerkEmail) {
       return Response.json(
         {
