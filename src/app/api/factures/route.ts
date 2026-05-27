@@ -2,6 +2,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getNextFactureNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
+import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
 import { z } from "zod";
 
 const CreateFactureSchema = z.object({
@@ -56,44 +57,45 @@ export async function POST(req: Request) {
       return Response.json({ error: "Numéro de devis manquant" }, { status: 400 });
     }
 
-    // Calculer le montant selon le type
-    let totalHt: number;
-    if (input.type === "ACOMPTE") {
-      totalHt = Math.round(devis.totalHt * (input.pourcentage / 100) * 100) / 100;
-    } else if (input.type === "AVOIR") {
-      totalHt = -devis.totalHt;
-    } else {
-      // Solde = total - acomptes déjà facturés
-      const acomptesTotal = await prisma.facture.aggregate({
-        where: { devisId: devis.id, type: "ACOMPTE" },
-        _sum: { totalHt: true },
-      });
-      totalHt = Math.round((devis.totalHt - (acomptesTotal._sum.totalHt ?? 0)) * 100) / 100;
-    }
+    // Pré-récupération du HT brut déjà facturé en acomptes (utilisé pour
+    // le calcul SOLDE par le helper).
+    const acomptesAggregate =
+      input.type === "SOLDE"
+        ? await prisma.facture.aggregate({
+            where: { devisId: devis.id, type: "ACOMPTE" },
+            _sum: { totalHt: true },
+          })
+        : null;
 
-    // Snapshot du taux TVA depuis le devis (default 20 % pour les anciens
-    // devis sans champ tauxTva renseigné).
-    const tauxTva = devis.tauxTva ?? 20;
-    const tva = Math.round(totalHt * (tauxTva / 100) * 100) / 100;
-    const totalTtc = Math.round((totalHt + tva) * 100) / 100;
+    // ⚠️ BUG #80 (NONNA) : avant ce helper, la TVA était calculée sur
+    // devis.totalHt (HT BRUT avant remise) — surfacturant la TVA sur les
+    // devis remisés. Le helper computeFactureTotalsFromDevis() reproduit
+    // fidèlement la sémantique de calculerDevis() : TVA sur HT post-remise.
+    // Voir src/lib/invoice-totals.ts.
+    const totals = computeFactureTotalsFromDevis({
+      devis,
+      type: input.type,
+      pourcentageAcompte: input.pourcentage,
+      acomptesTotalHt: acomptesAggregate?._sum.totalHt ?? 0,
+    });
 
-    // Snapshot du breakdown du devis lié, ramené au prorata du montant facturé.
-    // Ratio sur totalHt (plus stable que TTC à cause des arrondis TVA).
+    const totalHt        = totals.totalHt;
+    const tauxTva        = devis.tauxTva ?? 20;
+    const tva            = totals.tva;
+    const totalTtc       = totals.totalTtc;
+    const sousTotal      = totals.sousTotal;
+    const csComedien     = totals.csComedien;
+    const csTechniciens  = totals.csTechniciens;
+    const fraisGeneraux  = totals.fraisGeneraux;
+    const margeSnap      = totals.marge;
+    const remiseSnap     = totals.remise;
+    const coproductionSnap = totals.coproduction;
+    const baseMarge      = totals.baseMarge;
     // TODO immuabilité légale : aujourd'hui la facture lit les lignes
     // depuis le devis source. Une modif post-émission du devis altère
     // la facture, ce qui viole l'art. 289 CGI. À traiter avant prod :
     // soit dupliquer les lignes en FactureSection/FactureLigne au moment
     // de l'émission, soit verrouiller le devis dès qu'il a une facture.
-    const r2 = (n: number) => Math.round(n * 100) / 100;
-    const ratio = devis.totalHt > 0 ? totalHt / devis.totalHt : 0;
-    const sousTotal      = r2(devis.sousTotal     * ratio);
-    const csComedien     = r2(devis.csComedien    * ratio);
-    const csTechniciens  = r2(devis.csTechniciens * ratio);
-    const fraisGeneraux  = r2(devis.fraisGeneraux * ratio);
-    const margeSnap      = r2(devis.marge         * ratio);
-    const remiseSnap     = r2(devis.remise        * ratio);
-    const coproductionSnap = r2(devis.coproduction * ratio);
-    const baseMarge      = r2(sousTotal + csTechniciens);
 
     // Récupérer les infos société pour les mentions légales
     const company = user.company;
