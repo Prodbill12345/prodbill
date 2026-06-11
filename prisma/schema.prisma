@@ -365,6 +365,14 @@ model Devis {
   updatedAt   DateTime @updatedAt
   createdById String
 
+  // Traçabilité duplication (ticket #93). Si non null, ce devis a été créé
+  // via /api/devis/[id]/dupliquer en copiant le contenu du devis pointé.
+  // ON DELETE SET NULL : si le source est supprimé, le devis dupliqué
+  // perd juste sa trace de provenance, il n'est pas supprimé.
+  devisSourceId String?
+  devisSource   Devis?  @relation("DuplicateOf", fields: [devisSourceId], references: [id], onDelete: SetNull)
+  duplicates    Devis[] @relation("DuplicateOf")
+
   sections  DevisSection[]
   factures  Facture[]
   bdc       BDC?

@@ -28,6 +28,9 @@ export default async function DevisDetailPage({
       },
       bdc: true,
       factures: { include: { paiements: true } },
+      // Traçabilité duplication (ticket #93) : si non null, ce devis a
+      // été créé via /api/devis/[id]/dupliquer.
+      devisSource: { select: { id: true, numero: true, objet: true } },
     },
   });
 
@@ -57,6 +60,22 @@ export default async function DevisDetailPage({
               </span>
             </div>
             <p className="text-slate-500 mt-1">{devis.objet}</p>
+            {/* Mention "Dupliqué depuis ..." si le devis a été créé via
+                /api/devis/[id]/dupliquer. Ticket #93. */}
+            {devis.devisSource && (
+              <p className="text-xs text-slate-400 mt-1">
+                Dupliqué depuis{" "}
+                <Link
+                  href={`/devis/${devis.devisSource.id}`}
+                  className="text-blue-600 hover:text-blue-700 hover:underline"
+                >
+                  {devis.devisSource.numero ?? "(brouillon)"}
+                </Link>
+                {devis.devisSource.objet && (
+                  <span className="text-slate-400"> — {devis.devisSource.objet}</span>
+                )}
+              </p>
+            )}
           </div>
           <DevisActions devis={devis} />
         </div>

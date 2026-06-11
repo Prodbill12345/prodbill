@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle } from "lucide-react";
+import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy } from "lucide-react";
 import type { Devis } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 
@@ -53,6 +53,25 @@ export function DevisActions({ devis }: DevisActionsProps) {
         alert(err.error ?? "Erreur");
         return;
       }
+      router.refresh();
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function dupliquer() {
+    setLoading("dupliquer");
+    try {
+      const res = await fetch(`/api/devis/${devis.id}/dupliquer`, { method: "POST" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors de la duplication");
+        return;
+      }
+      const { data } = await res.json();
+      // Redirect vers le nouveau brouillon en mode édition pour que
+      // Vanda puisse ajuster avant l'émission.
+      router.push(`/devis/${data.id}/modifier`);
       router.refresh();
     } finally {
       setLoading(null);
@@ -154,6 +173,19 @@ export function DevisActions({ devis }: DevisActionsProps) {
           </button>
         </>
       )}
+
+      {/* Dupliquer — toujours disponible quel que soit le statut. Crée
+          un brouillon en copie et redirige vers /modifier. Ticket #93. */}
+      <button
+        type="button"
+        onClick={dupliquer}
+        disabled={loading === "dupliquer"}
+        title="Créer un brouillon copié à partir de ce devis"
+        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+      >
+        {isLoading("dupliquer") ?? <Copy className="w-4 h-4" />}
+        Dupliquer
+      </button>
 
       <button
         onClick={() => setShowPdfModal(true)}
