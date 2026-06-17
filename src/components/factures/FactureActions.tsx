@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check } from "lucide-react";
+import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check, CircleCheckBig, Undo2 } from "lucide-react";
 import type { Facture } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 
@@ -109,6 +109,23 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
     if (data) router.push(`/factures/${data.data.id}`);
   }
 
+  async function marquerPayee() {
+    const data = await post("payee", "payee");
+    if (data) {
+      showToast("Facture marquée payée");
+      router.refresh();
+    }
+  }
+
+  async function annulerPaiement() {
+    if (!confirm("Annuler le paiement et remettre la facture en émise ?")) return;
+    const data = await post("unpay", "unpay");
+    if (data) {
+      showToast("Paiement annulé, facture remise en émise");
+      router.refresh();
+    }
+  }
+
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 4000);
@@ -129,6 +146,16 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
     (facture.statut === "EMISE" ||
       facture.statut === "PAYEE" ||
       facture.statut === "PAYEE_PARTIEL");
+
+  // Ticket #92 — bouton "Marquer payée" : disponible sur facture émise
+  // non encore PAYEE (mais aussi EMISE/EN_RETARD/PAYEE_PARTIEL accepté
+  // pour le cas où Vanda reçoit le règlement final).
+  const canMarquerPayee =
+    isEmise &&
+    facture.type !== "AVOIR" &&
+    facture.statut !== "PAYEE" &&
+    facture.statut !== "ANNULEE";
+  const canAnnulerPaiement = facture.statut === "PAYEE";
 
   return (
     <div className="flex flex-col items-end gap-2">
@@ -225,6 +252,33 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
           >
             {spin("relancer") ?? <Bell className="w-4 h-4" />}
             {hasRelances ? "Relancer" : "1ère relance"}
+          </button>
+        )}
+
+        {/* Ticket #92 — bouton "Marquer payée" : 1 clic pour basculer en
+            PAYEE sans saisir le détail du paiement. Crée un Paiement
+            auto mode MARQUEE_MANUELLE en arrière-plan, qui pourra être
+            annulé via le bouton "Annuler le paiement" ci-dessous. */}
+        {canMarquerPayee && (
+          <button
+            onClick={marquerPayee}
+            disabled={loading !== null}
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 rounded-lg text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 transition-colors"
+          >
+            {spin("payee") ?? <CircleCheckBig className="w-4 h-4" />}
+            Marquer payée
+          </button>
+        )}
+
+        {canAnnulerPaiement && (
+          <button
+            onClick={annulerPaiement}
+            disabled={loading !== null}
+            className="flex items-center gap-2 px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            title="Remettre la facture en émise et annuler le paiement automatique"
+          >
+            {spin("unpay") ?? <Undo2 className="w-4 h-4" />}
+            Annuler le paiement
           </button>
         )}
 

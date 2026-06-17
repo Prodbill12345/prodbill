@@ -226,6 +226,20 @@ export default async function FactureDetailPage({
               factureId={facture.id}
               initialValue={facture.dateReglement}
             />
+            {/* Ticket #92 — affichage "Payée le DD/MM/YYYY" quand la
+                facture a été marquée payée via le bouton 1 clic.
+                datePaiement = timestamp système au moment du bascule
+                (à distinguer de dateReglement = saisie manuelle). */}
+            {facture.statut === "PAYEE" && facture.datePaiement && (
+              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-green-200 rounded-lg bg-green-50">
+                <span className="text-xs font-semibold text-green-700">
+                  ✓ Payée
+                </span>
+                <span className="text-sm text-green-800">
+                  le {formatDate(facture.datePaiement)}
+                </span>
+              </div>
+            )}
             {/* Période d'exploitation — snapshot du devis source à
                 l'émission. Lecture seule (immuabilité légale comme le
                 reste de la facture). Ticket #69. */}
