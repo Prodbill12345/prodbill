@@ -147,14 +147,16 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
       facture.statut === "PAYEE" ||
       facture.statut === "PAYEE_PARTIEL");
 
-  // Ticket #92 — bouton "Marquer payée" : disponible sur facture émise
-  // non encore PAYEE (mais aussi EMISE/EN_RETARD/PAYEE_PARTIEL accepté
-  // pour le cas où Vanda reçoit le règlement final).
+  // Ticket #92 — bouton "Marquer payée" : disponible sur facture en
+  // statut "à payer". On utilise le STATUT comme source de vérité (pas
+  // emiseAt), aligné sur canAvoir : certaines factures historiques de
+  // NONNA ont statut=EMISE avec emiseAt=null (import pré-champ-emiseAt),
+  // et le pattern isEmise=!!emiseAt les masquait à tort.
   const canMarquerPayee =
-    isEmise &&
     facture.type !== "AVOIR" &&
-    facture.statut !== "PAYEE" &&
-    facture.statut !== "ANNULEE";
+    (facture.statut === "EMISE" ||
+      facture.statut === "EN_RETARD" ||
+      facture.statut === "PAYEE_PARTIEL");
   const canAnnulerPaiement = facture.statut === "PAYEE";
 
   return (
