@@ -85,6 +85,15 @@ export async function POST(
       );
     }
 
+    // Le client peut ne pas avoir d'email (optionnel) — la relance est alors impossible.
+    const clientEmail = facture.client.email;
+    if (!clientEmail) {
+      return Response.json(
+        { error: "Ce client n'a pas d'email renseigné — impossible de relancer" },
+        { status: 400 }
+      );
+    }
+
     // Déterminer le niveau de relance selon les relances déjà envoyées (hors ENVOI)
     const relancesHorsEnvoi = facture.relances.filter((r) => r.type !== "ENVOI");
     const type: RelanceType =
@@ -114,7 +123,7 @@ export async function POST(
     );
 
     const { subject, skipped } = await sendRelanceEmail(type, {
-      to: facture.client.email,
+      to: clientEmail,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
       factureNumero: facture.numero,
@@ -145,13 +154,13 @@ export async function POST(
         factureId: id,
         companyId: user.companyId,
         type,
-        sentTo: facture.client.email,
+        sentTo: clientEmail,
         subject,
         createdById: user.id,
       },
     });
 
-    return Response.json({ success: true, type, sentTo: facture.client.email });
+    return Response.json({ success: true, type, sentTo: clientEmail });
   } catch (err) {
     return handleAuthError(err);
   }

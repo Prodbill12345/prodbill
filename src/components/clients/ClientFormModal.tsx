@@ -8,6 +8,7 @@ import { Search, Loader2, CheckCircle, AlertCircle, X } from "lucide-react";
 import type { Client } from "@/types";
 import type { SireneResult } from "@/lib/sirene";
 import { formatAdresseSirene } from "@/lib/sirene";
+import { optionalEmailField } from "@/lib/optional-email";
 
 const ClientSchema = z.object({
   name: z.string().min(1, "Nom requis"),
@@ -16,7 +17,7 @@ const ClientSchema = z.object({
   address: z.string().min(1, "Adresse requise"),
   city: z.string().default(""),
   postalCode: z.string().default(""),
-  email: z.string().email("Email invalide"),
+  email: optionalEmailField,
   phone: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -297,7 +298,7 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Email *
+                  Email
                 </label>
                 <input
                   {...register("email")}

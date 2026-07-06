@@ -71,6 +71,15 @@ export async function POST(
       );
     }
 
+    // Le client peut ne pas avoir d'email (optionnel) — l'envoi est alors impossible.
+    const clientEmail = facture.client.email;
+    if (!clientEmail) {
+      return Response.json(
+        { error: "Ce client n'a pas d'email renseigné — impossible d'envoyer la facture" },
+        { status: 400 }
+      );
+    }
+
     // Générer le PDF
     const devisNormalized = facture.devis
       ? { ...facture.devis, numero: facture.devis.numero ?? "" }
@@ -90,7 +99,7 @@ export async function POST(
       : 0;
 
     const { subject, skipped } = await sendRelanceEmail("ENVOI", {
-      to: facture.client.email,
+      to: clientEmail,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
       factureNumero: facture.numero,
@@ -120,13 +129,13 @@ export async function POST(
         factureId: id,
         companyId: user.companyId,
         type: "ENVOI",
-        sentTo: facture.client.email,
+        sentTo: clientEmail,
         subject,
         createdById: user.id,
       },
     });
 
-    return Response.json({ success: true, sentTo: facture.client.email });
+    return Response.json({ success: true, sentTo: clientEmail });
   } catch (err) {
     return handleAuthError(err);
   }

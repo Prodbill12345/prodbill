@@ -1,6 +1,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { optionalEmailField, normalizeOptionalEmail } from "@/lib/optional-email";
 
 const CreateClientSchema = z.object({
   name: z.string().min(1),
@@ -9,7 +10,7 @@ const CreateClientSchema = z.object({
   address: z.string().min(1),
   city: z.string().default(""),
   postalCode: z.string().default(""),
-  email: z.string().email(),
+  email: optionalEmailField,
   phone: z.string().optional(),
   tauxFgOverride: z.number().min(0).max(1).nullable().optional(),
   tauxMargeOverride: z.number().min(0).max(1).nullable().optional(),
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
       data: {
         companyId: user.companyId,
         ...input,
+        email: normalizeOptionalEmail(input.email), // "" → null
       },
     });
 

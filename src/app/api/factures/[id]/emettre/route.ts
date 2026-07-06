@@ -51,7 +51,7 @@ export async function POST(
     // déjà committée ci-dessus : un échec/skip d'envoi ne doit JAMAIS la
     // remettre en cause. sendFactureEmail passe par sendEmailSafe → si
     // MAIL_KILL_SWITCH est actif, aucun mail ne part (skipped, pas d'erreur).
-    if (facture.pdfUrl) {
+    if (facture.pdfUrl && facture.client.email) {
       try {
         await sendFactureEmail({
           to: facture.client.email,

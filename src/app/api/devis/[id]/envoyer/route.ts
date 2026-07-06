@@ -40,8 +40,8 @@ export async function POST(
       },
     });
 
-    // Envoyer l'email si le PDF est disponible
-    if (devis.pdfUrl) {
+    // Envoyer l'email si le PDF est disponible ET le client a un email.
+    if (devis.pdfUrl && devis.client.email) {
       await sendDevisEmail({
         to: devis.client.email,
         clientName: devis.client.name,

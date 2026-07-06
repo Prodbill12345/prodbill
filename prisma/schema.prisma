@@ -271,7 +271,7 @@ model Client {
   address    String
   city       String  @default("")
   postalCode String  @default("")
-  email      String
+  email      String? // Optionnel : un client peut ne pas avoir d'email (saisie manuelle)
   phone      String?
 
   // Tarification spéciale client (override des taux société)

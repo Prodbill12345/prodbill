@@ -108,9 +108,13 @@ export default async function ClientDetailPage({
               )}
               <div className="flex items-center gap-2 text-slate-600">
                 <Mail className="w-4 h-4 text-slate-300 shrink-0" />
-                <a href={`mailto:${client.email}`} className="hover:text-blue-600">
-                  {client.email}
-                </a>
+                {client.email ? (
+                  <a href={`mailto:${client.email}`} className="hover:text-blue-600">
+                    {client.email}
+                  </a>
+                ) : (
+                  <span className="italic text-slate-400">(pas d&apos;email renseigné)</span>
+                )}
               </div>
               {client.phone && (
                 <div className="flex items-center gap-2 text-slate-600">
