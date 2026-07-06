@@ -131,7 +131,11 @@ export async function POST(req: Request) {
       {
         data: {
           ...invitation,
-          email: { sent: !emailError, ...emailResult, error: emailError },
+          email: {
+            sent: !emailError && !emailResult?.skipped,
+            ...emailResult,
+            error: emailError,
+          },
         },
       },
       { status: 201 }

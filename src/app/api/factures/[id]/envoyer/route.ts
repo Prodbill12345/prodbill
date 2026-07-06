@@ -89,7 +89,7 @@ export async function POST(
       ? Math.round(facture.totalTtc * 0.15 * (joursRetard / 365) * 100) / 100
       : 0;
 
-    const subject = await sendRelanceEmail("ENVOI", {
+    const { subject, skipped } = await sendRelanceEmail("ENVOI", {
       to: facture.client.email,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
@@ -105,6 +105,15 @@ export async function POST(
       pdfBuffer,
       accentColor: company?.primaryColor ?? "#3b82f6",
     });
+
+    // Kill switch actif : aucun mail parti → on n'enregistre PAS l'ENVOI.
+    if (skipped) {
+      return Response.json({
+        success: true,
+        skipped: true,
+        reason: "MAIL_KILL_SWITCH",
+      });
+    }
 
     await prisma.relance.create({
       data: {

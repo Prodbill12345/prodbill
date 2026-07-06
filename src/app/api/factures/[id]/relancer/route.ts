@@ -113,7 +113,7 @@ export async function POST(
       await renderToBuffer(React.createElement(FacturePdf, { facture: factureForPdf }) as never)
     );
 
-    const subject = await sendRelanceEmail(type, {
+    const { subject, skipped } = await sendRelanceEmail(type, {
       to: facture.client.email,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
@@ -128,6 +128,17 @@ export async function POST(
       accentColor: company?.primaryColor ?? "#3b82f6",
       premierRelanceDate: premiereRelance ? new Date(premiereRelance.sentAt) : undefined,
     });
+
+    // Kill switch actif : aucun mail parti → on n'enregistre PAS de Relance
+    // (elle logguerait un envoi qui n'a pas eu lieu).
+    if (skipped) {
+      return Response.json({
+        success: true,
+        skipped: true,
+        reason: "MAIL_KILL_SWITCH",
+        type,
+      });
+    }
 
     await prisma.relance.create({
       data: {

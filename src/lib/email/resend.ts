@@ -1,7 +1,8 @@
-import { Resend } from "resend";
 import type { RelanceType } from "@prisma/client";
+import { sendEmailSafe } from "./sendEmailSafe";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+// Tous les envois passent OBLIGATOIREMENT par sendEmailSafe (kill switch
+// MAIL_KILL_SWITCH + check statut Resend). Ne jamais appeler Resend en direct.
 
 // ─── Sandbox dev ────────────────────────────────────────────────────────────
 // En développement (sans domaine vérifié), Resend impose l'expéditeur
@@ -223,7 +224,8 @@ export async function sendRelanceEmail(type: RelanceType, params: RelanceEmailPa
 
   const filename = `facture-${params.factureNumero.replace(/\//g, "-")}.pdf`;
 
-  await resend.emails.send({
+  const result = await sendEmailSafe({
+    type: `RELANCE_${type}`,
     from: resolveFrom(params.companyName),
     to: resolveTo(params.to),
     subject,
@@ -236,7 +238,7 @@ export async function sendRelanceEmail(type: RelanceType, params: RelanceEmailPa
     ],
   });
 
-  return subject;
+  return { subject, skipped: result.skipped };
 }
 
 interface SendDevisEmailParams {
@@ -259,7 +261,8 @@ export async function sendDevisEmail(params: SendDevisEmailParams) {
     currency: "EUR",
   }).format(totalTtc);
 
-  return resend.emails.send({
+  return sendEmailSafe({
+    type: "DEVIS",
     from: resolveFrom(companyName),
     to: resolveTo(to),
     subject: `Devis ${devisNumero} — ${devisObjet}`,
@@ -331,7 +334,8 @@ export async function sendFactureEmail(params: SendFactureEmailParams) {
     currency: "EUR",
   }).format(totalTtc);
 
-  return resend.emails.send({
+  return sendEmailSafe({
+    type: "FACTURE",
     from: resolveFrom(companyName),
     to: resolveTo(to),
     subject: `Facture ${factureNumero} — ${montant}`,
@@ -400,12 +404,18 @@ export async function sendInvitationEmail(params: InvitationEmailParams) {
   const recipient = resolveInvitationRecipient(params.to);
   const { subject, html } = buildInvitationEmailPayload(params, recipient);
 
-  await resend.emails.send({
+  const result = await sendEmailSafe({
+    type: "INVITATION",
     from: resolveFrom(params.companyName),
     to: recipient.actualTo,
     subject,
     html,
   });
 
-  return { subject, redirected: recipient.isRedirected, actualTo: recipient.actualTo };
+  return {
+    subject,
+    redirected: recipient.isRedirected,
+    actualTo: recipient.actualTo,
+    skipped: result.skipped,
+  };
 }

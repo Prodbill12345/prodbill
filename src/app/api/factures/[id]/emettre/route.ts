@@ -47,19 +47,29 @@ export async function POST(
       },
     });
 
-    // Envoyer par email si PDF disponible
+    // Envoyer par email si PDF disponible. L'émission (immuabilité légale) est
+    // déjà committée ci-dessus : un échec/skip d'envoi ne doit JAMAIS la
+    // remettre en cause. sendFactureEmail passe par sendEmailSafe → si
+    // MAIL_KILL_SWITCH est actif, aucun mail ne part (skipped, pas d'erreur).
     if (facture.pdfUrl) {
-      await sendFactureEmail({
-        to: facture.client.email,
-        clientName: facture.client.name,
-        companyName: facture.nomEmetteur,
-        factureNumero: facture.numero,
-        totalTtc: facture.totalTtc,
-        dateEcheance,
-        pdfUrl: facture.pdfUrl,
-        iban: facture.ibanEmetteur,
-        bic: facture.bicEmetteur,
-      });
+      try {
+        await sendFactureEmail({
+          to: facture.client.email,
+          clientName: facture.client.name,
+          companyName: facture.nomEmetteur,
+          factureNumero: facture.numero,
+          totalTtc: facture.totalTtc,
+          dateEcheance,
+          pdfUrl: facture.pdfUrl,
+          iban: facture.ibanEmetteur,
+          bic: facture.bicEmetteur,
+        });
+      } catch (mailErr) {
+        console.error(
+          `[emettre facture ${id}] envoi mail échoué (facture émise quand même) :`,
+          mailErr
+        );
+      }
     }
 
     await logAudit({
