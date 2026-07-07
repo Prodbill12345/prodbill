@@ -2,11 +2,16 @@
  * Numérotation séquentielle par société et par année.
  * Utilise une transaction Prisma atomique pour éviter les doublons.
  *
- * Formats :
- *   DEVIS   → "25-0042"  (legacy, sans préfixe)
- *           → "DEV-2026-26001"  (si Company.prefixDevis = "DEV-2026-")
+ * Formats (ticket #95 — format unifié) :
+ *   DEVIS   → "26001"  ("YY" + compteur sur 3 chiffres, sans préfixe)
+ *           → "DEV-2026-26001"  (si Company.prefixDevis renseigné — feature
+ *             préfixe conservée pour d'éventuels futurs workspaces ; Caleson
+ *             et NONNA ont leur préfixe vidé, ils sortent donc en "26001").
  *   FACTURE → dérivé du numéro de devis : "${devisNumero}-A1", "-S1", "AV-…"
- *   BDC     → "BDC-25-0042"
+ *   BDC     → "BDC-26001"
+ *
+ * L'affichage "D26001 - objet" est une pure présentation (voir
+ * src/lib/devis-numero.ts) : le numéro STOCKÉ reste "26001".
  */
 
 import { prisma } from "@/lib/prisma";
@@ -25,14 +30,15 @@ async function getNextValue(
   return counter.value;
 }
 
-function formatNumero(year: number, value: number, prefix?: string): string {
+export function formatNumero(year: number, value: number, prefix?: string): string {
   // Si un préfixe est configuré sur la Company, on l'utilise tel quel suivi
-  // du compteur brut (cas NONNA : "DEV-2026-" + 26001 = "DEV-2026-26001").
+  // du compteur brut (feature préfixe conservée).
   if (prefix && prefix.length > 0) return `${prefix}${value}`;
-  // Legacy : "YY-NNNN" (Caleson)
+  // Format unifié (#95) : "YY" + compteur sur 3 chiffres → "26001".
+  // Au-delà de 999/an le padStart n'ampute pas (ex: 1000 → "261000").
   const yy = String(year).slice(-2);
-  const seq = String(value).padStart(4, "0");
-  return `${yy}-${seq}`;
+  const seq = String(value).padStart(3, "0");
+  return `${yy}${seq}`;
 }
 
 export async function getNextDevisNumero(
