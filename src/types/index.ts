@@ -185,6 +185,7 @@ export const LIGNE_TAG_COLORS: Record<LigneTag, string> = {
 
 export const DEVIS_STATUT_LABELS: Record<DevisStatut, string> = {
   BROUILLON: "Brouillon",
+  VALIDE: "Validé",
   ENVOYE: "Envoyé",
   ACCEPTE: "Accepté",
   REFUSE: "Refusé",
@@ -193,6 +194,7 @@ export const DEVIS_STATUT_LABELS: Record<DevisStatut, string> = {
 
 export const DEVIS_STATUT_COLORS: Record<DevisStatut, string> = {
   BROUILLON: "bg-gray-100 text-gray-700",
+  VALIDE: "bg-teal-100 text-teal-700",
   ENVOYE: "bg-blue-100 text-blue-700",
   ACCEPTE: "bg-green-100 text-green-700",
   REFUSE: "bg-red-100 text-red-700",

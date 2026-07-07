@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy } from "lucide-react";
+import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy, ShieldCheck, Undo2 } from "lucide-react";
 import type { Devis } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 
@@ -116,12 +116,32 @@ export function DevisActions({ devis }: DevisActionsProps) {
       </Link>
 
       {devis.statut === "BROUILLON" && (
+        <>
+          {/* Valider = feu vert interne (Vanda), sans envoi mail (#96). */}
+          <button
+            onClick={() => action("valider", "valider")}
+            className="flex items-center gap-2 px-3 py-2 bg-teal-600 rounded-lg text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+          >
+            {isLoading("valider") ?? <ShieldCheck className="w-4 h-4" />}
+            Valider
+          </button>
+          <button
+            onClick={() => action("envoyer", "envoyer")}
+            className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+          >
+            {isLoading("envoyer") ?? <Send className="w-4 h-4" />}
+            Envoyer
+          </button>
+        </>
+      )}
+
+      {devis.statut === "VALIDE" && (
         <button
-          onClick={() => action("envoyer", "envoyer")}
-          className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+          onClick={() => action("devalider", "devalider")}
+          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
         >
-          {isLoading("envoyer") ?? <Send className="w-4 h-4" />}
-          Envoyer
+          {isLoading("devalider") ?? <Undo2 className="w-4 h-4" />}
+          Annuler la validation
         </button>
       )}
 

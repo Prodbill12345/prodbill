@@ -170,13 +170,14 @@ export const DEVIS_SORT_KEYS = [
 ] as const;
 export type DevisSortKey = typeof DEVIS_SORT_KEYS[number];
 
-// Ordre métier : BROUILLON → ENVOYE → ACCEPTE → REFUSE → EXPIRE
+// Ordre métier : BROUILLON → VALIDE → ENVOYE → ACCEPTE → REFUSE → EXPIRE
 const DEVIS_STATUT_ORDER: Record<DevisStatut, number> = {
   BROUILLON: 1,
-  ENVOYE: 2,
-  ACCEPTE: 3,
-  REFUSE: 4,
-  EXPIRE: 5,
+  VALIDE: 2,
+  ENVOYE: 3,
+  ACCEPTE: 4,
+  REFUSE: 5,
+  EXPIRE: 6,
 };
 
 export const DEVIS_SORT_ACCESSORS: Record<DevisSortKey, SortAccessor<DevisFilterable>> = {

@@ -36,6 +36,7 @@ enum LigneTag {
 
 enum DevisStatut {
   BROUILLON
+  VALIDE // Validé en interne (Vanda) — facturable, sans envoi mail client (#96)
   ENVOYE
   ACCEPTE
   REFUSE
