@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy, ShieldCheck, Undo2 } from "lucide-react";
 import type { Devis } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
+import { isDevisFacturable } from "@/lib/devis-facturable";
 
 interface DevisActionsProps {
   devis: Devis & { factures?: { id: string }[] };
@@ -164,7 +165,8 @@ export function DevisActions({ devis }: DevisActionsProps) {
         </>
       )}
 
-      {devis.statut === "ACCEPTE" && (
+      {/* #97 : facturable dès VALIDE (validation interne) ou ACCEPTE. */}
+      {isDevisFacturable(devis.statut) && (
         <>
           <div className="flex items-center gap-1">
             <input

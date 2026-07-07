@@ -1,8 +1,9 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getNextFactureNumero } from "@/lib/numbering";
+import { getNextFactureNumero, getNextDevisNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
+import { isDevisFacturable } from "@/lib/devis-facturable";
 import { z } from "zod";
 
 const CreateFactureSchema = z.object({
@@ -46,15 +47,25 @@ export async function POST(req: Request) {
       return Response.json({ error: "Devis introuvable" }, { status: 404 });
     }
 
-    if (devis.statut !== "ACCEPTE") {
+    // #97 : on peut facturer dès que le devis est VALIDÉ en interne (Vanda),
+    // sans attendre le circuit ENVOYE → ACCEPTE.
+    if (!isDevisFacturable(devis.statut)) {
       return Response.json(
-        { error: "Le devis doit être accepté pour générer une facture" },
+        { error: "Le devis doit être validé ou accepté pour générer une facture" },
         { status: 400 }
       );
     }
 
-    if (!devis.numero) {
-      return Response.json({ error: "Numéro de devis manquant" }, { status: 400 });
+    // Un devis VALIDE peut ne pas encore avoir de numéro (attribué au 1er PDF
+    // ou à l'envoi). On le matérialise ici si besoin — même logique que la
+    // génération PDF : le numéro séquentiel est réservé définitivement.
+    let devisNumero = devis.numero;
+    if (!devisNumero) {
+      devisNumero = await getNextDevisNumero(user.companyId);
+      await prisma.devis.update({
+        where: { id: devis.id },
+        data: { numero: devisNumero, dateEmission: devis.dateEmission ?? new Date() },
+      });
     }
 
     // Pré-récupération du HT brut déjà facturé en acomptes (utilisé pour
@@ -99,7 +110,7 @@ export async function POST(req: Request) {
 
     // Récupérer les infos société pour les mentions légales
     const company = user.company;
-    const numero = await getNextFactureNumero(user.companyId, input.type, devis.numero);
+    const numero = await getNextFactureNumero(user.companyId, input.type, devisNumero);
 
     const facture = await prisma.facture.create({
       data: {
