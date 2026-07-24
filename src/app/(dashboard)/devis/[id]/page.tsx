@@ -7,6 +7,7 @@ import { formatEuros, formatPct } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import { DevisActions } from "@/components/devis/DevisActions";
+import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
 
 export default async function DevisDetailPage({
   params,
@@ -22,6 +23,7 @@ export default async function DevisDetailPage({
     where: { id },
     include: {
       client: true,
+      company: { select: { hideTvaTtcOnDevis: true } },
       sections: {
         include: { lignes: { orderBy: { ordre: "asc" } } },
         orderBy: { ordre: "asc" },
@@ -35,6 +37,9 @@ export default async function DevisDetailPage({
   });
 
   if (!devis) notFound();
+
+  // NONNA : masque TVA + TTC sur les devis (pur affichage). Cf. company flag.
+  const { showTva, showTtc } = devisRecapVisibility(devis.company);
 
   return (
     <div className="space-y-6">
@@ -225,14 +230,18 @@ export default async function DevisDetailPage({
                   <span>TOTAL HT</span>
                   <span>{formatEuros(devis.totalApresRemise)}</span>
                 </div>
-                <div className="flex justify-between text-slate-500">
-                  <span>TVA {(devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ","))}%</span>
-                  <span>{formatEuros(devis.tva)}</span>
-                </div>
-                <div className="flex justify-between font-bold text-base border-t border-slate-200 pt-2 mt-2">
-                  <span>TOTAL TTC</span>
-                  <span className="text-blue-600">{formatEuros(devis.totalTtc)}</span>
-                </div>
+                {showTva && (
+                  <div className="flex justify-between text-slate-500">
+                    <span>TVA {(devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ","))}%</span>
+                    <span>{formatEuros(devis.tva)}</span>
+                  </div>
+                )}
+                {showTtc && (
+                  <div className="flex justify-between font-bold text-base border-t border-slate-200 pt-2 mt-2">
+                    <span>TOTAL TTC</span>
+                    <span className="text-blue-600">{formatEuros(devis.totalTtc)}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

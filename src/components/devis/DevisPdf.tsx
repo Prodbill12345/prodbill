@@ -13,6 +13,7 @@ import type {
   Client,
   Company,
 } from "@prisma/client";
+import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
 
 export type DevisForPdf = Devis & {
   client: Client;
@@ -201,6 +202,9 @@ const s = StyleSheet.create({
 
 export function DevisPdf({ devis }: { devis: DevisForPdf }) {
   const { company, client } = devis;
+
+  // NONNA : masque TVA + TTC sur les devis (pur affichage). Cf. company flag.
+  const { showTva, showTtc } = devisRecapVisibility(company);
 
   const titreDoc = devis.numero ? `DEVIS N° ${devis.numero}` : "DEVIS (Brouillon)";
 
@@ -484,7 +488,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                   <Text style={s.totHtLabel}>TOTAL HT</Text>
                   <Text style={s.totHtValue}>{euros(devis.totalApresRemise)}</Text>
                 </View>
-                {devis.tauxTva === 0 ? (
+                {showTva && (devis.tauxTva === 0 ? (
                   <View style={s.totRow}>
                     <Text style={s.totLabel}>TVA non applicable</Text>
                     <Text style={s.totValue}>—</Text>
@@ -494,15 +498,17 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                     <Text style={s.totLabel}>TVA {devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ",")} %</Text>
                     <Text style={s.totValue}>{euros(devis.tva)}</Text>
                   </View>
+                ))}
+
+                {showTtc && (
+                  <View style={s.totTtcRow}>
+                    <Text style={s.totTtcLabel}>TOTAL TTC</Text>
+                    <Text style={s.totTtcValue}>{euros(devis.totalTtc)}</Text>
+                  </View>
                 )}
 
-                <View style={s.totTtcRow}>
-                  <Text style={s.totTtcLabel}>TOTAL TTC</Text>
-                  <Text style={s.totTtcValue}>{euros(devis.totalTtc)}</Text>
-                </View>
-
-                {/* Mention légale TVA — visible uniquement si TVA=0 */}
-                {devis.tauxTva === 0 && (
+                {/* Mention légale TVA — visible uniquement si TVA=0 et TVA affichée */}
+                {showTva && devis.tauxTva === 0 && (
                   <View style={[s.totRow, { marginTop: 4 }]}>
                     <Text style={[s.totLabel, { fontStyle: "italic", fontSize: 8 }]}>
                       {devis.tvaMention || "Art. 293 B du CGI"}
