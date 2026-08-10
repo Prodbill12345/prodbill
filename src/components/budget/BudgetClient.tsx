@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useTransition, useMemo } from "react";
 import {
   Plus,
   Trash2,
@@ -12,6 +12,7 @@ import {
   Loader2,
   Mic2,
 } from "lucide-react";
+import { sortByLabelFr } from "@/lib/sort-by-name";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -155,6 +156,12 @@ export function BudgetClient({
 }: BudgetClientProps) {
   const [budget, setBudget] = useState<Budget | null>(initialBudget);
   const [devis, setDevis] = useState<Devis[]>(initialDevis);
+
+  // Dropdown "client" trié par ordre alphabétique français.
+  const sortedClients = useMemo(
+    () => sortByLabelFr(clients, (c) => c.name),
+    [clients]
+  );
   const [pipeFilter, setPipeFilter] = useState<string>("tous");
   const [pipeAnneeFilter, setPipeAnneeFilter] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -474,7 +481,7 @@ export function BudgetClient({
                 onChange={(e) => setNewClientId(e.target.value)}
                 className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
-                {clients.map((c) => (
+                {sortedClients.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>

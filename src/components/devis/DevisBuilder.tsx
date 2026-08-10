@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, Fragment } from "react";
+import { useState, useCallback, useEffect, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/zod-helpers";
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { BdcClientUploadField } from "./BdcClientUploadField";
+import { sortByLabelFr } from "@/lib/sort-by-name";
 
 // Convention : la DB stocke les taux en DÉCIMAL (0..1). Le form state
 // les manipule en POURCENTAGE (0..100). Conversions :
@@ -194,6 +195,21 @@ export function DevisBuilder({
   // un client via le modal, sans recharger la page (sinon le state du
   // formulaire de devis serait perdu).
   const [clients, setClients] = useState<Client[]>(initialClients);
+
+  // Listes déroulantes triées par ordre alphabétique français (localeCompare).
+  // Recalculées si la liste change (ex : création d'un client via le modal).
+  const sortedClients = useMemo(
+    () => sortByLabelFr(clients, (c) => c.name),
+    [clients]
+  );
+  const sortedAgents = useMemo(
+    () => sortByLabelFr(agents, (a) => (a.prenom ? `${a.prenom} ${a.nom}` : a.nom)),
+    [agents]
+  );
+  const sortedComediens = useMemo(
+    () => sortByLabelFr(comediens, (c) => `${c.prenom} ${c.nom}`),
+    [comediens]
+  );
   const [showClientModal, setShowClientModal] = useState(false);
 
   const {
@@ -485,7 +501,7 @@ export function DevisBuilder({
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   >
                     <option value="">Sélectionner un client...</option>
-                    {clients.map((c) => (
+                    {sortedClients.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
                       </option>
@@ -743,8 +759,8 @@ export function DevisBuilder({
               onRemove={() => removeSection(si)}
               canRemove={sectionFields.length > 1}
               watchedLignes={watchedValues.sections?.[si]?.lignes ?? []}
-              agents={agents}
-              comediens={comediens}
+              agents={sortedAgents}
+              comediens={sortedComediens}
             />
           ))}
 

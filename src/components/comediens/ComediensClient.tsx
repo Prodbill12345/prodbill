@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, UserRound, ChevronRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { sortByLabelFr } from "@/lib/sort-by-name";
 
 interface AgentRef {
   id: string;
@@ -84,6 +85,12 @@ const STATUT_COLORS: Record<string, string> = {
 
 export function ComediensClient({ comediens: initialComediens, agents }: ComediensClientProps) {
   const [comediens, setComediens] = useState<Comedien[]>(initialComediens);
+
+  // Dropdown "agent" trié par ordre alphabétique français.
+  const sortedAgents = useMemo(
+    () => sortByLabelFr(agents, (a) => (a.prenom ? `${a.prenom} ${a.nom}` : a.nom)),
+    [agents]
+  );
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Comedien | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -461,7 +468,7 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 >
                   <option value="">Aucun agent</option>
-                  {agents.map((a) => (
+                  {sortedAgents.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.prenom ? `${a.prenom} ${a.nom}` : a.nom}{a.agence ? ` — ${a.agence}` : ""}
                     </option>
