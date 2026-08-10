@@ -7,6 +7,7 @@ import {
   validatePeriodeExploitation,
 } from "@/lib/zod-helpers";
 import { del } from "@vercel/blob";
+import { evaluateClientChange } from "@/lib/devis-client-change";
 import { z } from "zod";
 
 const LigneSchema = z.object({
@@ -30,6 +31,9 @@ const SectionSchema = z.object({
 });
 
 const UpdateDevisSchema = z.object({
+  // Changement de client en édition (BUG-DEVIS-EDIT-CLIENT). Absent du schéma
+  // auparavant → zod le strippait silencieusement, l'update ne le voyait jamais.
+  clientId: z.string().min(1).optional(),
   objet: z.string().min(1).optional(),
   description: z.string().optional(),
   nomProjet: z.string().optional(),
@@ -95,6 +99,7 @@ export async function PUT(
     // Vérifier que le devis appartient à cette société et est éditable
     const existing = await prisma.devis.findFirst({
       where: { id, companyId: user.companyId },
+      include: { _count: { select: { factures: true } } },
     });
 
     if (!existing) {
@@ -103,6 +108,47 @@ export async function PUT(
 
     const body = await req.json();
     const input = UpdateDevisSchema.parse(body);
+
+    // Changement de client (BUG-DEVIS-EDIT-CLIENT) : règle métier déléguée au
+    // helper pur, puis validation d'appartenance au tenant côté DB.
+    const clientDecision = evaluateClientChange({
+      currentClientId: existing.clientId,
+      currentStatut: existing.statut,
+      facturesCount: existing._count.factures,
+      newClientId: input.clientId,
+    });
+
+    if (clientDecision === "blocked-status") {
+      return Response.json(
+        {
+          error:
+            "Le client ne peut être changé que sur un devis en brouillon ou validé. " +
+            "Ce devis est déjà envoyé/accepté : dupliquez-le pour repartir sur un autre client.",
+        },
+        { status: 400 }
+      );
+    }
+    if (clientDecision === "blocked-factures") {
+      return Response.json(
+        {
+          error:
+            "Impossible de changer le client : une facture a déjà été créée depuis ce devis.",
+        },
+        { status: 400 }
+      );
+    }
+    if (clientDecision === "allowed") {
+      // Le nouveau client doit appartenir à la même société (miroir du POST).
+      const client = await prisma.client.findFirst({
+        where: { id: input.clientId, companyId: user.companyId },
+        select: { id: true },
+      });
+      if (!client) {
+        return Response.json({ error: "Client introuvable" }, { status: 404 });
+      }
+    }
+
+    const clientChange = clientDecision === "allowed";
 
     // Recalculer si les sections sont mises à jour
     let totaux = {};
@@ -135,6 +181,7 @@ export async function PUT(
       return tx.devis.update({
         where: { id },
         data: {
+          ...(clientChange && { clientId: input.clientId }),
           ...(input.objet && { objet: input.objet }),
           ...(input.description !== undefined && { description: input.description }),
           ...(input.nomProjet !== undefined && { nomProjet: input.nomProjet }),
