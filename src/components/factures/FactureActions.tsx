@@ -24,7 +24,6 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
   const initAnnee = facture.dateEmission
     ? String(new Date(facture.dateEmission).getFullYear())
     : "";
-  const [editNumero, setEditNumero] = useState(facture.numero);
   const [editBdc, setEditBdc] = useState(facture.numeroBdc ?? "");
   const [editAnnee, setEditAnnee] = useState(initAnnee);
   const [saving, setSaving] = useState(false);
@@ -44,7 +43,6 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          numero: editNumero.trim() || facture.numero,
           numeroBdc: editBdc.trim() || null,
           dateEmission,
         }),
@@ -165,15 +163,6 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
       {showEdit && (
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 w-80 space-y-3 shadow-sm">
           <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Corriger la facture</p>
-          <div>
-            <label className="block text-xs text-slate-500 mb-1">N° Caleson</label>
-            <input
-              type="text"
-              value={editNumero}
-              onChange={(e) => setEditNumero(e.target.value)}
-              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
           <div>
             <label className="block text-xs text-slate-500 mb-1">N° BDC client</label>
             <input

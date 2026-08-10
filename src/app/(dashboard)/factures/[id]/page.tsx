@@ -10,6 +10,7 @@ import {
   FACTURE_STATUT_LABELS,
   FACTURE_TYPE_LABELS,
 } from "@/types";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import { FactureActions } from "@/components/factures/FactureActions";
 import { FactureBdcField } from "@/components/factures/FactureBdcField";
 import { FactureDateReglementField } from "@/components/factures/FactureDateReglementField";
@@ -111,7 +112,7 @@ export default async function FactureDetailPage({
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-slate-900">
-                {facture.numero}
+                {formatFactureNumero(facture)}
               </h1>
               <span
                 className={`text-xs font-medium px-2.5 py-1 rounded-full ${FACTURE_STATUT_COLORS[facture.statut]}`}

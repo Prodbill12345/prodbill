@@ -8,6 +8,8 @@ import {
 } from "@react-pdf/renderer";
 import type { Facture, Client, LigneTag } from "@prisma/client";
 
+import { formatFactureNumero } from "@/lib/facture-numero";
+
 export type FactureForPdf = Facture & {
   client: Client;
   devis?: {
@@ -261,7 +263,11 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
   const isAvoir = facture.type === "AVOIR";
 
   const docTitreLabel = isAvoir ? "AVOIR" : "FACTURE";
-  const titreDoc = `${docTitreLabel} N° ${facture.numero}`;
+  // #98 : numéro nul en brouillon → "(Brouillon)". Sinon préfixe F/AV via helper.
+  const numeroAffiche = facture.numero ? formatFactureNumero(facture) : null;
+  const titreDoc = numeroAffiche
+    ? `${docTitreLabel} N° ${numeroAffiche}`
+    : `${docTitreLabel} (Brouillon)`;
 
   const adresseClient = [
     client.address,
@@ -316,7 +322,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
           <View style={s.headerRight}>
             <Text style={s.docTitre}>{docTitreLabel}</Text>
             <Text style={isAvoir ? s.docAvoir : s.docNumero}>
-              N° {facture.numero}
+              {numeroAffiche ? `N° ${numeroAffiche}` : "(Brouillon)"}
             </Text>
             {facture.dateEmission && (
               <Text style={s.docDate}>

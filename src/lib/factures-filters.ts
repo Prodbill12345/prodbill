@@ -12,6 +12,7 @@
  */
 
 import type { FactureStatut, FactureType } from "@prisma/client";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import type { SortAccessor, SortState } from "./list-sort";
 
 export interface FacturesFilters {
@@ -31,7 +32,7 @@ export interface FacturesFilters {
 }
 
 export interface FactureFilterable {
-  numero: string;
+  numero: string | null;
   numeroBdc: string | null;
   type: FactureType;
   statut: FactureStatut;
@@ -70,7 +71,8 @@ export function filterFactures<T extends FactureFilterable>(
     if (f.q && f.q.trim() !== "") {
       const q = f.q.trim().toLowerCase();
       const hay = [
-        d.numero,
+        d.numero ?? "",
+        formatFactureNumero(d), // "F26005" / "Brouillon" → recherche par n° affiché
         d.client.name,
         d.devis?.numero ?? "",
         d.devis?.objet ?? "",
@@ -211,7 +213,7 @@ const FACTURE_TYPE_ORDER: Record<FactureType, number> = {
 };
 
 export const FACTURE_SORT_ACCESSORS: Record<FactureSortKey, SortAccessor<FactureFilterable>> = {
-  numero: (f) => f.numero,
+  numero: (f) => f.numero ?? "",
   client: (f) => f.client.name,
   type: (f) => FACTURE_TYPE_ORDER[f.type],
   annee: (f) => (f.dateEmission ? f.dateEmission.getUTCFullYear() : null),

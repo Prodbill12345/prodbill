@@ -1,6 +1,5 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getNextFactureNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 
 /**
@@ -38,8 +37,19 @@ export async function POST(
       );
     }
 
+    // La facture source est émise → elle a forcément un numéro. Garde-fou
+    // défensif (numero nullable depuis #98).
+    if (!facture.numero) {
+      return Response.json(
+        { error: "La facture source n'a pas de numéro (brouillon) — émission requise" },
+        { status: 400 }
+      );
+    }
+
     // Vérifier qu'un avoir n'existe pas déjà pour cette facture
-    // (on utilise le numero préfixé AV-)
+    // (on utilise le numero préfixé AV-). #98 : l'avoir dérive son numéro de
+    // la facture source, il ne consomme pas le Counter FACTURE (un futur type
+    // AVOIR aura son propre compteur + préfixe "A").
     const avoirNumero = `AV-${facture.numero}`;
     const existingAvoir = await prisma.facture.findFirst({
       where: { companyId: user.companyId, numero: avoirNumero },
@@ -56,18 +66,12 @@ export async function POST(
     const tva = -Math.abs(facture.tva);
     const totalTtc = -Math.abs(facture.totalTtc);
 
-    const numero = await getNextFactureNumero(
-      user.companyId,
-      "AVOIR",
-      facture.numero
-    );
-
     const avoir = await prisma.facture.create({
       data: {
         companyId: user.companyId,
         clientId: facture.clientId,
         devisId: facture.devisId,
-        numero,
+        numero: avoirNumero,
         type: "AVOIR",
         statut: "EMISE",
         totalHt,

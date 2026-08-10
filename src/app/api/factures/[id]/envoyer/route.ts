@@ -64,12 +64,13 @@ export async function POST(
       return Response.json({ error: "Facture introuvable" }, { status: 404 });
     }
 
-    if (!facture.emiseAt) {
+    if (!facture.emiseAt || !facture.numero) {
       return Response.json(
         { error: "La facture doit être émise avant d'être envoyée" },
         { status: 400 }
       );
     }
+    const factureNumero = facture.numero;
 
     // Le client peut ne pas avoir d'email (optionnel) — l'envoi est alors impossible.
     const clientEmail = facture.client.email;
@@ -102,7 +103,7 @@ export async function POST(
       to: clientEmail,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
-      factureNumero: facture.numero,
+      factureNumero,
       totalTtc: facture.totalTtc,
       dateEcheance: facture.dateEcheance ?? new Date(),
       joursRetard,

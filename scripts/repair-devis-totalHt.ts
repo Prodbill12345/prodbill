@@ -69,7 +69,7 @@ interface RepairCase {
   totalApresRemise: number;
   factures: {
     id: string;
-    numero: string;
+    numero: string | null;
     statut: string;
     storedTotalHt: number;
     newTotalHt: number;
@@ -290,7 +290,7 @@ async function commitTransaction(
   let nbFacturesUpdated = 0;
   let nbFacturesPayeeUpdated = 0;
   let nbAuditLogs = 0;
-  const payeeFactures: { numero: string; devisNumero: string | null; client: string; company: string }[] = [];
+  const payeeFactures: { numero: string | null; devisNumero: string | null; client: string; company: string }[] = [];
 
   await prisma.$transaction(
     async (tx) => {

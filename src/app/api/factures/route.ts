@@ -1,6 +1,6 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getNextFactureNumero, getNextDevisNumero } from "@/lib/numbering";
+import { getNextDevisNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
 import { isDevisFacturable } from "@/lib/devis-facturable";
@@ -110,14 +110,14 @@ export async function POST(req: Request) {
 
     // Récupérer les infos société pour les mentions légales
     const company = user.company;
-    const numero = await getNextFactureNumero(user.companyId, input.type, devisNumero);
-
+    // #98 : le brouillon n'a PAS de numéro. Il sera attribué à l'émission
+    // (POST /api/factures/[id]/emettre), tiré du Counter FACTURE.
     const facture = await prisma.facture.create({
       data: {
         companyId: user.companyId,
         clientId: devis.clientId,
         devisId: devis.id,
-        numero,
+        numero: null,
         type: input.type,
         totalHt,
         tauxTva,
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
       action: "FACTURE_CREEE",
       entityType: "Facture",
       entityId: facture.id,
-      details: { numero, type: input.type, totalHt },
+      details: { type: input.type, totalHt, devisNumero },
       factureId: facture.id,
     });
 

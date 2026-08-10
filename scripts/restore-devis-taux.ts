@@ -201,7 +201,7 @@ interface DevisLoaded {
   lignes: LigneInput[];
   factures: {
     id: string;
-    numero: string;
+    numero: string | null;
     statut: string;
     type: string;
     totalHt: number;
@@ -309,8 +309,8 @@ interface Plan {
   newTaux: TauxConfig;
   recomputed: ReturnType<typeof calculerDevis>;
   changed: string[];
-  facturesActionables: { id: string; numero: string; statut: string; type: string }[];
-  facturesSkipped: { id: string; numero: string; statut: string; type: string }[];
+  facturesActionables: { id: string; numero: string | null; statut: string; type: string }[];
+  facturesSkipped: { id: string; numero: string | null; statut: string; type: string }[];
 }
 
 function buildPlan(devis: DevisLoaded, target: Target): Plan {

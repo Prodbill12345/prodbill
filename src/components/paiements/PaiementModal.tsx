@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
+import { formatFactureNumero } from "@/lib/facture-numero";
 
 const MODES = [
   { value: "virement", label: "Virement bancaire" },
@@ -14,7 +15,7 @@ const MODES = [
 
 export interface FacturePaiementInfo {
   id: string;
-  numero: string;
+  numero: string | null;
   totalTtc: number;
   resteAPayer: number;
 }
@@ -88,7 +89,7 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
               Enregistrer un paiement
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Facture {facture.numero} — Reste dû :{" "}
+              Facture {formatFactureNumero(facture)} — Reste dû :{" "}
               <span className="font-medium text-slate-700">
                 {formatEuros(facture.resteAPayer)}
               </span>

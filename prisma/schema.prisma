@@ -460,7 +460,12 @@ model Facture {
   devisId   String?
   devis     Devis?  @relation(fields: [devisId], references: [id])
 
-  numero String // "25-0042-A1", "25-0042-S1", "AV-25-0042" — unicité scopée par tenant
+  // Numéro attribué à l'ÉMISSION (pas à la création), tiré du Counter FACTURE,
+  // stocké nu ("26005"). NULL tant que la facture est en brouillon. Préfixe "F"
+  // ajouté à l'affichage uniquement (cf. src/lib/facture-numero.ts). Les avoirs
+  // conservent le format "AV-<source>". Unicité scopée par tenant — plusieurs
+  // brouillons NULL coexistent (les NULL sont distincts en Postgres). Ticket #98.
+  numero String?
   type   FactureType
   statut FactureStatut @default(BROUILLON)
 

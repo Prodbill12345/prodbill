@@ -5,9 +5,9 @@ import { z } from "zod";
 const UpdateFactureSchema = z.object({
   numeroBdc: z.string().optional().nullable(),
   dateReglement: z.string().nullable().optional(), // "YYYY-MM-DD"
-  // Champs de correction (données importées)
-  numero: z.string().min(1).optional(),
-  dateEmission: z.string().nullable().optional(), // "YYYY-MM-DD"
+  // #98 : le numéro est attribué à l'émission et immuable — plus d'édition
+  // manuelle (le champ `numero` n'est plus accepté ici).
+  dateEmission: z.string().nullable().optional(), // "YYYY-MM-DD" (correction import)
 });
 
 export async function PUT(
@@ -49,7 +49,6 @@ export async function PUT(
           ...(input.dateReglement !== undefined && {
             dateReglement: input.dateReglement ? new Date(input.dateReglement) : null,
           }),
-          ...(input.numero !== undefined && { numero: input.numero }),
           ...(input.dateEmission !== undefined && {
             dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
           }),

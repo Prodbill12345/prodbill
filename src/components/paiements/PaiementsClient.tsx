@@ -12,11 +12,12 @@ import {
   FACTURE_TYPE_LABELS,
 } from "@/types";
 import { PaiementModal, type FacturePaiementInfo } from "./PaiementModal";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import type { FactureStatut, FactureType } from "@/types";
 
 export interface FactureRow {
   id: string;
-  numero: string;
+  numero: string | null;
   type: FactureType;
   statut: FactureStatut;
   totalTtc: number;
@@ -99,7 +100,7 @@ export function PaiementsClient({ factures }: Props) {
                       href={`/factures/${f.id}`}
                       className="font-medium text-blue-600 hover:text-blue-700 text-sm"
                     >
-                      {f.numero}
+                      {formatFactureNumero(f)}
                     </Link>
                   </td>
 

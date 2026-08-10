@@ -111,21 +111,24 @@ export async function GET(req: Request) {
       const cptClient = compte411(f.client.siret);
       const libClient = f.client.name.toUpperCase().slice(0, 35);
       const ecritureNum = nextNum();
-      const libEcriture = `FAC ${f.numero}`.slice(0, 35);
+      // Factures non-brouillon uniquement (cf. where) → numéro toujours présent ;
+      // coalescence défensive depuis que numero est nullable (#98).
+      const fNumero = f.numero ?? "";
+      const libEcriture = `FAC ${fNumero}`.slice(0, 35);
       const isAvoir = f.totalHt < 0;
 
       if (isAvoir) {
         // Avoir : sens inversé
         // 411 CRÉDIT, 706 DÉBIT, 44571 DÉBIT
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, cptClient, libClient, f.numero, pieceDate, libEcriture, "0,00", fecNum(f.totalTtc), "", "", validDate, "", ""]));
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "706000", "PRESTATIONS DE SERVICES", f.numero, pieceDate, libEcriture, fecNum(f.totalHt), "0,00", "", "", validDate, "", ""]));
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "445710", "TVA COLLECTÉE 20%", f.numero, pieceDate, libEcriture, fecNum(f.tva), "0,00", "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, cptClient, libClient, fNumero, pieceDate, libEcriture, "0,00", fecNum(f.totalTtc), "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "706000", "PRESTATIONS DE SERVICES", fNumero, pieceDate, libEcriture, fecNum(f.totalHt), "0,00", "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "445710", "TVA COLLECTÉE 20%", fNumero, pieceDate, libEcriture, fecNum(f.tva), "0,00", "", "", validDate, "", ""]));
       } else {
         // Facture normale
         // 411 DÉBIT TTC | 706 CRÉDIT HT | 44571 CRÉDIT TVA
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, cptClient, libClient, f.numero, pieceDate, libEcriture, fecNum(f.totalTtc), "0,00", "", "", validDate, "", ""]));
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "706000", "PRESTATIONS DE SERVICES", f.numero, pieceDate, libEcriture, "0,00", fecNum(f.totalHt), "", "", validDate, "", ""]));
-        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "445710", "TVA COLLECTÉE 20%", f.numero, pieceDate, libEcriture, "0,00", fecNum(f.tva), "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, cptClient, libClient, fNumero, pieceDate, libEcriture, fecNum(f.totalTtc), "0,00", "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "706000", "PRESTATIONS DE SERVICES", fNumero, pieceDate, libEcriture, "0,00", fecNum(f.totalHt), "", "", validDate, "", ""]));
+        lines.push(fecRow([ecritureNum, "Journal des ventes", ecritureNum, dateEcr, "445710", "TVA COLLECTÉE 20%", fNumero, pieceDate, libEcriture, "0,00", fecNum(f.tva), "", "", validDate, "", ""]));
       }
     }
 
@@ -135,11 +138,12 @@ export async function GET(req: Request) {
       const ecritureNum = nextBQ();
       const cptClient = compte411(p.facture.client.siret);
       const libClient = p.facture.client.name.toUpperCase().slice(0, 35);
-      const libEcriture = `REG ${p.facture.numero}`.slice(0, 35);
+      const pfNumero = p.facture.numero ?? "";
+      const libEcriture = `REG ${pfNumero}`.slice(0, 35);
 
       // 512 DÉBIT | 411 CRÉDIT
-      lines.push(fecRow([ecritureNum, "Journal de banque", ecritureNum, dateEcr, "512000", "BANQUE", p.reference ?? p.facture.numero, dateEcr, libEcriture, fecNum(p.montant), "0,00", "", "", validDate, "", ""]));
-      lines.push(fecRow([ecritureNum, "Journal de banque", ecritureNum, dateEcr, cptClient, libClient, p.reference ?? p.facture.numero, dateEcr, libEcriture, "0,00", fecNum(p.montant), "", "", validDate, "", ""]));
+      lines.push(fecRow([ecritureNum, "Journal de banque", ecritureNum, dateEcr, "512000", "BANQUE", p.reference ?? pfNumero, dateEcr, libEcriture, fecNum(p.montant), "0,00", "", "", validDate, "", ""]));
+      lines.push(fecRow([ecritureNum, "Journal de banque", ecritureNum, dateEcr, cptClient, libClient, p.reference ?? pfNumero, dateEcr, libEcriture, "0,00", fecNum(p.montant), "", "", validDate, "", ""]));
     }
 
     const debutStr = debut.toISOString().slice(0, 10);

@@ -7,6 +7,7 @@ import { ChevronRight, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown } from "luci
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { FACTURE_STATUT_COLORS, FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import type { FactureStatut, FactureType } from "@prisma/client";
 import {
   filterFactures,
@@ -29,7 +30,7 @@ import { FacturesFiltersBar } from "./FacturesFilters";
 
 interface FactureRow {
   id: string;
-  numero: string;
+  numero: string | null;
   numeroBdc: string | null;
   type: FactureType;
   statut: FactureStatut;
@@ -140,7 +141,7 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
                         className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1.5"
                       >
                         {isRetard && <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
-                        {f.numero}
+                        {formatFactureNumero(f)}
                       </Link>
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-600">{f.client.name}</td>

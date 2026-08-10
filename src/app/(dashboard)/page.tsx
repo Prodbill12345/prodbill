@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import { formatEuros } from "@/lib/calculations";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import {
   DEVIS_STATUT_COLORS,
   DEVIS_STATUT_LABELS,
@@ -354,7 +355,7 @@ export default async function DashboardPage() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-slate-800 truncate group-hover:text-emerald-700 transition-colors flex items-center gap-1.5">
                           {isRetard && <AlertCircle className="w-3 h-3 text-red-500 shrink-0" />}
-                          {facture.numero}
+                          {formatFactureNumero(facture)}
                         </p>
                         <p className="text-xs text-slate-400">{facture.client.name}</p>
                       </div>

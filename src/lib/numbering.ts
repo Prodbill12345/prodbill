@@ -7,7 +7,8 @@
  *           → "DEV-2026-26001"  (si Company.prefixDevis renseigné — feature
  *             préfixe conservée pour d'éventuels futurs workspaces ; Caleson
  *             et NONNA ont leur préfixe vidé, ils sortent donc en "26001").
- *   FACTURE → dérivé du numéro de devis : "${devisNumero}-A1", "-S1", "AV-…"
+ *   FACTURE → "26005" (compteur FACTURE, attribué à l'émission, préfixe "F"
+ *             à l'affichage). Avoir : "AV-<source>" dérivé côté route. (#98)
  *   BDC     → "BDC-26001"
  *
  * L'affichage "D26001 - objet" est une pure présentation (voir
@@ -55,22 +56,26 @@ export async function getNextDevisNumero(
   });
 }
 
+/**
+ * Numéro de facture séquentiel, attribué À L'ÉMISSION (#98). Tiré du Counter
+ * FACTURE de la société, stocké nu ("26005") — le préfixe "F" est ajouté à
+ * l'affichage uniquement (src/lib/facture-numero.ts). Indépendant du devis.
+ *
+ * Atomique : getNextValue fait un upsert increment → pas de doublon même en
+ * cas d'appels concurrents (chaque appel obtient une valeur distincte).
+ *
+ * Extensibilité avoirs : un futur type AVOIR aura son propre Counter (enum
+ * CounterType à étendre par migration) et son préfixe "A" à l'affichage. En
+ * attendant, l'avoir dérive son numéro de la facture source ("AV-<source>")
+ * côté route avoir, sans passer par ce compteur.
+ */
 export async function getNextFactureNumero(
   companyId: string,
-  type: "ACOMPTE" | "SOLDE" | "AVOIR",
-  devisNumero: string,
   year: number = new Date().getFullYear()
 ): Promise<string> {
   return prisma.$transaction(async () => {
-    await getNextValue(companyId, year, "FACTURE");
-    switch (type) {
-      case "ACOMPTE":
-        return `${devisNumero}-A1`;
-      case "SOLDE":
-        return `${devisNumero}-S1`;
-      case "AVOIR":
-        return `AV-${devisNumero}`;
-    }
+    const value = await getNextValue(companyId, year, "FACTURE");
+    return formatNumero(year, value);
   });
 }
 

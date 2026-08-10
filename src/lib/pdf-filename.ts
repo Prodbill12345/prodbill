@@ -62,10 +62,11 @@ export function devisPdfFilename(devis: {
  *   - Sans devis lié (ex avoir manuel) : `FACTURE_${numero}.pdf`
  */
 export function facturePdfFilename(facture: {
-  numero: string;
+  numero: string | null;
   devis?: { objet: string } | null;
 }): string {
-  const safeNumero = facture.numero.replace(FS_INVALID_CHARS, "-");
+  // #98 : brouillon sans numéro → token "BROUILLON" (comme les devis).
+  const safeNumero = (facture.numero ?? "BROUILLON").replace(FS_INVALID_CHARS, "-");
   if (facture.devis?.objet) {
     return `FACTURE_${safeNumero}_${slugify(facture.devis.objet)}.pdf`;
   }

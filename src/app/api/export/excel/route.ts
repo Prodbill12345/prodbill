@@ -1,5 +1,6 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { scopedPrisma } from "@/lib/scoped-prisma";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import ExcelJS from "exceljs";
 
 function parseRange(url: URL): { debut: Date; fin: Date } {
@@ -103,7 +104,7 @@ export async function GET(req: Request) {
     styleHeader(wsF.getRow(1));
     for (const f of factures) {
       wsF.addRow({
-        numero: f.numero,
+        numero: formatFactureNumero(f),
         date: fmtDate(f.dateEmission),
         echeance: fmtDate(f.dateEcheance),
         client: f.client.name,
@@ -132,7 +133,7 @@ export async function GET(req: Request) {
     for (const p of paiements) {
       wsP.addRow({
         date: fmtDate(p.date),
-        facture: p.facture.numero,
+        facture: formatFactureNumero(p.facture),
         client: p.facture.client.name,
         montant: p.montant,
         mode: p.mode ?? "",

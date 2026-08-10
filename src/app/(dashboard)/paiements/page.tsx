@@ -4,6 +4,7 @@ import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
 import { PaiementsClient, type FactureRow } from "@/components/paiements/PaiementsClient";
+import { formatFactureNumero } from "@/lib/facture-numero";
 import Link from "next/link";
 
 function joursEntre(a: Date, b: Date) {
@@ -216,7 +217,7 @@ export default async function PaiementsPage() {
                       href={`/factures/${p.factureId}`}
                       className="text-sm font-medium text-blue-600 hover:text-blue-700"
                     >
-                      {p.facture.numero}
+                      {formatFactureNumero(p.facture)}
                     </Link>
                   </td>
                   <td className="px-5 py-3.5 text-sm text-slate-700">

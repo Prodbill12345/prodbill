@@ -71,12 +71,13 @@ export async function POST(
       return Response.json({ error: "Facture introuvable" }, { status: 404 });
     }
 
-    if (!facture.emiseAt) {
+    if (!facture.emiseAt || !facture.numero) {
       return Response.json(
         { error: "La facture doit être émise avant d'être relancée" },
         { status: 400 }
       );
     }
+    const factureNumero = facture.numero;
 
     if (facture.statut === "PAYEE" || facture.statut === "ANNULEE") {
       return Response.json(
@@ -126,7 +127,7 @@ export async function POST(
       to: clientEmail,
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
-      factureNumero: facture.numero,
+      factureNumero,
       totalTtc: facture.totalTtc,
       dateEcheance: facture.dateEcheance ?? new Date(),
       joursRetard,

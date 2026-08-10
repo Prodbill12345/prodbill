@@ -184,6 +184,15 @@ export async function GET(
       return Response.json({ error: "Facture introuvable" }, { status: 404 });
     }
 
+    // #98 : Factur-X exige un numéro → uniquement sur facture émise.
+    if (!facture.numero) {
+      return Response.json(
+        { error: "La facture doit être émise (numérotée) pour générer un Factur-X" },
+        { status: 400 }
+      );
+    }
+    const factureNumero = facture.numero;
+
     const devisNormalized = facture.devis
       ? { ...facture.devis, numero: facture.devis.numero ?? "" }
       : null;
@@ -200,7 +209,7 @@ export async function GET(
 
     // 2. Générer le XML Factur-X (profil MINIMUM EN 16931)
     const xmlString = buildFacturXml({
-      numero: facture.numero,
+      numero: factureNumero,
       dateEmission: facture.dateEmission,
       totalHt: facture.totalHt,
       tva: facture.tva,
@@ -225,7 +234,7 @@ export async function GET(
     const pdfDoc = await PDFDocument.load(pdfBuffer);
 
     // Métadonnées PDF/A requises pour Factur-X
-    pdfDoc.setTitle(`Facture ${facture.numero}`);
+    pdfDoc.setTitle(`Facture ${factureNumero}`);
     pdfDoc.setCreator("ProdBill");
     pdfDoc.setProducer("ProdBill — Factur-X EN 16931");
 
@@ -240,7 +249,7 @@ export async function GET(
 
     const outputBytes = await pdfDoc.save();
 
-    const filename = `facturx-${facture.numero.replace(/\//g, "-")}.pdf`;
+    const filename = `facturx-${factureNumero.replace(/\//g, "-")}.pdf`;
 
     return new Response(Buffer.from(outputBytes), {
       headers: {
