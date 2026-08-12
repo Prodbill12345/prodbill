@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import { DevisActions } from "@/components/devis/DevisActions";
 import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
+import { formatTvaLabel } from "@/lib/tva-label";
 
 export default async function DevisDetailPage({
   params,
@@ -232,7 +233,7 @@ export default async function DevisDetailPage({
                 </div>
                 {showTva && (
                   <div className="flex justify-between text-slate-500">
-                    <span>TVA {(devis.tauxTva % 1 === 0 ? devis.tauxTva.toFixed(0) : String(devis.tauxTva).replace(".", ","))}%</span>
+                    <span>{formatTvaLabel(devis.tauxTva)}</span>
                     <span>{formatEuros(devis.tva)}</span>
                   </div>
                 )}

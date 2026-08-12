@@ -298,7 +298,12 @@ export function DevisBuilder({
   };
 
   const remiseValue = Number(watchedValues.remise) || 0;
-  const calculResult = calculerDevis(allLignes, taux, remiseValue);
+  // BUG-TVA-TAUX-IGNORE : le taux TVA sélectionné (%) DOIT être passé à
+  // calculerDevis, sinon le récap live retombe sur le défaut 20 %.
+  const tauxTvaPct = Number.isFinite(Number(watchedValues.tauxTva))
+    ? Number(watchedValues.tauxTva)
+    : 20;
+  const calculResult = calculerDevis(allLignes, taux, remiseValue, tauxTvaPct);
 
   const toggleSection = useCallback((idx: number) => {
     setExpandedSections((prev) => {
@@ -917,7 +922,7 @@ export function DevisBuilder({
 
       {/* Colonne droite — Totaux (1/3) */}
       <div className="space-y-4">
-        <TotauxPanel result={calculResult} taux={taux} />
+        <TotauxPanel result={calculResult} taux={taux} tauxTva={tauxTvaPct} />
 
         <button
           type="submit"

@@ -1,11 +1,14 @@
 "use client";
 
 import { formatEuros, formatPct } from "@/lib/calculations";
+import { formatTvaLabel } from "@/lib/tva-label";
 import type { CalculResult, TauxConfig } from "@/types";
 
 interface TotauxPanelProps {
   result: CalculResult;
   taux: TauxConfig;
+  /** Taux TVA en POURCENTAGE (20, 10, 5.5, 0). Pilote le libellé de la ligne TVA. */
+  tauxTva: number;
 }
 
 interface Row {
@@ -17,7 +20,7 @@ interface Row {
   negative?: boolean;
 }
 
-export function TotauxPanel({ result, taux }: TotauxPanelProps) {
+export function TotauxPanel({ result, taux, tauxTva }: TotauxPanelProps) {
   const rows: Row[] = [
     { label: "Sous-total HT", value: result.sousTotal, separator: true },
     {
@@ -51,7 +54,7 @@ export function TotauxPanel({ result, taux }: TotauxPanelProps) {
       { label: "Remise exceptionnelle", value: result.remise, sub: true, negative: true },
       { label: "Total après remise", value: result.totalApresRemise, sub: true, highlight: true },
     ] : []),
-    { label: "TVA 20%", value: result.tva, sub: true },
+    { label: formatTvaLabel(tauxTva), value: result.tva, sub: true },
     { label: "TOTAL TTC", value: result.totalTtc, highlight: true },
   ];
 
