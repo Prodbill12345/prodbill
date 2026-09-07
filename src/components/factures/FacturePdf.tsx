@@ -34,6 +34,15 @@ export type FactureForPdf = Facture & {
       }>;
     }>;
   } | null;
+  // #99 : facture récapitulative multi-devis. Renseigné (≥ 2 entrées) UNIQUEMENT
+  // pour une facture récap ; null/absent pour une facture mono classique (qui
+  // continue d'utiliser `devis` ci-dessus). Une ligne par devis source.
+  devisList?: Array<{
+    id: string;
+    numero: string; // stocké nu ("26005") — préfixe "D" ajouté à l'affichage
+    objet: string;
+    montantHt: number; // HT NET facturé pour ce devis (totalHt - remise)
+  }> | null;
   logoUrl?: string | null; // logo courant de la société (passé depuis le PDF route)
 };
 
@@ -261,6 +270,9 @@ const s = StyleSheet.create({
 export function FacturePdf({ facture }: { facture: FactureForPdf }) {
   const { client, logoUrl } = facture;
   const isAvoir = facture.type === "AVOIR";
+  // #99 : facture récapitulative = plusieurs devis sources (une ligne par
+  // devis, pas de décomposition CS/FG/marge — cf. Vanda).
+  const isRecap = !!facture.devisList && facture.devisList.length > 0;
 
   const docTitreLabel = isAvoir ? "AVOIR" : "FACTURE";
   // #98 : numéro nul en brouillon → "(Brouillon)". Sinon préfixe F/AV via helper.
@@ -365,13 +377,23 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
           </View>
         </View>
 
-        {/* ── Référence devis ───────────────────────────────────── */}
-        {facture.devis && (
+        {/* ── Référence devis (facture mono) ────────────────────── */}
+        {facture.devis && !isRecap && (
           <View style={s.refRow}>
             <Text style={s.refLabel}>Réf. :</Text>
             <Text style={s.refText}>
               {ligneDescription}
               {ligneRef ? ` — ${ligneRef}` : ""}
+            </Text>
+          </View>
+        )}
+
+        {/* ── Bandeau facture récapitulative (#99) ──────────────── */}
+        {isRecap && (
+          <View style={s.refRow}>
+            <Text style={s.refLabel}>Facture récapitulative :</Text>
+            <Text style={s.refText}>
+              regroupe {facture.devisList!.length} devis
             </Text>
           </View>
         )}
@@ -407,6 +429,34 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
             au prorata (ratio = facture.totalHt / devis.totalHt).
             Fallback single-line si pas de devis (NONNA/SACEM) ou avoir. */}
         {(() => {
+          // #99 : facture récapitulative → une ligne par devis source
+          // (réf D26XXX + objet + total HT du devis), puis TOTAL global dans
+          // le bloc totaux. Pas de décomposition par section.
+          if (isRecap) {
+            const devisList = facture.devisList!;
+            return (
+              <View style={s.amountsBlock}>
+                <View style={s.amountsTable}>
+                  <View style={s.amountsHead}>
+                    <Text style={[s.thText, s.colTag]}>Devis</Text>
+                    <Text style={[s.thText, s.colDesc]}>Objet</Text>
+                    <Text style={[s.thText, s.colTot]}>Total HT</Text>
+                  </View>
+                  {devisList.map((d, i) => (
+                    <View
+                      key={d.id}
+                      style={[s.amountsRow, i % 2 === 1 ? s.tableRowAlt : {}]}
+                    >
+                      <Text style={[s.tdText, s.colTag]}>D{d.numero}</Text>
+                      <Text style={[s.tdText, s.colDesc]}>{d.objet}</Text>
+                      <Text style={[s.tdRight, s.colTot]}>{euros(d.montantHt)}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            );
+          }
+
           const hasDetail =
             !isAvoir &&
             facture.devis &&
@@ -505,7 +555,10 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
 
         {/* ── Totaux ──────────────────────────────────────────── */}
         {(() => {
-          const hasBreakdown = !isAvoir && facture.sousTotal > 0;
+          // #99 : pas de décomposition CS/FG/marge sur une récap — les lignes
+          // par devis totalisent déjà le HT tout compris. On affiche seulement
+          // TOTAL HT / TVA / TTC.
+          const hasBreakdown = !isAvoir && !isRecap && facture.sousTotal > 0;
           const detailRows = hasBreakdown
             ? [
                 { label: "Charges sociales / comédien",    taux: facture.tauxCsComedien, montant: facture.csComedien },

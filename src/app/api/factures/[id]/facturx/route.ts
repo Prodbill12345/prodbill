@@ -4,6 +4,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
+import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
 import React from "react";
 
 function buildFacturXml(facture: {
@@ -172,6 +173,12 @@ export async function GET(
               },
             },
           },
+          // #99 : devis sources d'une facture récapitulative multi-devis.
+          devisLinks: {
+            select: {
+              devis: { select: { id: true, numero: true, objet: true, totalHt: true, remise: true } },
+            },
+          },
         },
       }),
       prisma.company.findUnique({
@@ -196,9 +203,16 @@ export async function GET(
     const devisNormalized = facture.devis
       ? { ...facture.devis, numero: facture.devis.numero ?? "" }
       : null;
+    // #99 : récap = devisId non renseigné + ≥ 2 devis liés (une ligne par devis
+    // dans le PDF visuel ; le XML MINIMUM reste sur les totaux scalaires — taux
+    // TVA uniforme garanti à la création).
+    const devisList = isRecapFacture(facture.devisId, facture.devisLinks.length)
+      ? buildRecapDevisList(facture.devisLinks)
+      : null;
     const factureWithLogo = {
       ...facture,
       devis: devisNormalized,
+      devisList,
       logoUrl: company?.logoUrl ?? null,
     };
 

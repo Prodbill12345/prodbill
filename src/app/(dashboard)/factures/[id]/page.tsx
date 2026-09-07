@@ -11,6 +11,7 @@ import {
   FACTURE_TYPE_LABELS,
 } from "@/types";
 import { formatFactureNumero } from "@/lib/facture-numero";
+import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
 import { FactureActions } from "@/components/factures/FactureActions";
 import { FactureBdcField } from "@/components/factures/FactureBdcField";
 import { FactureDateReglementField } from "@/components/factures/FactureDateReglementField";
@@ -75,12 +76,23 @@ export default async function FactureDetailPage({
           },
         },
       },
+      // #99 : devis sources d'une facture récapitulative multi-devis.
+      devisLinks: {
+        select: {
+          devis: { select: { id: true, numero: true, objet: true, totalHt: true, remise: true } },
+        },
+      },
       paiements: { orderBy: { date: "desc" } },
       relances: { orderBy: { sentAt: "desc" } },
     },
   });
 
   if (!facture) notFound();
+
+  // #99 : récap = devisId non renseigné + ≥ 2 devis liés. Une ligne par devis
+  // (HT NET = totalHt - remise), sans décomposition CS/FG/marge.
+  const isRecap = isRecapFacture(facture.devisId, facture.devisLinks.length);
+  const recapDevis = isRecap ? buildRecapDevisList(facture.devisLinks) : [];
 
   const totalPaye = facture.paiements.reduce((s, p) => s + p.montant, 0);
   const resteAPayer = facture.totalTtc - totalPaye;
@@ -129,7 +141,7 @@ export default async function FactureDetailPage({
                 </span>
               )}
             </div>
-            {facture.devis && (
+            {facture.devis && !isRecap && (
               <p className="text-slate-500 mt-1">
                 Réf. devis :{" "}
                 <Link
@@ -139,6 +151,22 @@ export default async function FactureDetailPage({
                   {facture.devis.numero}
                 </Link>{" "}
                 — {facture.devis.objet}
+              </p>
+            )}
+            {isRecap && (
+              <p className="text-slate-500 mt-1">
+                Facture récapitulative —{" "}
+                {recapDevis.map((d, i) => (
+                  <span key={d.id}>
+                    {i > 0 && ", "}
+                    <Link
+                      href={`/devis/${d.id}`}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      {d.numero ? `D${d.numero}` : "(brouillon)"}
+                    </Link>
+                  </span>
+                ))}
               </p>
             )}
           </div>
@@ -271,7 +299,48 @@ export default async function FactureDetailPage({
           {/* Détail — sections/lignes lues depuis le devis lié,
               valeurs ramenées au prorata (ratio = facture.totalHt / devis.totalHt).
               Fallback single-line pour les factures sans devis (NONNA/SACEM). */}
-          {facture.devis && facture.devis.sections.length > 0 ? (
+          {isRecap ? (
+            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
+                <h4 className="font-semibold text-slate-800">
+                  Devis regroupés ({recapDevis.length})
+                </h4>
+              </div>
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium w-28">
+                      Devis
+                    </th>
+                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                      Objet
+                    </th>
+                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium w-32">
+                      Total HT
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {recapDevis.map((d) => (
+                    <tr key={d.id}>
+                      <td className="px-5 py-3 text-sm">
+                        <Link
+                          href={`/devis/${d.id}`}
+                          className="text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          {d.numero ? `D${d.numero}` : "(brouillon)"}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-700">{d.objet}</td>
+                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-slate-900">
+                        {formatEuros(d.montantHt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : facture.devis && facture.devis.sections.length > 0 ? (
             (() => {
               const ratio =
                 facture.devis!.totalHt > 0
@@ -450,7 +519,9 @@ export default async function FactureDetailPage({
             <div className="space-y-2 text-sm">
               {/* Sous-total + CS/FG/Marge : affichés seulement si on a un
                   breakdown valide. Lignes à 0 € masquées (cf. devis). */}
-              {!isAvoir && facture.sousTotal > 0 && (
+              {/* #99 : pas de décomposition CS/FG/marge sur une récap (les
+                  lignes par devis totalisent déjà le HT tout compris). */}
+              {!isAvoir && !isRecap && facture.sousTotal > 0 && (
                 <>
                   {(
                     [
