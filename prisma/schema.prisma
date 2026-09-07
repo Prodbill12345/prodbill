@@ -381,6 +381,9 @@ model Devis {
 
   sections  DevisSection[]
   factures  Facture[]
+  // Liens vers les factures récapitulatives multi-devis (#99). Source de
+  // vérité de l'appartenance d'un devis à une facture (mono OU multi).
+  factureLinks FactureDevis[]
   bdc       BDC?
   auditLogs AuditLog[]
 
@@ -539,10 +542,35 @@ model Facture {
   paiements Paiement[]
   relances  Relance[]
   auditLogs AuditLog[]
+  // Devis sources — via table de liaison (#99). Pour une facture mono-devis,
+  // `devisId` (ci-dessus) reste renseigné en miroir ET une ligne FactureDevis
+  // existe (backfillée pour l'existant). Pour une facture récap multi-devis,
+  // `devisId` est NULL et l'ensemble des sources vit ici.
+  devisLinks FactureDevis[]
 
   @@unique([companyId, numero])
   @@index([companyId])
   @@index([clientId])
+  @@index([devisId])
+}
+
+// ─────────────────────────────────────────────
+// FACTURE ↔ DEVIS (liaison N-N) — #99
+// ─────────────────────────────────────────────
+// Table de liaison permettant à UNE facture de récapituler PLUSIEURS devis
+// d'un même client (facture récapitulative mensuelle). Source de vérité de
+// l'ensemble des devis sources d'une facture, mono comme multi. Rétrocompat :
+// `Facture.devisId` est conservé en miroir pour le chemin mono existant et est
+// backfillé ici pour toutes les factures existantes (une ligne par facture).
+model FactureDevis {
+  id        String  @id @default(cuid())
+  factureId String
+  devisId   String
+  facture   Facture @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  devis     Devis   @relation(fields: [devisId], references: [id])
+
+  @@unique([factureId, devisId])
+  @@index([factureId])
   @@index([devisId])
 }
 
