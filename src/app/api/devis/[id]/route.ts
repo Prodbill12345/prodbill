@@ -99,7 +99,9 @@ export async function PUT(
     // Vérifier que le devis appartient à cette société et est éditable
     const existing = await prisma.devis.findFirst({
       where: { id, companyId: user.companyId },
-      include: { _count: { select: { factures: true } } },
+      // #99 : on compte aussi les liens FactureDevis (factures récap multi-devis
+      // où devisId n'est pas renseigné) en plus des factures mono.
+      include: { _count: { select: { factures: true, factureLinks: true } } },
     });
 
     if (!existing) {
@@ -115,6 +117,7 @@ export async function PUT(
       currentClientId: existing.clientId,
       currentStatut: existing.statut,
       facturesCount: existing._count.factures,
+      factureLinksCount: existing._count.factureLinks,
       newClientId: input.clientId,
     });
 

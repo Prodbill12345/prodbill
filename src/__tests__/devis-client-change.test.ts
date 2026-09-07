@@ -88,4 +88,41 @@ describe("evaluateClientChange", () => {
       })
     ).toBe("blocked-status");
   });
+
+  // #99 : appartenance à une facture récapitulative (lien FactureDevis) sans
+  // facture mono (devisId non renseigné → facturesCount = 0).
+  test("VALIDE, membre d'une facture récap (factureLinksCount>0) → blocked-factures", () => {
+    expect(
+      evaluateClientChange({
+        ...base,
+        currentStatut: "VALIDE",
+        facturesCount: 0,
+        factureLinksCount: 1,
+        newClientId: "cli-B",
+      })
+    ).toBe("blocked-factures");
+  });
+
+  test("factureLinksCount omis (appelant pré-#99) → défaut 0, comportement inchangé", () => {
+    expect(
+      evaluateClientChange({
+        ...base,
+        currentStatut: "VALIDE",
+        facturesCount: 0,
+        newClientId: "cli-B",
+      })
+    ).toBe("allowed");
+  });
+
+  test("les deux comptes non nuls (facture mono + lien) → blocked-factures", () => {
+    expect(
+      evaluateClientChange({
+        ...base,
+        currentStatut: "BROUILLON",
+        facturesCount: 1,
+        factureLinksCount: 1,
+        newClientId: "cli-B",
+      })
+    ).toBe("blocked-factures");
+  });
 });
