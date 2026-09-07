@@ -149,3 +149,108 @@ export function computeFactureTotalsFromDevis(
     baseMarge,
   };
 }
+
+// ─────────────────────────────────────────────
+// FACTURE RÉCAPITULATIVE MULTI-DEVIS (#99)
+// ─────────────────────────────────────────────
+
+/** Snapshot par devis source, exposé pour le PDF récap et les tests. */
+export interface PerDevisSnapshot {
+  totalHt: number;    // HT BRUT du devis (facturé à 100 %)
+  remise: number;
+  totalHtNet: number; // HT NET = totalHt - remise (base TVA)
+  tva: number;
+  totalTtc: number;
+  tauxTva: number;
+}
+
+export interface MultiDevisFactureTotals {
+  /** Σ totalHt BRUT de chaque devis. */
+  totalHt: number;
+  remise: number;
+  coproduction: number;
+  /** Σ (totalHt - remise) de chaque devis — base TVA agrégée. */
+  totalHtNet: number;
+  /** Σ TVA calculée PAR DEVIS puis sommée (préserve le fix #80 et la remise
+   *  propre à chaque devis). */
+  tva: number;
+  totalTtc: number;
+  sousTotal: number;
+  csComedien: number;
+  csTechniciens: number;
+  fraisGeneraux: number;
+  marge: number;
+  baseMarge: number;
+  /** Taux TVA commun. La route #99 garantit l'uniformité (400 sinon) ; la
+   *  valeur renvoyée est celle du 1er devis. */
+  tauxTva: number;
+  /** Détail par devis (dans l'ordre d'entrée) pour le rendu PDF ligne à ligne. */
+  perDevis: PerDevisSnapshot[];
+}
+
+/**
+ * Vrai si tous les devis partagent le même taux de TVA. Garde-fou métier #99 :
+ * le PDF et le Factur-X sont mono-taux, on refuse (400) une facture récap qui
+ * mélangerait des taux. Comparaison sur le taux normalisé (défaut 20).
+ */
+export function haveUniformTvaRate(
+  devisList: Array<Pick<DevisForFactureCompute, "tauxTva">>
+): boolean {
+  if (devisList.length === 0) return true;
+  const first = devisList[0].tauxTva ?? 20;
+  return devisList.every((d) => (d.tauxTva ?? 20) === first);
+}
+
+/**
+ * Agrège les totaux d'une facture RÉCAPITULATIVE à partir de N devis, chacun
+ * facturé à 100 % (pas d'acompte en V1). Pure, sans side effect.
+ *
+ * Méthode : réutilise computeFactureTotalsFromDevis(type: SOLDE, sans acompte)
+ * pour CHAQUE devis, puis somme. La TVA est donc calculée par devis sur son HT
+ * NET (post-remise, taux du devis) AVANT sommation — ce qui préserve
+ * exactement le fix bug #80 et la remise propre à chaque devis, et resterait
+ * correct même si un jour on autorisait des taux mixtes.
+ *
+ * Précondition (garantie par la route) : devisList non vide et taux TVA
+ * uniforme (cf. haveUniformTvaRate). Le champ tauxTva renvoyé est celui du 1er.
+ */
+export function computeFactureTotalsFromMultipleDevis(
+  devisList: DevisForFactureCompute[]
+): MultiDevisFactureTotals {
+  if (devisList.length === 0) {
+    throw new Error("computeFactureTotalsFromMultipleDevis: au moins un devis requis");
+  }
+
+  const per = devisList.map((devis) => {
+    const t = computeFactureTotalsFromDevis({ devis, type: "SOLDE", acomptesTotalHt: 0 });
+    const snap: PerDevisSnapshot = {
+      totalHt: t.totalHt,
+      remise: t.remise,
+      totalHtNet: t.totalHtNet,
+      tva: t.tva,
+      totalTtc: t.totalTtc,
+      tauxTva: devis.tauxTva ?? 20,
+    };
+    return { t, snap };
+  });
+
+  const sum = (pick: (t: FactureTotalsSnapshot) => number): number =>
+    round2(per.reduce((acc, p) => acc + pick(p.t), 0));
+
+  return {
+    totalHt:       sum((t) => t.totalHt),
+    remise:        sum((t) => t.remise),
+    coproduction:  sum((t) => t.coproduction),
+    totalHtNet:    sum((t) => t.totalHtNet),
+    tva:           sum((t) => t.tva),
+    totalTtc:      sum((t) => t.totalTtc),
+    sousTotal:     sum((t) => t.sousTotal),
+    csComedien:    sum((t) => t.csComedien),
+    csTechniciens: sum((t) => t.csTechniciens),
+    fraisGeneraux: sum((t) => t.fraisGeneraux),
+    marge:         sum((t) => t.marge),
+    baseMarge:     sum((t) => t.baseMarge),
+    tauxTva:       devisList[0].tauxTva ?? 20,
+    perDevis:      per.map((p) => p.snap),
+  };
+}
