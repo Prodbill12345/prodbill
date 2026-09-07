@@ -43,14 +43,22 @@ describe("validateRecapDevisSet (#99)", () => {
     if (!r.ok) expect(r.error).toMatch(/même client/i);
   });
 
-  test("un devis non facturable (ENVOYE) → refus, message nomme le devis", () => {
+  test("ENVOYE est éligible (#99) : VALIDE + ENVOYE → ok", () => {
     const r = validateRecapDevisSet([
       d({ id: "d1", numero: "26001", statut: "VALIDE" }),
       d({ id: "d2", numero: "26002", statut: "ENVOYE" }),
     ]);
+    expect(r).toEqual({ ok: true, clientId: "clientA" });
+  });
+
+  test("un devis non facturable (REFUSE) → refus, message nomme le devis", () => {
+    const r = validateRecapDevisSet([
+      d({ id: "d1", numero: "26001", statut: "VALIDE" }),
+      d({ id: "d2", numero: "26002", statut: "REFUSE" }),
+    ]);
     expect(r.ok).toBe(false);
     if (!r.ok) {
-      expect(r.error).toMatch(/validé ou accepté/i);
+      expect(r.error).toMatch(/pour être facturé/i);
       expect(r.error).toContain("26002");
     }
   });

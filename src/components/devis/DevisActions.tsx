@@ -165,7 +165,7 @@ export function DevisActions({ devis }: DevisActionsProps) {
         </>
       )}
 
-      {/* #97 : facturable dès VALIDE (validation interne) ou ACCEPTE. */}
+      {/* #97/#99 : facturable dès VALIDE (validation interne), ENVOYE ou ACCEPTE. */}
       {isDevisFacturable(devis.statut) && (
         <>
           <div className="flex items-center gap-1">

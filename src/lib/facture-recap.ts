@@ -59,7 +59,7 @@ export function validateRecapDevisSet(devisList: RecapDevisInput[]): RecapValida
   if (notFacturable) {
     return {
       ok: false,
-      error: `Le devis ${label(notFacturable)} doit être validé ou accepté pour être facturé.`,
+      error: `Le devis ${label(notFacturable)} doit être validé, envoyé ou accepté pour être facturé.`,
     };
   }
 

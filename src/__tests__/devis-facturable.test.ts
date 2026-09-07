@@ -1,21 +1,23 @@
 /**
- * Tests de isDevisFacturable (#97) — un devis est facturable dès VALIDE
- * (validation interne) ou ACCEPTE. Source unique route + UI.
+ * Tests de isDevisFacturable (#97, élargi #99) — un devis est facturable dès
+ * VALIDE (validation interne), ENVOYE (cas réel Vanda : pas d'acceptation
+ * formelle in-app) ou ACCEPTE. Source unique route + UI (mono et récap).
  */
 
 import type { DevisStatut } from "@prisma/client";
 import { isDevisFacturable } from "../lib/devis-facturable";
 
 describe("isDevisFacturable", () => {
-  test("VALIDE → facturable", () => {
-    expect(isDevisFacturable("VALIDE")).toBe(true);
-  });
+  test.each<DevisStatut>(["VALIDE", "ENVOYE", "ACCEPTE"])(
+    "%s → facturable",
+    (statut) => {
+      expect(isDevisFacturable(statut)).toBe(true);
+    }
+  );
 
-  test("ACCEPTE → facturable", () => {
-    expect(isDevisFacturable("ACCEPTE")).toBe(true);
-  });
-
-  test.each<DevisStatut>(["BROUILLON", "ENVOYE", "REFUSE", "EXPIRE"])(
+  // #99 : ENVOYE devient facturable (aligné mono/récap). BROUILLON (pas encore
+  // émis) et les états terminaux REFUSE/EXPIRE restent exclus.
+  test.each<DevisStatut>(["BROUILLON", "REFUSE", "EXPIRE"])(
     "%s → non facturable",
     (statut) => {
       expect(isDevisFacturable(statut)).toBe(false);

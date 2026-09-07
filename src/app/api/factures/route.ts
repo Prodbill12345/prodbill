@@ -47,11 +47,11 @@ export async function POST(req: Request) {
       return Response.json({ error: "Devis introuvable" }, { status: 404 });
     }
 
-    // #97 : on peut facturer dès que le devis est VALIDÉ en interne (Vanda),
-    // sans attendre le circuit ENVOYE → ACCEPTE.
+    // #97/#99 : on peut facturer dès que le devis est VALIDÉ en interne (Vanda),
+    // ENVOYÉ, ou ACCEPTÉ — cf. isDevisFacturable (source unique mono/récap).
     if (!isDevisFacturable(devis.statut)) {
       return Response.json(
-        { error: "Le devis doit être validé ou accepté pour générer une facture" },
+        { error: "Le devis doit être validé, envoyé ou accepté pour générer une facture" },
         { status: 400 }
       );
     }
