@@ -71,6 +71,10 @@ export async function POST(
         companyId: user.companyId,
         clientId: facture.clientId,
         devisId: facture.devisId,
+        // #99 : miroir FactureDevis (uniquement si la source pointe un devis).
+        ...(facture.devisId
+          ? { devisLinks: { create: { devisId: facture.devisId } } }
+          : {}),
         numero: avoirNumero,
         type: "AVOIR",
         statut: "EMISE",

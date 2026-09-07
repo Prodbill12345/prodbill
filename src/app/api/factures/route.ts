@@ -117,6 +117,10 @@ export async function POST(req: Request) {
         companyId: user.companyId,
         clientId: devis.clientId,
         devisId: devis.id,
+        // #99 : miroir dans la table de liaison — FactureDevis est la source
+        // de vérité de l'appartenance devis↔facture (mono comme récap). Le
+        // chemin mono garde aussi devisId renseigné (rétrocompat).
+        devisLinks: { create: { devisId: devis.id } },
         numero: null,
         type: input.type,
         totalHt,
