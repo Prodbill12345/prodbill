@@ -8,6 +8,7 @@ import {
 } from "@/lib/zod-helpers";
 import { del } from "@vercel/blob";
 import { evaluateClientChange } from "@/lib/devis-client-change";
+import { refreshBrouillonFacturesForDevis } from "@/lib/facture-recompute";
 import { z } from "zod";
 
 const LigneSchema = z.object({
@@ -181,7 +182,7 @@ export async function PUT(
         await tx.devisSection.deleteMany({ where: { devisId: id } });
       }
 
-      return tx.devis.update({
+      const updated = await tx.devis.update({
         where: { id },
         data: {
           ...(clientChange && { clientId: input.clientId }),
@@ -260,6 +261,13 @@ export async function PUT(
           },
         },
       });
+
+      // #99 (BUG-RECAP-BROUILLON-STALE) : rafraîchir les totaux des factures
+      // BROUILLON liées à ce devis (mono ou récap) pour qu'elles reflètent
+      // l'édition. Les factures émises ne sont jamais touchées (figées).
+      await refreshBrouillonFacturesForDevis(tx, user.companyId, id);
+
+      return updated;
     });
 
     return Response.json({ data: devis });

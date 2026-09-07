@@ -123,6 +123,9 @@ export async function POST(req: Request) {
         devisLinks: { create: { devisId: devis.id } },
         numero: null,
         type: input.type,
+        // #99 : mémorise le % d'acompte pour un recalcul exact tant que la
+        // facture reste brouillon (si le devis change). NULL pour SOLDE/AVOIR.
+        pourcentageAcompte: input.type === "ACOMPTE" ? input.pourcentage : null,
         totalHt,
         tauxTva,
         // Snapshot de la mention TVA du devis source — utile uniquement

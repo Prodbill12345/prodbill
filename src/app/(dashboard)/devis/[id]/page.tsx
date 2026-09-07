@@ -2,7 +2,7 @@ import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, FileDown, Send, CheckCircle, Receipt } from "lucide-react";
+import { ChevronLeft, FileDown, Send, CheckCircle, Receipt, Info } from "lucide-react";
 import { formatEuros, formatPct } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
@@ -42,8 +42,30 @@ export default async function DevisDetailPage({
   // NONNA : masque TVA + TTC sur les devis (pur affichage). Cf. company flag.
   const { showTva, showTtc } = devisRecapVisibility(devis.company);
 
+  // #99 : ce devis est-il lié à des factures BROUILLON (mono via devisId ou
+  // récap via FactureDevis) ? Si oui, avertir que les modifs s'y répercutent
+  // tant que la facture n'est pas émise.
+  const brouillonFacturesCount = await db.facture.count({
+    where: {
+      statut: "BROUILLON",
+      OR: [{ devisId: id }, { devisLinks: { some: { devisId: id } } }],
+    },
+  });
+
   return (
     <div className="space-y-6">
+      {brouillonFacturesCount > 0 && (
+        <div className="flex items-start gap-2 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-800">
+          <Info className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>
+            Ce devis est lié à {brouillonFacturesCount} brouillon
+            {brouillonFacturesCount > 1 ? "s" : ""} de facture. Vos modifications
+            se répercutent sur {brouillonFacturesCount > 1 ? "leurs" : "son"}{" "}
+            total tant {brouillonFacturesCount > 1 ? "qu'elles ne sont" : "qu'elle n'est"}{" "}
+            pas émise{brouillonFacturesCount > 1 ? "s" : ""}.
+          </span>
+        </div>
+      )}
       {/* Header */}
       <div>
         <Link

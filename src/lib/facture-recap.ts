@@ -90,3 +90,65 @@ export function validateRecapDevisSet(devisList: RecapDevisInput[]): RecapValida
 
   return { ok: true, clientId };
 }
+
+/** Devis lié, tel que vu au moment d'émettre la facture. */
+export interface EmittableDevisInput {
+  numero: string | null;
+  statut: DevisStatut;
+  clientId: string;
+  tauxTva: number;
+  /** Déjà ÉMIS dans une AUTRE facture (non-avoir) → double-facturation. */
+  emittedElsewhere: boolean;
+}
+
+export type EmitValidation = { ok: true } | { ok: false; error: string };
+
+/**
+ * Garde-fou d'ÉMISSION (#99 BUG-RECAP-BROUILLON-STALE) : entre la création du
+ * brouillon et son émission, un devis lié peut avoir changé d'état (repassé en
+ * BROUILLON, REFUSE…), de taux de TVA, ou avoir été émis ailleurs. On revalide
+ * avant de figer. `isRecap` active les contrôles multi-devis (même client, taux
+ * TVA uniforme). Une facture sans devis lié (import) n'appelle pas ce contrôle.
+ */
+export function validateFactureEmittable(params: {
+  isRecap: boolean;
+  devis: EmittableDevisInput[];
+}): EmitValidation {
+  const { isRecap, devis } = params;
+  if (devis.length === 0) return { ok: true }; // facture sans devis (import) : rien à revalider
+
+  const notFacturable = devis.find((d) => !isDevisFacturable(d.statut));
+  if (notFacturable) {
+    return {
+      ok: false,
+      error: `Le devis ${devisLabel(notFacturable.numero)} n'est plus facturable (statut ${notFacturable.statut}) — impossible d'émettre. Rétablissez-le ou retirez-le de la facture.`,
+    };
+  }
+
+  const emitted = devis.find((d) => d.emittedElsewhere);
+  if (emitted) {
+    return {
+      ok: false,
+      error: `Le devis ${devisLabel(emitted.numero)} a déjà été facturé (émis) dans une autre facture.`,
+    };
+  }
+
+  if (isRecap) {
+    const clientId = devis[0].clientId;
+    if (!devis.every((d) => d.clientId === clientId)) {
+      return { ok: false, error: "Les devis liés n'ont plus le même client." };
+    }
+    if (!haveUniformTvaRate(devis)) {
+      return {
+        ok: false,
+        error:
+          "Les devis liés ont des taux de TVA différents, facturez-les séparément.",
+      };
+    }
+  }
+  return { ok: true };
+}
+
+function devisLabel(numero: string | null): string {
+  return numero ? `n° ${numero}` : "(brouillon sans numéro)";
+}

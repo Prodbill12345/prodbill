@@ -4,7 +4,13 @@
  * acompte, déjà facturé, taux TVA uniforme).
  */
 
-import { validateRecapDevisSet, type RecapDevisInput } from "../lib/facture-recap";
+import {
+  validateRecapDevisSet,
+  validateFactureEmittable,
+  type RecapDevisInput,
+  type EmittableDevisInput,
+} from "../lib/facture-recap";
+import type { DevisStatut } from "@prisma/client";
 
 function d(overrides: Partial<RecapDevisInput> = {}): RecapDevisInput {
   return {
@@ -117,5 +123,85 @@ describe("validateRecapDevisSet (#99)", () => {
     ]);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(/brouillon sans numéro/i);
+  });
+});
+
+describe("validateFactureEmittable (#99 garde-fou émission)", () => {
+  function ed(over: Partial<EmittableDevisInput> = {}): EmittableDevisInput {
+    return {
+      numero: "numero" in over ? (over.numero as string | null) : "26001",
+      statut: over.statut ?? "VALIDE",
+      clientId: over.clientId ?? "clientA",
+      tauxTva: over.tauxTva ?? 20,
+      emittedElsewhere: over.emittedElsewhere ?? false,
+    };
+  }
+
+  test("mono facturable → ok", () => {
+    expect(validateFactureEmittable({ isRecap: false, devis: [ed()] })).toEqual({ ok: true });
+  });
+
+  test("récap tous facturables, même client, TVA uniforme → ok", () => {
+    expect(
+      validateFactureEmittable({
+        isRecap: true,
+        devis: [ed({ statut: "ENVOYE" }), ed({ statut: "VALIDE" }), ed({ statut: "ACCEPTE" })],
+      })
+    ).toEqual({ ok: true });
+  });
+
+  test("facture sans devis lié (import) → ok (rien à revalider)", () => {
+    expect(validateFactureEmittable({ isRecap: false, devis: [] })).toEqual({ ok: true });
+  });
+
+  test.each<DevisStatut>(["BROUILLON", "REFUSE", "EXPIRE"])(
+    "devis redevenu %s → refus nommant le devis",
+    (statut) => {
+      const r = validateFactureEmittable({
+        isRecap: true,
+        devis: [ed({ numero: "26001" }), ed({ numero: "26002", statut })],
+      });
+      expect(r.ok).toBe(false);
+      if (!r.ok) {
+        expect(r.error).toMatch(/n'est plus facturable/i);
+        expect(r.error).toContain("26002");
+      }
+    }
+  );
+
+  test("devis déjà émis ailleurs → refus", () => {
+    const r = validateFactureEmittable({
+      isRecap: true,
+      devis: [ed({ numero: "26001" }), ed({ numero: "26002", emittedElsewhere: true })],
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/déjà été facturé/i);
+      expect(r.error).toContain("26002");
+    }
+  });
+
+  test("récap : clients divergents → refus", () => {
+    const r = validateFactureEmittable({
+      isRecap: true,
+      devis: [ed({ clientId: "A" }), ed({ clientId: "B" })],
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/même client/i);
+  });
+
+  test("récap : taux TVA divergents → refus", () => {
+    const r = validateFactureEmittable({
+      isRecap: true,
+      devis: [ed({ tauxTva: 20 }), ed({ tauxTva: 10 })],
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/taux de TVA différents/i);
+  });
+
+  test("mono : TVA/ client non contrôlés (un seul devis) → ok même si tauxTva atypique", () => {
+    expect(validateFactureEmittable({ isRecap: false, devis: [ed({ tauxTva: 5.5 })] })).toEqual({
+      ok: true,
+    });
   });
 });

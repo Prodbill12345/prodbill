@@ -472,6 +472,12 @@ model Facture {
   type   FactureType
   statut FactureStatut @default(BROUILLON)
 
+  // Pourcentage de l'acompte (1..100) pour un ACOMPTE — mémorisé pour
+  // recalculer exactement le montant tant que la facture est BROUILLON si le
+  // devis source change (#99 BUG-RECAP-BROUILLON-STALE). NULL pour SOLDE/AVOIR
+  // et pour les acomptes legacy (fallback : dérivé du ratio totalHt/devis).
+  pourcentageAcompte Float?
+
   // Montants
   totalHt  Float
   tauxTva  Float @default(20) // Taux TVA appliqué (%) — 20, 10, 5.5, 0… (snapshot)

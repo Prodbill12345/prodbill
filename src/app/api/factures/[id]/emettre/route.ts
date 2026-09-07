@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
 import { getNextFactureNumero } from "@/lib/numbering";
 import { sendFactureEmail } from "@/lib/email/resend";
+import { loadFactureTotals } from "@/lib/facture-recompute";
+import { isRecapFacture } from "@/lib/facture-recap-view";
+import { validateFactureEmittable } from "@/lib/facture-recap";
 
 /**
  * POST /api/factures/[id]/emettre
@@ -33,6 +36,38 @@ export async function POST(
       );
     }
 
+    // #99 (BUG-RECAP-BROUILLON-STALE) : recalculer les totaux à jour depuis les
+    // devis liés (le brouillon a pu se désynchroniser) puis REVALIDER
+    // l'éligibilité avant de figer — un devis lié a pu changer d'état/TVA ou
+    // être émis ailleurs entre la création et l'émission.
+    const { devisRows, totals } = await loadFactureTotals(prisma, id);
+    const isRecap = isRecapFacture(facture.devisId, devisRows.length);
+
+    if (devisRows.length > 0) {
+      const devisIds = devisRows.map((d) => d.id);
+      const emittedLinks = await prisma.factureDevis.findMany({
+        where: {
+          devisId: { in: devisIds },
+          facture: { emiseAt: { not: null }, type: { not: "AVOIR" }, id: { not: id } },
+        },
+        select: { devisId: true },
+      });
+      const emittedElsewhere = new Set(emittedLinks.map((l) => l.devisId));
+      const check = validateFactureEmittable({
+        isRecap,
+        devis: devisRows.map((d) => ({
+          numero: d.numero,
+          statut: d.statut,
+          clientId: d.clientId,
+          tauxTva: d.tauxTva ?? 20,
+          emittedElsewhere: emittedElsewhere.has(d.id),
+        })),
+      });
+      if (!check.ok) {
+        return Response.json({ error: check.error }, { status: 400 });
+      }
+    }
+
     const now = new Date();
     const dateEcheance =
       facture.dateEcheance ??
@@ -54,6 +89,9 @@ export async function POST(
         dateEmission: now,
         dateEcheance,
         emiseAt: now, // Marque l'immuabilité
+        // #99 : fige les totaux recalculés à l'instant (no-op si déjà à jour ;
+        // omis pour une facture sans devis lié → on garde ses totaux stockés).
+        ...(totals ?? {}),
       },
     });
 
@@ -79,7 +117,7 @@ export async function POST(
           clientName: facture.client.name,
           companyName: facture.nomEmetteur,
           factureNumero: numero,
-          totalTtc: facture.totalTtc,
+          totalTtc: updated.totalTtc,
           dateEcheance,
           pdfUrl: facture.pdfUrl,
           iban: facture.ibanEmetteur,
@@ -102,7 +140,7 @@ export async function POST(
       entityId: id,
       details: {
         numero,
-        totalTtc: facture.totalTtc,
+        totalTtc: updated.totalTtc,
         dateEcheance: dateEcheance.toISOString(),
       },
       factureId: id,
