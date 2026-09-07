@@ -13,6 +13,10 @@ export default async function DevisPage() {
     include: {
       client: { select: { name: true } },
       bdc: { select: { numero: true } },
+      // #99 : sélection multi pour facture récap — clientId/tauxTva/statut sont
+      // déjà sur le modèle. On ajoute le compte de factures liées (mono +
+      // récap) pour n'offrir la case qu'aux devis non encore facturés.
+      _count: { select: { factures: true, factureLinks: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
