@@ -53,12 +53,22 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
     }
   }
 
+  // Le serveur renvoie un message métier explicite (ex : « la facture doit
+  // être émise (numérotée) pour générer un Factur-X »). On l'affiche au lieu
+  // d'un texte en dur : c'est précisément ce masquage qui a rendu l'incident
+  // de juillet en prod inexplicable — l'utilisateur voyait « Erreur lors de
+  // la génération du Factur-X » sans jamais savoir pourquoi.
+  async function errorMessage(res: Response, fallback: string): Promise<string> {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    return body?.error ?? fallback;
+  }
+
   async function generateFacturx() {
     setGeneratingFacturx(true);
     try {
       const res = await fetch(`/api/factures/${id}/facturx`);
       if (!res.ok) {
-        alert("Erreur lors de la génération du Factur-X");
+        alert(await errorMessage(res, "Erreur lors de la génération du Factur-X"));
         return;
       }
       const blob = await res.blob();
@@ -84,7 +94,7 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
       const endpoint = type === "devis" ? "devis" : "factures";
       const res = await fetch(`/api/${endpoint}/${id}/pdf${qs}`);
       if (!res.ok) {
-        alert("Erreur lors de la génération du PDF");
+        alert(await errorMessage(res, "Erreur lors de la génération du PDF"));
         return;
       }
       const blob = await res.blob();
