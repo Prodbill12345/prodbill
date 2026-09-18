@@ -49,6 +49,7 @@ export type Permission =
   | "facture:read"
   | "facture:create"
   | "facture:emit"  // Rend immuable
+  | "facture:delete" // Brouillons uniquement — une facture émise est immuable
   | "client:read"
   | "client:create"
   | "client:edit"
@@ -60,14 +61,14 @@ export type Permission =
 export const PERMISSIONS: Record<Role, Permission[]> = {
   ADMIN: [
     "devis:read", "devis:create", "devis:edit", "devis:delete", "devis:send", "devis:accept",
-    "facture:read", "facture:create", "facture:emit",
+    "facture:read", "facture:create", "facture:emit", "facture:delete",
     "client:read", "client:create", "client:edit",
     "paiement:read", "paiement:create",
     "parametres:edit", "users:manage",
   ],
   DIRECTEUR_PROD: [
     "devis:read", "devis:create", "devis:edit", "devis:send", "devis:accept",
-    "facture:read", "facture:create", "facture:emit",
+    "facture:read", "facture:create", "facture:emit", "facture:delete",
     "client:read", "client:create", "client:edit",
     "paiement:read", "paiement:create",
   ],
@@ -79,7 +80,7 @@ export const PERMISSIONS: Record<Role, Permission[]> = {
   ],
   COMPTABLE: [
     "devis:read",
-    "facture:read", "facture:create", "facture:emit",
+    "facture:read", "facture:create", "facture:emit", "facture:delete",
     "client:read",
     "paiement:read", "paiement:create",
   ],

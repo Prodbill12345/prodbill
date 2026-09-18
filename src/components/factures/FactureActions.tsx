@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check, CircleCheckBig, Undo2 } from "lucide-react";
+import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check, CircleCheckBig, Undo2, Trash2, AlertTriangle } from "lucide-react";
 import type { Facture } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 
@@ -18,6 +18,7 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
   const [loading, setLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Formulaire de correction
   const [showEdit, setShowEdit] = useState(false);
@@ -56,6 +57,27 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
       router.refresh();
     } finally {
       setSaving(false);
+    }
+  }
+
+  // FEAT-FACTURE-BROUILLON-DELETE — suppression d'un brouillon.
+  // Le bouton n'est rendu qu'en BROUILLON ; la route DELETE applique la
+  // même règle (400 explicite sinon) via canDeleteFacture().
+  async function deleteFacture() {
+    setLoading("delete");
+    try {
+      const res = await fetch(`/api/factures/${facture.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors de la suppression");
+        return;
+      }
+      // La page courante n'existe plus — retour à la liste.
+      router.push("/factures");
+      router.refresh();
+    } finally {
+      setLoading(null);
+      setShowDeleteConfirm(false);
     }
   }
 
@@ -156,6 +178,13 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
       facture.statut === "EN_RETARD" ||
       facture.statut === "PAYEE_PARTIEL");
   const canAnnulerPaiement = facture.statut === "PAYEE";
+
+  // Suppression : brouillons uniquement (FEAT-FACTURE-BROUILLON-DELETE).
+  // Contrairement aux devis (bouton désactivé + tooltip), on masque
+  // complètement le bouton hors BROUILLON : sur une facture émise la
+  // suppression n'est pas "temporairement indisponible", elle est
+  // légalement exclue — la voie de sortie est l'avoir.
+  const canDelete = facture.statut === "BROUILLON" && !facture.emiseAt;
 
   return (
     <div className="flex flex-col items-end gap-2">
@@ -291,6 +320,21 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
           <FileDown className="w-4 h-4" />
           PDF
         </button>
+
+        {/* Supprimer — brouillons uniquement. Une facture émise est
+            immuable (art. 289 CGI) : on passe par « Générer un avoir ». */}
+        {canDelete && (
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={loading !== null}
+            title="Supprimer ce brouillon de facture"
+            className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
+            {spin("delete") ?? <Trash2 className="w-4 h-4" />}
+            Supprimer
+          </button>
+        )}
       </div>
 
       {showPdfModal && (
@@ -300,6 +344,56 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
           numero={facture.numero}
           onClose={() => setShowPdfModal(false)}
         />
+      )}
+
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) =>
+            e.target === e.currentTarget &&
+            loading !== "delete" &&
+            setShowDeleteConfirm(false)
+          }
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">
+                  Supprimer ce brouillon de facture ?
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Êtes-vous sûr de vouloir supprimer ce brouillon
+                  {facture.numero ? ` (${facture.numero})` : ""} ? Cette action
+                  est définitive. Les devis rattachés redeviendront facturables.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={loading === "delete"}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors disabled:opacity-40"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={deleteFacture}
+                disabled={loading === "delete"}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {loading === "delete" && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                {loading === "delete" ? "Suppression…" : "Supprimer"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Toast confirmation */}
