@@ -214,3 +214,74 @@ Wrapper central : `src/lib/email/resend.ts`.
 - Les tests intégration `__tests__/api/factures/relancer.test.ts` (si créés) couvrent le cas Resend KO
 
 ---
+
+## Chantier mails (#91) — BUG-FACTURE-PDF-EMAIL-MORT
+
+Repéré le 18/09/2026 en marge de C-FACTURE-PDF-BDC. **À traiter dans le
+chantier mails (#91 + DNS + kill-switch), pas avant** : aucun mail ne part
+en prod aujourd'hui de toute façon, le bug est donc sans impact immédiat.
+
+### Le constat
+
+`Facture.pdfUrl`, `Facture.facturxUrl` et `Devis.pdfUrl` ne sont **écrits
+nulle part** dans le code. Les PDF sont générés à la volée par les routes
+`/api/*/[id]/pdf` et streamés en réponse ; rien ne les persiste sur Vercel
+Blob, donc ces trois colonnes valent NULL pour toutes les pièces (hors
+imports éventuels).
+
+Or deux envois d'email sont conditionnés à ces colonnes :
+
+- `POST /api/devis/[id]/envoyer` → `if (devis.pdfUrl && devis.client.email)`
+  encadre **tout** l'appel `sendDevisEmail()`
+- `POST /api/factures/[id]/emettre` → `if (facture.pdfUrl && facture.client.email)`
+  encadre **tout** l'appel `sendFactureEmail()`
+
+Conséquence : ces deux branches sont mortes. Le devis passe en ENVOYE et la
+facture est émise (avec numéro, immuabilité, AuditLog — tout le reste est
+correct), mais **aucun mail n'est jamais tenté**. Ce n'est pas « le mail part
+sans le PDF », c'est « le mail ne part pas ». `sendDevisEmail` et
+`sendFactureEmail` n'ont qu'un seul appelant chacune : ce sont donc deux
+templates Resend entièrement morts en production.
+
+Le silence est total : pas d'erreur, pas de log, et `AuditLog DEVIS_ENVOYE` /
+`FACTURE_EMISE` est écrit dans tous les cas — il affirme donc un envoi qui n'a
+pas eu lieu.
+
+### Ce qui n'est PAS concerné
+
+Le bouton « Envoyer par email » de la fiche facture
+(`POST /api/factures/[id]/envoyer`) et les relances passent par
+`sendRelanceEmail()` et **ne dépendent pas de `pdfUrl`**. Ces chemins-là sont
+fonctionnels (sous réserve du kill-switch et du DNS). C'est vraisemblablement
+pourquoi le bug est passé inaperçu : le chemin manuel, le seul réellement
+utilisé par Vanda, marche.
+
+### Deux options, à trancher dans #91
+
+1. **Supprimer la dépendance** (recommandé) : aligner les deux routes sur le
+   modèle de `sendRelanceEmail` — plus de `pdfUrl` en paramètre, le client
+   récupère sa pièce via un lien vers l'app ou une PJ générée à la volée.
+   Les colonnes `pdfUrl` / `facturxUrl` deviennent alors supprimables par
+   migration.
+2. **Persister réellement le PDF** : `put()` sur Vercel Blob à l'émission,
+   écriture de `pdfUrl`. Plus lourd, mais c'est ce qu'appelle l'archivage
+   légal 10 ans (cf. CLAUDE.md § Sécurité & conformité) — donc à arbitrer
+   avec ce besoin, pas isolément.
+
+À noter : l'archivage 10 ans suppose de toute façon un PDF figé quelque part.
+Ce ticket recoupe donc SNAPSHOT-FACTURE-LIGNES (figer les lignes à
+l'émission) — les deux décident « ce qu'on fige et où » et gagnent à être
+tranchés ensemble.
+
+### Acceptance criteria
+
+- Émettre une facture avec un client qui a un email déclenche une tentative
+  d'envoi réelle (ou un skip explicite si kill-switch), jamais un no-op muet
+- Idem pour l'envoi d'un devis
+- Si aucun envoi n'a lieu, l'AuditLog le dit (`emailSkipped: true` + raison)
+  au lieu d'affirmer implicitement le contraire
+- Plus aucune branche d'envoi conditionnée à une colonne jamais écrite
+- Si l'option 1 est retenue : migration de suppression de `pdfUrl` /
+  `facturxUrl`, ou commentaire de schéma expliquant pourquoi elles restent
+
+---
