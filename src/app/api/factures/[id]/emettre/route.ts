@@ -6,6 +6,12 @@ import { sendFactureEmail } from "@/lib/email/resend";
 import { loadFactureTotals } from "@/lib/facture-recompute";
 import { isRecapFacture } from "@/lib/facture-recap-view";
 import { validateFactureEmittable } from "@/lib/facture-recap";
+import {
+  getFacturationState,
+  toFactureForFacturation,
+  FACTURE_FACTURATION_SELECT,
+  type FactureForFacturation,
+} from "@/lib/devis-facturation-state";
 
 /**
  * POST /api/factures/[id]/emettre
@@ -45,14 +51,33 @@ export async function POST(
 
     if (devisRows.length > 0) {
       const devisIds = devisRows.map((d) => d.id);
+      // GUARD-DEVIS-DOUBLE-FACTURATION : « déjà émis ailleurs » ne veut pas dire
+      // « a une autre facture émise », mais « a une autre facture émise QUI
+      // OCCUPE LA MÊME PLACE ». Un ACOMPTE émis ne doit pas empêcher d'émettre
+      // le SOLDE : c'est le flux légitime (bug avant ce ticket — l'émission du
+      // solde était refusée dès qu'un acompte était émis). On délègue au même
+      // prédicat que la création, qui ignore aussi les AVOIR et les ANNULEE.
       const emittedLinks = await prisma.factureDevis.findMany({
         where: {
           devisId: { in: devisIds },
-          facture: { emiseAt: { not: null }, type: { not: "AVOIR" }, id: { not: id } },
+          facture: { emiseAt: { not: null }, id: { not: id } },
         },
-        select: { devisId: true },
+        select: { devisId: true, facture: { select: FACTURE_FACTURATION_SELECT } },
       });
-      const emittedElsewhere = new Set(emittedLinks.map((l) => l.devisId));
+      const emittedByDevis = new Map<string, FactureForFacturation[]>();
+      for (const l of emittedLinks) {
+        const list = emittedByDevis.get(l.devisId) ?? [];
+        list.push(toFactureForFacturation(l.facture));
+        emittedByDevis.set(l.devisId, list);
+      }
+      const emittedElsewhere = new Set(
+        devisIds.filter((devisId) => {
+          const state = getFacturationState(emittedByDevis.get(devisId) ?? []);
+          if (facture.type === "ACOMPTE") return !state.canCreateAcompte;
+          if (facture.type === "SOLDE") return !state.canCreateSolde;
+          return false; // AVOIR : hors périmètre du garde-fou
+        })
+      );
       const check = validateFactureEmittable({
         isRecap,
         devis: devisRows.map((d) => ({

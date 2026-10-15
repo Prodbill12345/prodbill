@@ -4,11 +4,11 @@
  * Formule avec indexations annuelles incluses dans le sousTotal :
  *
  *   sousTotal     = Σ (quantite × prixUnit) + indexations_artiste + indexations_musique
- *   baseComedien  = Σ lignes ARTISTE (quantite × prixUnit) + indexations_artiste
+ *   baseComedien  = Σ lignes ARTISTE(!horsCS) + indexations_artiste(!horsCS)
  *   CS Artistes   = baseComedien × tauxCsComedien      [57%]
- *   CS Techniciens= Σ lignes TECHNICIEN_HCS × tauxCsTech [65%]
+ *   CS Techniciens= Σ lignes TECHNICIEN_HCS(!horsCS) × tauxCsTech [65%]
  *   baseMarge     = Σ lignes(!horsMarge) + Σ indexations(!horsMarge)
- *                 + Σ CS_Tech(!horsMarge)              ⚠️ CS Artistes EXCLUS
+ *                 + Σ CS_Tech(!horsMarge, !horsCS)     ⚠️ CS Artistes EXCLUS
  *   Frais généraux= baseMarge × tauxFg
  *   Marge         = baseMarge × tauxMarge
  *   TOTAL HT      = sousTotal + CS Artistes + CS Techniciens + FG + Marge
@@ -19,6 +19,19 @@
  * retirées du baseMarge (et la part csTech correspondante si TECH_HCS).
  * sousTotal HT et charges sociales restent inchangés — les cotisations
  * sont dues quoi qu'il arrive. Tickets #66 #67 #68 (Vanda).
+ *
+ * Flag `horsCS` sur une ligne (FEAT-LIGNE-HORS-CS) : la ligne et son
+ * indexation sont retirées de la BASE DES CHARGES SOCIALES. Cas d'usage :
+ * un artiste qui facture lui-même (société, auto-entrepreneur, facture
+ * étrangère) — pas de cotisation à précompter. Pertinent sur les deux tags
+ * qui portent une base CS : ARTISTE et TECHNICIEN_HCS.
+ *   - sousTotal HT inchangé : la ligne reste facturée.
+ *   - baseMarge inchangé pour la ligne elle-même (elle reste dans FG/Marge,
+ *     sauf si horsMarge est aussi coché — les deux flags sont indépendants).
+ *   - ⚠️ EFFET DE BORD ASSUMÉ : csTechniciens entre dans baseMarge. Une ligne
+ *     TECHNICIEN_HCS en horsCS fait donc aussi BAISSER FG + Marge, puisque la
+ *     part de CS qu'elles surfacturaient n'existe plus. Cohérent : pas de CS
+ *     → rien à surfacturer dessus.
  */
 
 import type { LigneInput, TauxConfig, CalculResult } from "@/types";
@@ -63,18 +76,29 @@ export function calculerDevis(
     + indexationsArtiste_raw + indexationsMusique_raw
   );
 
-  // 3. Bases CS — charges sociales calculées sur TOUTES les lignes du tag
-  // (cotisation due quoi qu'il arrive, même si la ligne est horsMarge).
-  const baseComedien_raw = lignes
+  // 3. Bases CS — charges sociales calculées sur les lignes du tag, hormis
+  // celles flaggées horsCS (FEAT-LIGNE-HORS-CS : artiste/technicien qui
+  // facture lui-même, rien à précompter). Le flag horsMarge, lui, n'a AUCUN
+  // effet ici : la cotisation reste due même sur une ligne hors marge.
+  const lignesPourCs = lignes.filter((l) => !l.horsCS);
+
+  const baseComedien_raw = lignesPourCs
     .filter((l) => l.tag === "ARTISTE")
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
 
-  const baseTech = lignes
+  const baseTech = lignesPourCs
     .filter((l) => l.tag === "TECHNICIEN_HCS")
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
 
+  // Indexation artiste entrant dans la base CS : symétrique de horsMarge, le
+  // flag emporte la ligne ET son indexation. L'indexation reste dans le
+  // sousTotal HT (cf. étape 2) — elle est facturée, simplement pas cotisée.
+  const indexationsArtisteCs_raw = lignesPourCs
+    .filter((l) => l.tag === "ARTISTE")
+    .reduce((sum, l) => sum + indexationRaw(l), 0);
+
   // 4. Charges sociales
-  const csComedien = round2((baseComedien_raw + indexationsArtiste_raw) * taux.tauxCsComedien);
+  const csComedien = round2((baseComedien_raw + indexationsArtisteCs_raw) * taux.tauxCsComedien);
   const csTechniciens = round2(baseTech * taux.tauxCsTech);
 
   // 5. Base marge — exclut les lignes flaggées horsMarge (et leur
@@ -82,8 +106,11 @@ export function calculerDevis(
   const lignesPourMarge = lignes.filter((l) => !l.horsMarge);
   const sousTotalMarge_raw =
     lignesPourMarge.reduce((sum, l) => sum + l.quantite * l.prixUnit + indexationRaw(l), 0);
+  // !horsCS aussi : une ligne technicien sans CS n'apporte pas de part de CS
+  // à surfacturer dans la base marge (sinon on facturerait FG/marge sur une
+  // charge inexistante).
   const baseTechMarge = lignesPourMarge
-    .filter((l) => l.tag === "TECHNICIEN_HCS")
+    .filter((l) => l.tag === "TECHNICIEN_HCS" && !l.horsCS)
     .reduce((sum, l) => sum + l.quantite * l.prixUnit, 0);
   const csTechMarge_raw = baseTechMarge * taux.tauxCsTech;
   const baseMarge = round2(sousTotalMarge_raw + csTechMarge_raw);
@@ -147,6 +174,18 @@ export function formatEuros(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+/**
+ * Formate une quantité selon les conventions françaises.
+ * Jusqu'à 2 décimales, sans zéros inutiles : 1 → "1", 0.75 → "0,75",
+ * 1.5 → "1,5". Vanda facture des fractions d'heure (ticket qté step).
+ */
+export function formatQuantite(q: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(q);
 }
 
 /**

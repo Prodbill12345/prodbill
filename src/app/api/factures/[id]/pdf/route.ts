@@ -46,6 +46,7 @@ export async function GET(
                       total: true,
                       tauxIndexation: true,
                       horsMarge: true,
+                      horsCS: true,
                     },
                   },
                 },

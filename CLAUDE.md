@@ -32,13 +32,30 @@ sociales et le sousTotal HT restent inchangés — les cotisations
 restent dues. Cas d'usage : lignes Musique que l'utilisateur ne
 souhaite pas surfacturer via Marge/FG (tickets #66 #67 #68).
 
+### Flag `horsCS` sur une ligne
+Booléen sur `DevisLigne`. Si `true`, la ligne (et son indexation) sont
+exclues de la base des **charges sociales** — `CS_ARTISTE` pour un tag
+`ARTISTE`, `CS_TECHNICIENS` pour un tag `TECHNICIEN_HCS`. Sans effet sur
+les autres tags (pas de base CS). Le sousTotal HT reste inchangé : la
+ligne est facturée normalement. Cas d'usage : artiste ou technicien qui
+facture lui-même (société, auto-entrepreneur, facture étrangère) — il
+n'y a aucune cotisation à précompter.
+
+⚠️ `CS_TECHNICIENS` entre dans `BASE_MARGE`. Une ligne
+`TECHNICIEN_HCS` en `horsCS` fait donc aussi baisser FG + Marge (pas de
+CS → rien à surfacturer dessus). Une ligne `ARTISTE` en `horsCS`, elle,
+ne change ni `BASE_MARGE` ni FG/Marge, puisque `CS_ARTISTE` n'y a
+jamais été inclus.
+
+`horsMarge` et `horsCS` sont **indépendants** et cumulables.
+
 ### Formule de calcul (ordre impératif)
 ```
 SOUS_TOTAL_HT     = Σ toutes les lignes (qté × P.U.) + indexations
-CS_ARTISTE        = Σ lignes ARTISTE (incl. indexation) × taux_cs_comedien  [défaut: 57%]
-CS_TECHNICIENS    = Σ lignes TECHNICIEN_HCS × taux_cs_tech                  [défaut: 65%]
+CS_ARTISTE        = Σ lignes ARTISTE(!horsCS) (incl. indexation) × taux_cs_comedien  [défaut: 57%]
+CS_TECHNICIENS    = Σ lignes TECHNICIEN_HCS(!horsCS) × taux_cs_tech         [défaut: 65%]
 BASE_MARGE        = Σ lignes(!horsMarge) + Σ indexations(!horsMarge)
-                  + Σ CS_TECHNICIENS(!horsMarge)                            ⚠️ CS_ARTISTE EXCLUS
+                  + Σ CS_TECHNICIENS(!horsMarge, !horsCS)                   ⚠️ CS_ARTISTE EXCLUS
 FRAIS_GENERAUX    = BASE_MARGE × taux_fg                                    [5% ou 15%]
 MARGE             = BASE_MARGE × taux_marge                                 [10%, 13% ou 15%]
 TOTAL_HT          = SOUS_TOTAL_HT + CS_ARTISTE + CS_TECHNICIENS + FRAIS_GENERAUX + MARGE
@@ -47,7 +64,8 @@ TOTAL_TTC         = TOTAL_HT + TVA
 ```
 
 ### Exemple de validation (cas de test à garder)
-Aucune ligne `horsMarge=true` dans cet exemple — comportement baseline :
+Aucune ligne `horsMarge=true` ni `horsCS=true` dans cet exemple —
+comportement baseline :
 ```
 Lignes:
   - Artiste : 900 € → CS_ARTISTE = 900 × 57% = 513 €

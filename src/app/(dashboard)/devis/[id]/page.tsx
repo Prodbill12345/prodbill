@@ -3,12 +3,18 @@ import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, FileDown, Send, CheckCircle, Receipt, Info } from "lucide-react";
-import { formatEuros, formatPct } from "@/lib/calculations";
+import { formatEuros, formatPct, formatQuantite } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
 import { DevisActions } from "@/components/devis/DevisActions";
 import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
 import { formatTvaLabel } from "@/lib/tva-label";
+import {
+  getFacturationState,
+  toFactureForFacturation,
+  FACTURE_FACTURATION_SELECT,
+} from "@/lib/devis-facturation-state";
+import { FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
 
 export default async function DevisDetailPage({
   params,
@@ -30,7 +36,8 @@ export default async function DevisDetailPage({
         orderBy: { ordre: "asc" },
       },
       bdc: true,
-      factures: { include: { paiements: true } },
+      // Les factures liées sont chargées séparément (facturesLiees ci-dessous)
+      // pour couvrir mono ET récap via la table de liaison FactureDevis.
       // Traçabilité duplication (ticket #93) : si non null, ce devis a
       // été créé via /api/devis/[id]/dupliquer.
       devisSource: { select: { id: true, numero: true, objet: true } },
@@ -42,15 +49,33 @@ export default async function DevisDetailPage({
   // NONNA : masque TVA + TTC sur les devis (pur affichage). Cf. company flag.
   const { showTva, showTtc } = devisRecapVisibility(devis.company);
 
-  // #99 : ce devis est-il lié à des factures BROUILLON (mono via devisId ou
-  // récap via FactureDevis) ? Si oui, avertir que les modifs s'y répercutent
-  // tant que la facture n'est pas émise.
-  const brouillonFacturesCount = await db.facture.count({
+  // Factures liées à ce devis — mono (devisId miroir) ET récap (FactureDevis).
+  // Une seule requête sert trois usages : l'avertissement #99 sur les
+  // brouillons, le garde-fou anti double-facturation (boutons Acompte/Solde) et
+  // la liste « Factures générées » ci-dessous.
+  const facturesLiees = await db.facture.findMany({
     where: {
-      statut: "BROUILLON",
       OR: [{ devisId: id }, { devisLinks: { some: { devisId: id } } }],
     },
+    select: {
+      ...FACTURE_FACTURATION_SELECT,
+      id: true,
+      numero: true,
+      totalTtc: true,
+    },
+    orderBy: { createdAt: "asc" },
   });
+
+  // #99 : ce devis est-il lié à des factures BROUILLON ? Si oui, avertir que
+  // les modifs s'y répercutent tant que la facture n'est pas émise.
+  const brouillonFacturesCount = facturesLiees.filter(
+    (f) => f.statut === "BROUILLON"
+  ).length;
+
+  // GUARD-DEVIS-DOUBLE-FACTURATION : prédicat partagé avec les routes serveur.
+  const facturation = getFacturationState(
+    facturesLiees.map(toFactureForFacturation)
+  );
 
   return (
     <div className="space-y-6">
@@ -105,7 +130,7 @@ export default async function DevisDetailPage({
               </p>
             )}
           </div>
-          <DevisActions devis={devis} />
+          <DevisActions devis={devis} facturation={facturation} />
         </div>
       </div>
 
@@ -179,7 +204,7 @@ export default async function DevisDetailPage({
                         </span>
                       </td>
                       <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
-                        {ligne.quantite}
+                        {formatQuantite(ligne.quantite)}
                       </td>
                       <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
                         {formatEuros(ligne.prixUnit)}
@@ -194,28 +219,41 @@ export default async function DevisDetailPage({
             </div>
           ))}
 
-          {/* Factures liées */}
-          {devis.factures.length > 0 && (
+          {/* Factures liées — mono ET récap. Avant le garde-fou, ce bloc ne
+              lisait que devis.factures (relation mono via devisId), donc une
+              facture récapitulative n'apparaissait nulle part sur le devis.
+              On liste maintenant facturesLiees : le devis facturé reste
+              visible et traçable dans son historique. */}
+          {facturesLiees.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-100 p-5">
               <h3 className="font-semibold text-slate-900 mb-3">Factures générées</h3>
               <div className="space-y-2">
-                {devis.factures.map((f) => (
-                  <Link
-                    key={f.id}
-                    href={`/factures/${f.id}`}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-blue-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Receipt className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm font-medium text-slate-700">
-                        {f.numero}
+                {facturesLiees.map((f) => {
+                  const isRecap = f.devisId === null && f._count.devisLinks >= 2;
+                  return (
+                    <Link
+                      key={f.id}
+                      href={`/factures/${f.id}`}
+                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Receipt className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span className="text-sm font-medium text-slate-700">
+                          {f.numero ?? "Brouillon"}
+                        </span>
+                        <span className="text-xs text-slate-400 truncate">
+                          {FACTURE_TYPE_LABELS[f.type]}
+                          {isRecap && " · récapitulative"}
+                          {" · "}
+                          {FACTURE_STATUT_LABELS[f.statut]}
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-slate-900 shrink-0">
+                        {formatEuros(f.totalTtc)}
                       </span>
-                    </div>
-                    <span className="text-sm font-semibold text-slate-900">
-                      {formatEuros(f.totalTtc)}
-                    </span>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

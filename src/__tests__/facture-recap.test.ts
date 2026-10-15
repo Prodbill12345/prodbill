@@ -21,6 +21,7 @@ function d(overrides: Partial<RecapDevisInput> = {}): RecapDevisInput {
     tauxTva: overrides.tauxTva ?? 20,
     alreadyHasAcompte: overrides.alreadyHasAcompte ?? false,
     alreadyInvoiced: overrides.alreadyInvoiced ?? false,
+    blockingIsDraft: overrides.blockingIsDraft ?? false,
   };
 }
 
@@ -123,6 +124,47 @@ describe("validateRecapDevisSet (#99)", () => {
     ]);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(/brouillon sans numéro/i);
+  });
+});
+
+describe("validateRecapDevisSet — sortie explicite (GUARD-DEVIS-DOUBLE-FACTURATION)", () => {
+  test("devis bloqué par un BROUILLON de facture → message proposant de le supprimer", () => {
+    const r = validateRecapDevisSet([
+      d({ id: "d1" }),
+      d({ id: "d2", numero: "26002", alreadyInvoiced: true, blockingIsDraft: true }),
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toContain("26002");
+      expect(r.error).toMatch(/supprimez le brouillon de facture/i);
+    }
+  });
+
+  test("devis bloqué par un ACOMPTE en brouillon → règle V1 + sortie", () => {
+    const r = validateRecapDevisSet([
+      d({ id: "d1" }),
+      d({
+        id: "d2",
+        numero: "26002",
+        alreadyHasAcompte: true,
+        alreadyInvoiced: true,
+        blockingIsDraft: true,
+      }),
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toMatch(/non géré en V1/i);
+      expect(r.error).toMatch(/supprimez le brouillon de facture/i);
+    }
+  });
+
+  test("devis bloqué par une facture ÉMISE → aucune sortie proposée", () => {
+    const r = validateRecapDevisSet([
+      d({ id: "d1" }),
+      d({ id: "d2", numero: "26002", alreadyInvoiced: true, blockingIsDraft: false }),
+    ]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).not.toMatch(/supprimez/i);
   });
 });
 

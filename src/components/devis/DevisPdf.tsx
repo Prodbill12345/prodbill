@@ -35,6 +35,14 @@ function euros(n: number): string {
   }).format(n).replace(/[\u202F\u00A0]/g, "\u0020");
 }
 
+function qte(n: number): string {
+  // Même normalisation que euros() : Helvetica embarquée ne contient pas U+202F.
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(n).replace(/[\u202F\u00A0]/g, "\u0020");
+}
+
 function pct(r: number): string {
   return `${Math.round(r * 10000) / 100}%`;
 }
@@ -365,9 +373,14 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
                         hors marge &amp; FG
                       </Text>
                     )}
+                    {ligne.horsCS && (
+                      <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
+                        hors charges sociales
+                      </Text>
+                    )}
                   </View>
                   <Text style={[s.tdText, s.colTag]}>{TAG_LABELS[ligne.tag] ?? ligne.tag}</Text>
-                  <Text style={[s.tdRight, s.colQte]}>{ligne.quantite}</Text>
+                  <Text style={[s.tdRight, s.colQte]}>{qte(ligne.quantite)}</Text>
                   <Text style={[s.tdRight, s.colPu]}>{euros(ligne.prixUnit)}</Text>
                   <Text style={[s.tdRight, s.colTot]}>{euros(ligne.total)}</Text>
                 </View>,

@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth-context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Mail, AlertTriangle, FileText, ExternalLink } from "lucide-react";
-import { formatEuros, formatPct } from "@/lib/calculations";
+import { formatEuros, formatPct, formatQuantite } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import {
   FACTURE_STATUT_COLORS,
@@ -393,7 +393,7 @@ export default async function FactureDetailPage({
                                     {ligne.libelle}
                                   </td>
                                   <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
-                                    {ligne.quantite}
+                                    {formatQuantite(ligne.quantite)}
                                   </td>
                                   <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
                                     {formatEuros(pu)}

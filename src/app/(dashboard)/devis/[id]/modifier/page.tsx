@@ -99,6 +99,7 @@ export default async function ModifierDevisPage({
         agentId: l.agentId,
         tauxIndexation: l.tauxIndexation ?? 0,
         horsMarge: l.horsMarge,
+        horsCS: l.horsCS,
       })),
     })),
   };

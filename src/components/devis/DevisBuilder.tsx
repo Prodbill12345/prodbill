@@ -38,6 +38,7 @@ const LigneSchema = z.object({
   comedienId: z.string().optional(),
   agentId: z.string().optional(),
   horsMarge: z.boolean().optional(),
+  horsCS: z.boolean().optional(),
 });
 
 const SectionSchema = z.object({
@@ -133,6 +134,7 @@ interface DevisInitialData {
       comedienId?: string | null;
       agentId?: string | null;
       horsMarge?: boolean;
+      horsCS?: boolean;
     }[];
   }[];
 }
@@ -284,6 +286,7 @@ export function DevisBuilder({
       prixUnit: Number(l.prixUnit) || 0,
       tauxIndexation: Number(l.tauxIndexation) || 0,
       horsMarge: Boolean(l.horsMarge),
+      horsCS: Boolean(l.horsCS),
     }))
   ) ?? [];
 
@@ -1253,6 +1256,36 @@ function SectionBlock({
                         hors marge
                       </span>
                     </label>
+                    {/* Toggle horsCS — exclut la ligne de la base des charges
+                        sociales. Affiché uniquement sur les tags qui PORTENT
+                        une base CS (ARTISTE, TECHNICIEN_HCS) : sur STUDIO /
+                        MUSIQUE / AGENT la case n'aurait aucun effet et ferait
+                        croire le contraire. FEAT-LIGNE-HORS-CS (Vanda). */}
+                    {(tagValue === "ARTISTE" || tagValue === "TECHNICIEN_HCS") && (
+                      <label
+                        className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
+                        title={
+                          tagValue === "ARTISTE"
+                            ? "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS comédien. Utile quand l'artiste facture lui-même (société, auto-entrepreneur)."
+                            : "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS technicien. Attention : la part de CS disparaissant de la base, les FG et la Marge baissent aussi."
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          {...register(`sections.${sectionIndex}.lignes.${li}.horsCS`)}
+                          className="w-3 h-3 cursor-pointer accent-rose-500 shrink-0"
+                        />
+                        <span
+                          className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
+                            ligne.horsCS
+                              ? "text-rose-600"
+                              : "text-slate-300 group-hover:text-slate-500"
+                          }`}
+                        >
+                          hors cs
+                        </span>
+                      </label>
+                    )}
                   </div>
                   {tagValue === "ARTISTE" && comediens.length > 0 && (
                     <select
@@ -1304,7 +1337,13 @@ function SectionBlock({
                 />
                 <input
                   type="number"
-                  step="0.5"
+                  /*
+                    step="any" : Vanda facture des fractions d'heure (0,25 /
+                    0,75 / 1,5…). Un step fixe faisait rejeter la saisie par la
+                    validation native du navigateur. La borne « > 0 » est
+                    portée par le schéma zod (client + serveur).
+                  */
+                  step="any"
                   min="0"
                   {...register(`sections.${sectionIndex}.lignes.${li}.quantite`)}
                   className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -31,6 +31,7 @@ export type FactureForPdf = Facture & {
         // Optionnel : si le devis source a été supprimé ou si le champ
         // n'a pas été selectionné par la route API, on retombe sur false.
         horsMarge?: boolean;
+        horsCS?: boolean;
       }>;
     }>;
   } | null;
@@ -61,6 +62,14 @@ function euros(n: number): string {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n).replace(/[\u202F\u00A0]/g, "\u0020");
+}
+
+function qte(n: number): string {
+  // Même normalisation que euros() : Helvetica embarquée ne contient pas U+202F.
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(n).replace(/[\u202F\u00A0]/g, "\u0020");
 }
@@ -529,11 +538,16 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                               hors marge &amp; FG
                             </Text>
                           )}
+                          {l.horsCS === true && (
+                            <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
+                              hors charges sociales
+                            </Text>
+                          )}
                         </View>
                         <Text style={[s.tdText, s.colTag]}>
                           {TAG_LABELS[l.tag] ?? l.tag}
                         </Text>
-                        <Text style={[s.tdRight, s.colQte]}>{l.quantite}</Text>
+                        <Text style={[s.tdRight, s.colQte]}>{qte(l.quantite)}</Text>
                         <Text style={[s.tdRight, s.colPu]}>{euros(l.prixUnit)}</Text>
                         <Text style={[s.tdRight, s.colTot]}>{euros(l.total)}</Text>
                       </View>

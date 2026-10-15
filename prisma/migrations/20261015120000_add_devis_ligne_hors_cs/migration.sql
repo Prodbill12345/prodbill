@@ -1,0 +1,11 @@
+-- AlterTable DevisLigne : ajout du flag horsCS (FEAT-LIGNE-HORS-CS, Vanda).
+-- Si true, la ligne et son indexation sont exclues de la BASE DES CHARGES
+-- SOCIALES (tags ARTISTE et TECHNICIEN_HCS ; sans effet sur les autres).
+-- Le sousTotal HT reste inchangé — la ligne est facturée normalement.
+-- Cas d'usage : artiste ou technicien qui facture lui-même (société,
+-- auto-entrepreneur, facture étrangère) → aucune cotisation à précompter.
+--
+-- Additif, non destructif, aucun backfill : DEFAULT false reproduit
+-- exactement le comportement actuel sur tout l'historique (même décision
+-- que pour horsMarge, cf. 20260519121410_add_devis_ligne_hors_marge).
+ALTER TABLE "DevisLigne" ADD COLUMN "horsCS" BOOLEAN NOT NULL DEFAULT false;

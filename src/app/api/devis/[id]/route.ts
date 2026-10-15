@@ -21,6 +21,8 @@ const LigneSchema = z.object({
   comedienId: optionalFkId,
   agentId: optionalFkId,
   horsMarge: z.boolean().optional().default(false),
+  // FEAT-LIGNE-HORS-CS : exclut la ligne de la base des charges sociales.
+  horsCS: z.boolean().optional().default(false),
   ordre: z.number().int(),
 });
 
@@ -246,6 +248,7 @@ export async function PUT(
                     comedienId: ligne.comedienId ?? null,
                     agentId: ligne.agentId ?? null,
                     horsMarge: ligne.horsMarge ?? false,
+                    horsCS: ligne.horsCS ?? false,
                     ordre: ligne.ordre,
                   })),
                 },

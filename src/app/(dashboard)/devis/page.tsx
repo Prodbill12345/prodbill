@@ -3,6 +3,10 @@ import { getCurrentUser } from "@/lib/auth-context";
 import Link from "next/link";
 import { Plus, FileText } from "lucide-react";
 import { DevisListClient } from "@/components/devis/DevisListClient";
+import {
+  toFactureForFacturation,
+  FACTURE_FACTURATION_SELECT,
+} from "@/lib/devis-facturation-state";
 
 export default async function DevisPage() {
   const user = await getCurrentUser();
@@ -14,12 +18,20 @@ export default async function DevisPage() {
       client: { select: { name: true } },
       bdc: { select: { numero: true } },
       // #99 : sélection multi pour facture récap — clientId/tauxTva/statut sont
-      // déjà sur le modèle. On ajoute le compte de factures liées (mono +
-      // récap) pour n'offrir la case qu'aux devis non encore facturés.
-      _count: { select: { factures: true, factureLinks: true } },
+      // déjà sur le modèle. On charge les factures liées (mono + récap via
+      // FactureDevis) pour que la case à cocher applique exactement le même
+      // garde-fou que la route (GUARD-DEVIS-DOUBLE-FACTURATION).
+      factureLinks: { select: { facture: { select: FACTURE_FACTURATION_SELECT } } },
     },
     orderBy: { updatedAt: "desc" },
   });
+
+  // On ne transmet au client que ce dont le prédicat a besoin (type/statut/
+  // isRecap), pas les lignes Prisma complètes.
+  const rows = devis.map(({ factureLinks, ...d }) => ({
+    ...d,
+    facturesLiees: factureLinks.map((l) => toFactureForFacturation(l.facture)),
+  }));
 
   // Années disponibles pour le filtre — basées sur Devis.annee (saisi) en
   // priorité, sinon year(dateEmission). Cf. src/lib/devis-filters.ts.
@@ -68,7 +80,7 @@ export default async function DevisPage() {
           </Link>
         </div>
       ) : (
-        <DevisListClient devis={devis} availableYears={availableYears} />
+        <DevisListClient devis={rows} availableYears={availableYears} />
       )}
     </div>
   );

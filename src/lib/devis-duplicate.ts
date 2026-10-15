@@ -136,6 +136,7 @@ export function buildDuplicatedDevisData(
             agentId: ligne.agentId,
             paiementComedien: ligne.paiementComedien,
             horsMarge: ligne.horsMarge,
+            horsCS: ligne.horsCS,
             ordre: ligne.ordre,
           })),
         },

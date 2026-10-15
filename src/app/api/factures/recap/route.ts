@@ -4,6 +4,11 @@ import { getNextDevisNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromMultipleDevis } from "@/lib/invoice-totals";
 import { validateRecapDevisSet, type RecapDevisInput } from "@/lib/facture-recap";
+import {
+  getFacturationState,
+  toFactureForFacturation,
+  FACTURE_FACTURATION_SELECT,
+} from "@/lib/devis-facturation-state";
 import { z } from "zod";
 
 /**
@@ -52,28 +57,39 @@ export async function POST(req: Request) {
     const devisList = ids.map((id) => byId.get(id)!);
 
     // État "déjà facturé" via la table de liaison (source de vérité, mono +
-    // récap ; les avoirs et factures annulées ne comptent pas).
+    // récap ; les avoirs et factures annulées ne comptent pas). La décision est
+    // déléguée à getFacturationState — même prédicat que le chemin mono et que
+    // l'UI (GUARD-DEVIS-DOUBLE-FACTURATION).
     const links = await prisma.factureDevis.findMany({
       where: { devisId: { in: ids } },
-      select: { devisId: true, facture: { select: { type: true, statut: true } } },
+      select: { devisId: true, facture: { select: FACTURE_FACTURATION_SELECT } },
     });
-    const acompteSet = new Set<string>();
-    const invoicedSet = new Set<string>();
+    const facturesByDevis = new Map<string, ReturnType<typeof toFactureForFacturation>[]>();
     for (const l of links) {
-      if (l.facture.statut === "ANNULEE" || l.facture.type === "AVOIR") continue;
-      invoicedSet.add(l.devisId);
-      if (l.facture.type === "ACOMPTE") acompteSet.add(l.devisId);
+      const list = facturesByDevis.get(l.devisId) ?? [];
+      list.push(toFactureForFacturation(l.facture));
+      facturesByDevis.set(l.devisId, list);
     }
 
-    const validationInput: RecapDevisInput[] = devisList.map((d) => ({
-      id: d.id,
-      numero: d.numero,
-      clientId: d.clientId,
-      statut: d.statut,
-      tauxTva: d.tauxTva ?? 20,
-      alreadyHasAcompte: acompteSet.has(d.id),
-      alreadyInvoiced: invoicedSet.has(d.id),
-    }));
+    const validationInput: RecapDevisInput[] = devisList.map((d) => {
+      const facturation = getFacturationState(facturesByDevis.get(d.id) ?? []);
+      return {
+        id: d.id,
+        numero: d.numero,
+        clientId: d.clientId,
+        statut: d.statut,
+        tauxTva: d.tauxTva ?? 20,
+        alreadyHasAcompte: facturation.acompte.exists,
+        alreadyInvoiced: facturation.isInvoiced,
+        // Sortie explicite : si la pièce bloquante est un brouillon, le devis
+        // se re-libère en la supprimant.
+        blockingIsDraft:
+          (facturation.acompte.exists && facturation.acompte.isDraft) ||
+          (!facturation.acompte.exists &&
+            facturation.solde.exists &&
+            facturation.solde.isDraft),
+      };
+    });
 
     const validation = validateRecapDevisSet(validationInput);
     if (!validation.ok) {

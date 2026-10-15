@@ -83,6 +83,7 @@ function makeSource(
             agentId: null,
             paiementComedien: false,
             horsMarge: false,
+            horsCS: false,
             ordre: 0,
           },
           {
@@ -99,6 +100,8 @@ function makeSource(
             agentId: null,
             paiementComedien: false,
             horsMarge: true,
+            // FEAT-LIGNE-HORS-CS : flag métier, doit survivre à la duplication.
+            horsCS: true,
             ordre: 1,
           },
         ],
@@ -220,6 +223,7 @@ describe("buildDuplicatedDevisData — ticket #93", () => {
       prixUnit: 600,
       total: 600,
       horsMarge: false,
+      horsCS: false,
       ordre: 0,
     });
     // La ligne MUSIQUE flaggée horsMarge est aussi copiée (le flag est
@@ -228,6 +232,9 @@ describe("buildDuplicatedDevisData — ticket #93", () => {
       libelle: "Musique composition",
       tag: "MUSIQUE",
       horsMarge: true,
+      // FEAT-LIGNE-HORS-CS : le flag horsCS est métier lui aussi, il doit
+      // être recopié tel quel sur le duplicata.
+      horsCS: true,
     });
 
     // Les ids sources ne sont PAS copiés (Prisma régénère)

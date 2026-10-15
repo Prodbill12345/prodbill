@@ -8,6 +8,10 @@ import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS } from "@/types";
 import { isDevisFacturable } from "@/lib/devis-facturable";
+import {
+  getFacturationState,
+  type FactureForFacturation,
+} from "@/lib/devis-facturation-state";
 import type { DevisStatut } from "@prisma/client";
 import {
   filterDevis,
@@ -41,17 +45,33 @@ interface DevisRow {
   bdc?: { numero: string } | null;
   // #99 : sélection multi pour facture récapitulative
   clientId: string;
-  _count?: { factures: number; factureLinks: number };
+  /**
+   * Factures liées (mono + récap), préparées côté serveur. Alimente le même
+   * prédicat que les routes — GUARD-DEVIS-DOUBLE-FACTURATION.
+   */
+  facturesLiees?: FactureForFacturation[];
 }
 
 /**
  * #99 : un devis est sélectionnable pour une facture récap s'il est facturable
- * (VALIDE/ACCEPTE) et n'a encore AUCUNE facture (mono ou récap). Le serveur
- * reste l'autorité (client identique, taux TVA uniforme, etc.).
+ * (VALIDE/ENVOYE/ACCEPTE) et si sa place n'est pas déjà prise. Le serveur reste
+ * l'autorité (client identique, taux TVA uniforme, etc.).
+ *
+ * Avant le garde-fou, ce test comptait `_count.factures + _count.factureLinks`
+ * brut : il était donc PLUS strict que le serveur (il comptait les AVOIR et les
+ * factures ANNULEE, et double-comptait les mono). On passe par
+ * getFacturationState pour que l'UI et la route décident à l'identique, et pour
+ * récupérer le motif exact du blocage.
  */
-function isSelectableForRecap(d: DevisRow): boolean {
-  const facturesCount = (d._count?.factures ?? 0) + (d._count?.factureLinks ?? 0);
-  return isDevisFacturable(d.statut) && facturesCount === 0;
+function recapSelectability(d: DevisRow): { selectable: boolean; reason: string | null } {
+  if (!isDevisFacturable(d.statut)) {
+    return {
+      selectable: false,
+      reason: "Ce devis doit être validé, envoyé ou accepté pour être facturé.",
+    };
+  }
+  const state = getFacturationState(d.facturesLiees ?? []);
+  return { selectable: state.canJoinRecap, reason: state.recapBlockedReason };
 }
 
 interface DevisListClientProps {
@@ -232,7 +252,8 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
               </tr>
             ) : (
               sorted.map((d) => {
-                const selectable = isSelectableForRecap(d);
+                const { selectable, reason: notSelectableReason } =
+                  recapSelectability(d);
                 const isChecked = selected.has(d.id);
                 // Verrou client : si une sélection existe pour un autre client,
                 // on désactive les cases des autres clients.
@@ -252,7 +273,7 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
                       onChange={() => toggleSelected(d.id)}
                       title={
                         !selectable
-                          ? "Devis non facturable ou déjà facturé"
+                          ? (notSelectableReason ?? "Devis non facturable ou déjà facturé")
                           : clientLocked && !isChecked
                             ? "Un autre client est déjà sélectionné"
                             : "Sélectionner pour une facture récapitulative"

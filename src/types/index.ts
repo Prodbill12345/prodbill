@@ -104,6 +104,10 @@ export interface LigneInput {
   // Si true : la ligne (et son indexation) sont exclues du baseMarge
   // utilisé pour calculer FG et Marge. CS et sousTotal HT restent inchangés.
   horsMarge?: boolean;
+  // Si true : la ligne (et son indexation) sont exclues de la BASE DES
+  // CHARGES SOCIALES (ARTISTE et TECHNICIEN_HCS). sousTotal HT inchangé.
+  // Cas d'usage : artiste qui facture lui-même → rien à précompter.
+  horsCS?: boolean;
 }
 
 export interface TauxConfig {

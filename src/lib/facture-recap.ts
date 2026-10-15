@@ -28,6 +28,12 @@ export interface RecapDevisInput {
   alreadyHasAcompte: boolean;
   /** A déjà été facturé (facture non-avoir non-annulée, acompte inclus). */
   alreadyInvoiced: boolean;
+  /**
+   * La pièce qui bloque ce devis est un BROUILLON de facture : le devis se
+   * re-libère en la supprimant. Sert à proposer la sortie dans le message
+   * (GUARD-DEVIS-DOUBLE-FACTURATION). Optionnel : false par défaut.
+   */
+  blockingIsDraft?: boolean;
 }
 
 export type RecapValidation =
@@ -36,6 +42,16 @@ export type RecapValidation =
 
 function label(d: RecapDevisInput): string {
   return d.numero ? `n° ${d.numero}` : "(brouillon sans numéro)";
+}
+
+/**
+ * Sortie proposée quand la pièce bloquante est un brouillon de facture
+ * (supprimable) — rien si elle est émise (immuable, art. 289 CGI).
+ */
+function draftExit(d: RecapDevisInput): string {
+  return d.blockingIsDraft
+    ? " Supprimez le brouillon de facture existant pour re-libérer ce devis."
+    : "";
 }
 
 export function validateRecapDevisSet(devisList: RecapDevisInput[]): RecapValidation {
@@ -68,7 +84,9 @@ export function validateRecapDevisSet(devisList: RecapDevisInput[]): RecapValida
   if (withAcompte) {
     return {
       ok: false,
-      error: `Le devis ${label(withAcompte)} a déjà un acompte facturé : il ne peut pas entrer dans une facture récapitulative (non géré en V1, facturez son solde séparément).`,
+      error:
+        `Le devis ${label(withAcompte)} a déjà un acompte facturé : il ne peut pas entrer dans une facture récapitulative (non géré en V1, facturez son solde séparément).` +
+        draftExit(withAcompte),
     };
   }
 
@@ -76,7 +94,7 @@ export function validateRecapDevisSet(devisList: RecapDevisInput[]): RecapValida
   if (invoiced) {
     return {
       ok: false,
-      error: `Le devis ${label(invoiced)} a déjà été facturé.`,
+      error: `Le devis ${label(invoiced)} a déjà été facturé.` + draftExit(invoiced),
     };
   }
 

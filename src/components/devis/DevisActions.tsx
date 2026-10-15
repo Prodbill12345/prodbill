@@ -3,16 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy, ShieldCheck, Undo2 } from "lucide-react";
+import { Send, CheckCircle, XCircle, FileDown, Receipt, Loader2, Pencil, Trash2, AlertTriangle, Copy, ShieldCheck, Undo2, Lock } from "lucide-react";
 import type { Devis } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
 import { isDevisFacturable } from "@/lib/devis-facturable";
+import type { FacturationState } from "@/lib/devis-facturation-state";
 
 interface DevisActionsProps {
-  devis: Devis & { factures?: { id: string }[] };
+  devis: Devis;
+  /**
+   * GUARD-DEVIS-DOUBLE-FACTURATION : état de facturation du devis, calculé
+   * côté serveur avec le prédicat partagé getFacturationState. Le serveur
+   * reste l'autorité (409 sur POST /api/factures) — ici on évite le clic
+   * inutile et on explique pourquoi, avec la sortie quand il y en a une.
+   */
+  facturation: FacturationState;
 }
 
-export function DevisActions({ devis }: DevisActionsProps) {
+export function DevisActions({ devis, facturation }: DevisActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [acomptePct, setAcomptePct] = useState(50);
@@ -165,9 +173,25 @@ export function DevisActions({ devis }: DevisActionsProps) {
         </>
       )}
 
-      {/* #97/#99 : facturable dès VALIDE (validation interne), ENVOYE ou ACCEPTE. */}
+      {/* #97/#99 : facturable dès VALIDE (validation interne), ENVOYE ou ACCEPTE.
+          GUARD-DEVIS-DOUBLE-FACTURATION : les boutons restent VISIBLES mais
+          désactivés quand la place est déjà prise — le devis facturé garde
+          ainsi sa place dans l'historique, avec le motif en tooltip. */}
       {isDevisFacturable(devis.statut) && (
         <>
+          {facturation.isInvoiced && (
+            <span
+              title={
+                facturation.soldeBlockedReason ??
+                facturation.acompteBlockedReason ??
+                undefined
+              }
+              className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-slate-100 text-xs font-medium text-slate-600"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              {facturation.solde.exists ? "Facturé" : "Acompte facturé"}
+            </span>
+          )}
           <div className="flex items-center gap-1">
             <input
               type="number"
@@ -175,25 +199,38 @@ export function DevisActions({ devis }: DevisActionsProps) {
               max={100}
               value={acomptePct}
               onChange={(e) => setAcomptePct(Number(e.target.value))}
-              className="w-14 text-center border border-slate-200 rounded-l-lg px-2 py-2 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              disabled={!facturation.canCreateAcompte}
+              className="w-14 text-center border border-slate-200 rounded-l-lg px-2 py-2 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
               title="Pourcentage de l'acompte"
             />
             <button
-              onClick={() => createFacture("ACOMPTE")}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 rounded-r-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              onClick={() => facturation.canCreateAcompte && createFacture("ACOMPTE")}
+              disabled={!facturation.canCreateAcompte}
+              title={facturation.acompteBlockedReason ?? "Générer une facture d'acompte"}
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600 rounded-r-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
             >
               {isLoading("facture-ACOMPTE") ?? <Receipt className="w-4 h-4" />}
               Acompte {acomptePct}%
             </button>
           </div>
           <button
-            onClick={() => createFacture("SOLDE")}
-            className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+            onClick={() => facturation.canCreateSolde && createFacture("SOLDE")}
+            disabled={!facturation.canCreateSolde}
+            title={facturation.soldeBlockedReason ?? "Générer la facture de solde"}
+            className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
             {isLoading("facture-SOLDE") ?? <Receipt className="w-4 h-4" />}
             Facture solde
           </button>
         </>
+      )}
+
+      {/* Motif du blocage en clair sous les boutons — un tooltip seul est
+          invisible au tactile et trop discret pour expliquer la sortie. */}
+      {facturation.isInvoiced && isDevisFacturable(devis.statut) && (
+        <p className="w-full text-right text-xs text-slate-500 order-last">
+          {facturation.soldeBlockedReason ?? facturation.acompteBlockedReason}
+        </p>
       )}
 
       {/* Dupliquer — toujours disponible quel que soit le statut. Crée

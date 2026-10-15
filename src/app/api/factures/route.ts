@@ -4,6 +4,11 @@ import { getNextDevisNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
 import { isDevisFacturable } from "@/lib/devis-facturable";
+import {
+  getFacturationState,
+  toFactureForFacturation,
+  FACTURE_FACTURATION_SELECT,
+} from "@/lib/devis-facturation-state";
 import { z } from "zod";
 
 const CreateFactureSchema = z.object({
@@ -56,6 +61,32 @@ export async function POST(req: Request) {
       );
     }
 
+    // GUARD-DEVIS-DOUBLE-FACTURATION : un devis ne peut porter qu'UN acompte
+    // + UN solde (ou un solde seul, ou une récap). Les BROUILLONS comptent —
+    // sinon le trou reste ouvert. La suppression d'un brouillon re-libère le
+    // devis, ce que le message d'erreur indique explicitement.
+    // Requête en OR (devisId miroir + FactureDevis) : même pattern que la page
+    // détail devis, robuste même si un lien n'a pas été backfillé.
+    const facturesLiees = await prisma.facture.findMany({
+      where: {
+        companyId: user.companyId,
+        OR: [{ devisId: devis.id }, { devisLinks: { some: { devisId: devis.id } } }],
+      },
+      select: FACTURE_FACTURATION_SELECT,
+    });
+    const facturation = getFacturationState(
+      facturesLiees.map(toFactureForFacturation)
+    );
+
+    // AVOIR : hors périmètre du garde-fou (généré depuis une facture émise via
+    // /api/factures/[id]/avoir, qui a ses propres contrôles).
+    if (input.type === "ACOMPTE" && !facturation.canCreateAcompte) {
+      return Response.json({ error: facturation.acompteBlockedReason }, { status: 409 });
+    }
+    if (input.type === "SOLDE" && !facturation.canCreateSolde) {
+      return Response.json({ error: facturation.soldeBlockedReason }, { status: 409 });
+    }
+
     // Un devis VALIDE peut ne pas encore avoir de numéro (attribué au 1er PDF
     // ou à l'envoi). On le matérialise ici si besoin — même logique que la
     // génération PDF : le numéro séquentiel est réservé définitivement.
@@ -70,10 +101,17 @@ export async function POST(req: Request) {
 
     // Pré-récupération du HT brut déjà facturé en acomptes (utilisé pour
     // le calcul SOLDE par le helper).
+    // Cohérence avec le garde-fou ci-dessus : un acompte ANNULÉ n'occupe plus
+    // de place, il ne doit donc pas non plus être déduit du solde (sinon le
+    // solde sous-facture du montant d'un acompte qui n'existe plus).
     const acomptesAggregate =
       input.type === "SOLDE"
         ? await prisma.facture.aggregate({
-            where: { devisId: devis.id, type: "ACOMPTE" },
+            where: {
+              devisId: devis.id,
+              type: "ACOMPTE",
+              statut: { not: "ANNULEE" },
+            },
             _sum: { totalHt: true },
           })
         : null;

@@ -3,7 +3,7 @@
  * Valider impérativement avant toute modification de calculations.ts
  */
 
-import { calculerDevis, calculerLigne } from "../lib/calculations";
+import { calculerDevis, calculerLigne, formatQuantite } from "../lib/calculations";
 import type { LigneInput, TauxConfig } from "../types";
 
 describe("calculerDevis", () => {
@@ -377,5 +377,183 @@ describe("calculerDevis", () => {
       expect(result.fraisGeneraux).toBe(62.43);  // 1248.50 × 5%
       expect(result.marge).toBe(187.28);         // 1248.50 × 15%
     });
+  });
+});
+
+/**
+ * Quantités fractionnaires — Vanda facture des quarts d'heure (0,25 / 0,75).
+ * Le champ Qté est en step="any" ; on vérifie que les calculs et le
+ * formatage encaissent les décimales.
+ */
+describe("quantités fractionnaires", () => {
+  const tauxRef: TauxConfig = {
+    tauxCsComedien: 0.57,
+    tauxCsTech: 0.65,
+    tauxFg: 0.05,
+    tauxMarge: 0.15,
+  };
+
+  test("0,75 × 400 € = 300 € de sous-total", () => {
+    const lignes: LigneInput[] = [{ tag: "STUDIO", quantite: 0.75, prixUnit: 400 }];
+    const result = calculerDevis(lignes, tauxRef);
+    expect(result.sousTotal).toBe(300);
+    expect(result.baseMarge).toBe(300);
+    expect(result.totalHt).toBe(360); // 300 + 15 (FG) + 45 (marge)
+  });
+
+  test("0,25 h d'artiste : CS calculées sur la fraction", () => {
+    const lignes: LigneInput[] = [{ tag: "ARTISTE", quantite: 0.25, prixUnit: 900 }];
+    const result = calculerDevis(lignes, tauxRef);
+    expect(result.sousTotal).toBe(225);
+    expect(result.csComedien).toBe(128.25); // 225 × 57%
+  });
+
+  test("formatQuantite : affichage FR sans zéros inutiles", () => {
+    expect(formatQuantite(0.75)).toBe("0,75");
+    expect(formatQuantite(0.25)).toBe("0,25");
+    expect(formatQuantite(1.5)).toBe("1,5");
+    expect(formatQuantite(1)).toBe("1");
+    expect(formatQuantite(12)).toBe("12");
+  });
+});
+
+/**
+ * FEAT-LIGNE-HORS-CS — flag `horsCS` par ligne (Vanda).
+ *
+ * La ligne reste facturée dans le sousTotal HT mais ne porte aucune charge
+ * sociale. S'applique aux deux tags qui portent une base CS : ARTISTE et
+ * TECHNICIEN_HCS. Le flag emporte la ligne ET son indexation.
+ */
+describe("flag horsCS (FEAT-LIGNE-HORS-CS)", () => {
+  const tauxRef: TauxConfig = {
+    tauxCsComedien: 0.57,
+    tauxCsTech: 0.65,
+    tauxFg: 0.05,
+    tauxMarge: 0.15,
+  };
+
+  test("ligne ARTISTE horsCS : aucune CS comédien, HT et marge inchangés", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 900, horsCS: true },
+      { tag: "STUDIO", quantite: 1, prixUnit: 2360 },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.sousTotal).toBe(3260); // la ligne reste facturée
+    expect(r.csComedien).toBe(0); // ⟵ cœur du ticket
+    expect(r.csTechniciens).toBe(0);
+    // La ligne reste dans la base marge (horsCS ≠ horsMarge).
+    expect(r.baseMarge).toBe(3260);
+    expect(r.fraisGeneraux).toBe(163);
+    expect(r.marge).toBe(489);
+    expect(r.totalHt).toBe(3912);
+  });
+
+  test("artiste horsCS parmi d'autres artistes : seule la ligne flaggée sort de la base", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 900 },
+      { tag: "ARTISTE", quantite: 1, prixUnit: 500, horsCS: true },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.sousTotal).toBe(1400);
+    expect(r.csComedien).toBe(513); // 900 × 57% seulement, pas 1400
+  });
+
+  test("l'indexation d'une ligne horsCS sort aussi de la base CS mais reste dans le HT", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 1000, tauxIndexation: 10, horsCS: true },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.indexationsArtiste).toBe(100); // affichée / facturée
+    expect(r.sousTotal).toBe(1100); // 1000 + 100
+    expect(r.csComedien).toBe(0); // ni le principal ni l'indexation
+  });
+
+  test("indexation : artiste normal + artiste horsCS", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 1000, tauxIndexation: 10 },
+      { tag: "ARTISTE", quantite: 1, prixUnit: 2000, tauxIndexation: 10, horsCS: true },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.indexationsArtiste).toBe(300); // 100 + 200, toutes facturées
+    expect(r.sousTotal).toBe(3300);
+    expect(r.csComedien).toBe(627); // (1000 + 100) × 57%
+  });
+
+  test("ligne TECHNICIEN_HCS horsCS : pas de CS tech, et FG/Marge baissent", () => {
+    const lignes: LigneInput[] = [
+      { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 1000, horsCS: true },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.sousTotal).toBe(1000);
+    expect(r.csTechniciens).toBe(0);
+    // ⚠️ Effet de bord assumé : csTech entrait dans baseMarge. Sans CS, la
+    // base marge retombe au seul montant de la ligne (1000 au lieu de 1650).
+    expect(r.baseMarge).toBe(1000);
+    expect(r.fraisGeneraux).toBe(50);
+    expect(r.marge).toBe(150);
+    expect(r.totalHt).toBe(1200);
+  });
+
+  test("horsCS et horsMarge sont indépendants et cumulables", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 1000, horsCS: true, horsMarge: true },
+      { tag: "STUDIO", quantite: 1, prixUnit: 500 },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.sousTotal).toBe(1500); // toujours facturée
+    expect(r.csComedien).toBe(0); // horsCS
+    expect(r.baseMarge).toBe(500); // horsMarge → seule la ligne STUDIO
+    expect(r.totalHt).toBe(1600); // 1500 + 25 (FG) + 75 (marge)
+  });
+
+  test("horsCS sur un tag sans base CS (STUDIO/MUSIQUE) n'a aucun effet", () => {
+    const sansFlag = calculerDevis(
+      [
+        { tag: "STUDIO", quantite: 1, prixUnit: 800 },
+        { tag: "MUSIQUE", quantite: 1, prixUnit: 400 },
+      ],
+      tauxRef
+    );
+    const avecFlag = calculerDevis(
+      [
+        { tag: "STUDIO", quantite: 1, prixUnit: 800, horsCS: true },
+        { tag: "MUSIQUE", quantite: 1, prixUnit: 400, horsCS: true },
+      ],
+      tauxRef
+    );
+    expect(avecFlag).toEqual(sansFlag);
+  });
+
+  test("non-régression : sans horsCS, le cas de référence est inchangé", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 900 },
+      { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 90 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 2360 },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+    expect(r.totalHt).toBe(4603.2);
+  });
+
+  test("le même devis avec l'artiste en horsCS : écart = CS + FG/marge associés", () => {
+    const lignes: LigneInput[] = [
+      { tag: "ARTISTE", quantite: 1, prixUnit: 900, horsCS: true },
+      { tag: "TECHNICIEN_HCS", quantite: 1, prixUnit: 90 },
+      { tag: "STUDIO", quantite: 1, prixUnit: 2360 },
+    ];
+    const r = calculerDevis(lignes, tauxRef);
+
+    expect(r.sousTotal).toBe(3350); // identique : rien n'est retiré du HT
+    expect(r.csComedien).toBe(0); // -513 €
+    expect(r.csTechniciens).toBe(58.5); // le technicien cotise toujours
+    expect(r.baseMarge).toBe(3408.5); // inchangé : csArtiste n'y était pas
+    expect(r.fraisGeneraux).toBe(170.43);
+    expect(r.marge).toBe(511.28);
+    expect(r.totalHt).toBe(4090.2); // 4603,20 - 513
   });
 });
