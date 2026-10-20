@@ -3,8 +3,9 @@
  *
  * 1. Régression schéma : le PUT retenait `clientId` (avant le fix, zod le
  *    strippait → le changement de client ne persistait jamais).
- * 2. Règle métier evaluateClientChange (option 1) : client modifiable
- *    seulement sur BROUILLON/VALIDE et sans facture.
+ * 2. Règle métier evaluateClientChange (FIX-CLIENT-CHANGE-ENVOYE) : client
+ *    modifiable sur tout statut, bloqué dès qu'une facture (mono ou récap)
+ *    est liée.
  */
 
 import { z } from "zod";
@@ -58,36 +59,42 @@ describe("evaluateClientChange", () => {
   });
 
   test.each<DevisStatut>(["ENVOYE", "ACCEPTE", "REFUSE", "EXPIRE"])(
-    "%s → blocked-status",
+    "%s, sans facture, nouveau client → allowed (FIX-CLIENT-CHANGE-ENVOYE)",
     (statut) => {
       expect(
         evaluateClientChange({ ...base, currentStatut: statut, newClientId: "cli-B" })
-      ).toBe("blocked-status");
+      ).toBe("allowed");
     }
   );
 
-  test("VALIDE avec facture existante → blocked-factures", () => {
-    expect(
-      evaluateClientChange({
-        ...base,
-        currentStatut: "VALIDE",
-        facturesCount: 1,
-        newClientId: "cli-B",
-      })
-    ).toBe("blocked-factures");
-  });
+  test.each<DevisStatut>(["VALIDE", "ENVOYE", "ACCEPTE"])(
+    "%s avec facture mono existante → blocked-factures",
+    (statut) => {
+      expect(
+        evaluateClientChange({
+          ...base,
+          currentStatut: statut,
+          facturesCount: 1,
+          newClientId: "cli-B",
+        })
+      ).toBe("blocked-factures");
+    }
+  );
 
-  test("priorité : statut bloquant vérifié avant les factures", () => {
-    // ACCEPTE + factures : on renvoie blocked-status (1er garde-fou), pas factures.
-    expect(
-      evaluateClientChange({
-        ...base,
-        currentStatut: "ACCEPTE",
-        facturesCount: 3,
-        newClientId: "cli-B",
-      })
-    ).toBe("blocked-status");
-  });
+  test.each<DevisStatut>(["ENVOYE", "ACCEPTE"])(
+    "%s membre d'une facture récap (factureLinksCount>0) → blocked-factures",
+    (statut) => {
+      expect(
+        evaluateClientChange({
+          ...base,
+          currentStatut: statut,
+          facturesCount: 0,
+          factureLinksCount: 1,
+          newClientId: "cli-B",
+        })
+      ).toBe("blocked-factures");
+    }
+  );
 
   // #99 : appartenance à une facture récapitulative (lien FactureDevis) sans
   // facture mono (devisId non renseigné → facturesCount = 0).

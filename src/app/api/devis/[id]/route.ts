@@ -124,16 +124,6 @@ export async function PUT(
       newClientId: input.clientId,
     });
 
-    if (clientDecision === "blocked-status") {
-      return Response.json(
-        {
-          error:
-            "Le client ne peut être changé que sur un devis en brouillon ou validé. " +
-            "Ce devis est déjà envoyé/accepté : dupliquez-le pour repartir sur un autre client.",
-        },
-        { status: 400 }
-      );
-    }
     if (clientDecision === "blocked-factures") {
       return Response.json(
         {
