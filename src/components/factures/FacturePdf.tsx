@@ -9,6 +9,7 @@ import {
 import type { Facture, Client, LigneTag } from "@prisma/client";
 
 import { formatFactureNumero } from "@/lib/facture-numero";
+import { facturxMention } from "@/lib/facturx-tax";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -289,6 +290,8 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
   const titreDoc = numeroAffiche
     ? `${docTitreLabel} N° ${numeroAffiche}`
     : `${docTitreLabel} (Brouillon)`;
+  // Mention Factur-X en pied de page : pièces émises uniquement.
+  const mentionFacturx = facturxMention(facture);
 
   const adresseClient = [
     client.address,
@@ -713,6 +716,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
             {facture.nomEmetteur} — SIRET {facture.siretEmetteur} — TVA{" "}
             {facture.tvaIntraEmetteur}
           </Text>
+          {mentionFacturx && <Text style={s.footerText}>{mentionFacturx}</Text>}
           <Text
             style={s.pageNum}
             render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}

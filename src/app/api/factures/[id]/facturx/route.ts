@@ -5,12 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
 import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
+import { buildFacturxTaxBlock, escapeXml } from "@/lib/facturx-tax";
 import React from "react";
 
 function buildFacturXml(facture: {
   numero: string;
   dateEmission: Date | null;
   totalHt: number;
+  tauxTva: number;
+  tvaMention: string | null;
   tva: number;
   totalTtc: number;
   nomEmetteur: string;
@@ -95,14 +98,7 @@ function buildFacturXml(facture: {
         </ram:PayeePartyCreditorFinancialAccount>
       </ram:SpecifiedTradeSettlementPaymentMeans>` : ""}
 
-      <ram:ApplicableTradeTax>
-        <ram:CalculatedAmount>${fmt(facture.tva)}</ram:CalculatedAmount>
-        <ram:TypeCode>VAT</ram:TypeCode>
-        <ram:ExemptionReason>Exonération TVA — production audiovisuelle</ram:ExemptionReason>
-        <ram:BasisAmount>${fmt(facture.totalHt)}</ram:BasisAmount>
-        <ram:CategoryCode>E</ram:CategoryCode>
-        <ram:RateApplicablePercent>0.00</ram:RateApplicablePercent>
-      </ram:ApplicableTradeTax>
+      ${buildFacturxTaxBlock(facture)}
 
       <ram:SpecifiedTradePaymentTerms>
         <ram:DueDateDateTime>
@@ -122,15 +118,6 @@ function buildFacturXml(facture: {
   </rsm:SupplyChainTradeTransaction>
 
 </rsm:CrossIndustryInvoice>`;
-}
-
-function escapeXml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 export async function GET(
@@ -221,11 +208,13 @@ export async function GET(
       React.createElement(FacturePdf, { facture: factureWithLogo }) as never
     );
 
-    // 2. Générer le XML Factur-X (profil MINIMUM EN 16931)
+    // 2. Générer le XML Factur-X (profil MINIMUM — EN 16931 complet : CONFORMITE-2027)
     const xmlString = buildFacturXml({
       numero: factureNumero,
       dateEmission: facture.dateEmission,
       totalHt: facture.totalHt,
+      tauxTva: facture.tauxTva,
+      tvaMention: facture.tvaMention,
       tva: facture.tva,
       totalTtc: facture.totalTtc,
       nomEmetteur: facture.nomEmetteur,
@@ -247,15 +236,16 @@ export async function GET(
     const { PDFDocument } = await import("pdf-lib");
     const pdfDoc = await PDFDocument.load(pdfBuffer);
 
-    // Métadonnées PDF/A requises pour Factur-X
+    // Métadonnées du document (le conteneur n'est pas encore PDF/A-3 :
+    // XMP, OutputIntent et validation veraPDF → CONFORMITE-2027)
     pdfDoc.setTitle(`Facture ${factureNumero}`);
     pdfDoc.setCreator("ProdBill");
-    pdfDoc.setProducer("ProdBill — Factur-X EN 16931");
+    pdfDoc.setProducer("ProdBill — Factur-X");
 
     // Pièce jointe XML avec relation "Alternative" (spéc ZUGFeRD/Factur-X)
     await pdfDoc.attach(xmlBytes, "factur-x.xml", {
       mimeType: "application/xml",
-      description: "Factur-X EN 16931 — profil MINIMUM",
+      description: "Factur-X — profil MINIMUM",
       creationDate: facture.dateEmission ?? new Date(),
       modificationDate: facture.dateEmission ?? new Date(),
       afRelationship: "Alternative" as never,

@@ -285,3 +285,68 @@ tranchés ensemble.
   `facturxUrl`, ou commentaire de schéma expliquant pourquoi elles restent
 
 ---
+
+## Chantier CONFORMITE-2027 — Facturation électronique (réforme)
+
+Ouvert le 20/10/2026 (validé par Vanda sur le principe, arbitrage option A
+de FEAT-FACTURX-LOGO-MENTION). **Échéance réglementaire : 1er septembre
+2027. Cible de déploiement : printemps 2027.** Plan complet à faire dans une
+session dédiée — ce ticket ne fixe que le périmètre.
+
+### Point de départ (après FIX-FACTURX-TVA, option C)
+
+La route `GET /api/factures/[id]/facturx` produit aujourd'hui un PDF
+react-pdf + XML CII **profil MINIMUM** attaché via pdf-lib. Ce n'est **ni
+EN 16931, ni PDF/A-3**. L'option C a seulement rendu le fichier honnête :
+bloc TVA réel (catégorie S/E + taux snapshot `tauxTva`), plus aucune
+mention « EN 16931 » dans les métadonnées, mention sobre « Facture
+disponible au format Factur-X » (sans profil) en pied du PDF classique
+des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
+
+### Périmètre (chantier unique, les briques dépendent les unes des autres)
+
+1. **SNAPSHOT-FACTURE-LIGNES — prérequis.** Le XML EN 16931 doit se
+   construire sur des lignes figées à l'émission, pas relues depuis le
+   devis source (cf. TODO schéma `Facture` + art. 289 CGI). À faire en
+   premier.
+2. **XML EN 16931 complet** : profil `urn:cen.eu:en16931:2017`, lignes de
+   facture (BG-25), ventilation TVA par taux/catégorie (BG-23), conditions
+   et date d'échéance réelles, validation XSD + schematron officiels.
+3. **PDF/A-3** : métadonnées XMP (pdfaid + extension schema Factur-X),
+   OutputIntent sRGB (profil ICC), polices intégralement embarquées,
+   pièce jointe `factur-x.xml` conforme (AFRelationship), validation
+   **veraPDF** en CI ou au moins en test.
+4. **Nouvelles mentions obligatoires de la réforme (4)** — liste à
+   confirmer sur le texte officiel au moment du plan : SIREN du client,
+   adresse de livraison si différente de l'adresse de facturation,
+   **catégorie d'opération (biens / services / mixte)** — absente du
+   modèle aujourd'hui, migration Prisma à prévoir —, option pour le
+   paiement de la TVA d'après les débits le cas échéant.
+5. **Logo officiel Factur-X du profil** (fx.n pour EN 16931) sur le
+   conteneur, asset officiel FNFE-MPE (fnfe-mpe.org), conditions d'usage
+   à vérifier — et seulement une fois 2 et 3 validés. Mention du pied de
+   page alors complétée en « (EN 16931) ».
+
+### Écarts repérés dans le XML actuel (à reprendre dans le point 2)
+
+- `TypeCode` toujours 380 : un avoir devrait être 381
+- Date d'échéance = date d'émission (ignore `dateEcheance`)
+- SIRET émis en `SpecifiedTaxRegistration schemeID="FC"` : à remplacer par
+  `SpecifiedLegalOrganization` (schemeID 0002) — à confirmer au schematron
+- Taux 0 % : tout part en catégorie E (motif = `tvaMention`, texte libre).
+  Autoliquidation (AE), intracom (K), export (G) non distingués → passer
+  la mention TVA d'un texte libre à une valeur structurée
+- B2B uniquement par principe ; tous les clients Caleson/NONNA sont des
+  professionnels → aucune condition B2C à coder pour l'instant
+
+### Acceptance criteria
+
+- Factur-X EN 16931 d'une facture émise validé par veraPDF (PDF/A-3) et par
+  le schematron EN 16931 / Factur-X, sur facture mono, récap, acompte,
+  solde et avoir
+- XML construit exclusivement depuis les lignes snapshotées
+- Les 4 mentions de la réforme présentes sur le PDF et dans le XML
+- Logo fx.n présent sur le conteneur Factur-X, absent du PDF classique
+  et des brouillons
+
+---
