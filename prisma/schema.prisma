@@ -535,6 +535,14 @@ model Facture {
   // Référence commande client
   numeroBdc  String?
 
+  // Objet + description du projet (FEAT-FACTURE-OBJET-DESCRIPTION). Snapshot
+  // de Devis.objet / Devis.description à la création d'une facture mono
+  // (acompte/solde) ; NULL sur une récap (N devis = N objets) et sur les
+  // pièces émises avant la feature. Éditables tant que BROUILLON, figés à
+  // l'émission comme le reste.
+  objet             String?
+  descriptionProjet String?
+
   // Période d'exploitation — snapshot recopié depuis le devis source
   // au moment de l'émission (re-snapshot à chaque facture acompte/solde).
   // Immuabilité après EMISE comme le reste de la facture. Ticket #69.

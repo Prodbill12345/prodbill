@@ -1,6 +1,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canDeleteFacture } from "@/lib/facture-delete";
+import { canEditFactureObjet, cleanText } from "@/lib/facture-objet";
 import { del } from "@vercel/blob";
 import { z } from "zod";
 
@@ -10,6 +11,9 @@ const UpdateFactureSchema = z.object({
   // #98 : le numéro est attribué à l'émission et immuable — plus d'édition
   // manuelle (le champ `numero` n'est plus accepté ici).
   dateEmission: z.string().nullable().optional(), // "YYYY-MM-DD" (correction import)
+  // FEAT-FACTURE-OBJET-DESCRIPTION : brouillon uniquement (400 sinon).
+  objet: z.string().max(500).nullable().optional(),
+  descriptionProjet: z.string().max(5000).nullable().optional(),
 });
 
 export async function PUT(
@@ -27,6 +31,16 @@ export async function PUT(
 
     const body = await req.json();
     const input = UpdateFactureSchema.parse(body);
+
+    // Objet / description : figés à l'émission comme le reste de la pièce.
+    const touchesObjet =
+      input.objet !== undefined || input.descriptionProjet !== undefined;
+    if (touchesObjet && !canEditFactureObjet(existing)) {
+      return Response.json(
+        { error: "L'objet et la description ne sont modifiables que sur une facture en brouillon." },
+        { status: 400 }
+      );
+    }
 
     // numeroBdc : normalement verrouillé après émission, mais on autorise la correction
     // de données importées (emiseAt peut être null pour les imports CSV)
@@ -53,6 +67,10 @@ export async function PUT(
           }),
           ...(input.dateEmission !== undefined && {
             dateEmission: input.dateEmission ? new Date(input.dateEmission) : null,
+          }),
+          ...(input.objet !== undefined && { objet: cleanText(input.objet) }),
+          ...(input.descriptionProjet !== undefined && {
+            descriptionProjet: cleanText(input.descriptionProjet),
           }),
         },
       });

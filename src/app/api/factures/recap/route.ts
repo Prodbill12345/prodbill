@@ -150,6 +150,9 @@ export async function POST(req: Request) {
         // Période d'exploitation : volontairement NON copiée (validé Vanda,
         // 22/10/2026). N devis = N périodes, pas de période agrégée sur une
         // facture récap — les champs periodeExploitation* restent null.
+        // Idem objet / descriptionProjet (FEAT-FACTURE-OBJET-DESCRIPTION) :
+        // non copiés, le bloc « Devis regroupés » porte réf + objet de
+        // chaque devis. Saisie manuelle possible en brouillon (titre global).
         tva: totals.tva,
         totalTtc: totals.totalTtc,
         sousTotal: totals.sousTotal,

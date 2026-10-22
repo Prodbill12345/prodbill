@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check, CircleCheckBig, Undo2, Trash2, AlertTriangle } from "lucide-react";
 import type { Facture } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
+import { canEditFactureObjet } from "@/lib/facture-objet";
 
 const ANNEES = [2023, 2024, 2025, 2026, 2027];
 
@@ -27,6 +28,10 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
     : "";
   const [editBdc, setEditBdc] = useState(facture.numeroBdc ?? "");
   const [editAnnee, setEditAnnee] = useState(initAnnee);
+  // FEAT-FACTURE-OBJET-DESCRIPTION : éditables en brouillon uniquement.
+  const objetEditable = canEditFactureObjet(facture);
+  const [editObjet, setEditObjet] = useState(facture.objet ?? "");
+  const [editDescription, setEditDescription] = useState(facture.descriptionProjet ?? "");
   const [saving, setSaving] = useState(false);
 
   async function saveCorrection() {
@@ -46,6 +51,12 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
         body: JSON.stringify({
           numeroBdc: editBdc.trim() || null,
           dateEmission,
+          // Envoyés seulement en brouillon : la route les refuse (400) après
+          // émission, la correction du BDC doit rester possible.
+          ...(objetEditable && {
+            objet: editObjet.trim() || null,
+            descriptionProjet: editDescription.trim() || null,
+          }),
         }),
       });
       if (!res.ok) {
@@ -192,6 +203,29 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
       {showEdit && (
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 w-80 space-y-3 shadow-sm">
           <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Corriger la facture</p>
+          {objetEditable && (
+            <>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Objet</label>
+                <input
+                  type="text"
+                  value={editObjet}
+                  onChange={(e) => setEditObjet(e.target.value)}
+                  placeholder="Ex : Production du spot TV Marque X"
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Description du projet</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+              </div>
+            </>
+          )}
           <div>
             <label className="block text-xs text-slate-500 mb-1">N° BDC client</label>
             <input

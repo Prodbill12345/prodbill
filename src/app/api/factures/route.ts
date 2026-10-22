@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
 import { isDevisFacturable } from "@/lib/devis-facturable";
 import { snapshotPeriodeExploitation } from "@/lib/periode-exploitation";
+import { snapshotObjetFromDevis } from "@/lib/facture-objet";
 import {
   getFacturationState,
   toFactureForFacturation,
@@ -177,6 +178,9 @@ export async function POST(req: Request) {
         // Date invalide/hors bornes côté devis → null, jamais Invalid Date
         // (BUG-FACTURE-PERIODE-FIN-INVALIDE).
         ...snapshotPeriodeExploitation(devis),
+        // Objet + description du projet (FEAT-FACTURE-OBJET-DESCRIPTION) :
+        // snapshot, éditable tant que BROUILLON.
+        ...snapshotObjetFromDevis(devis),
         tva,
         totalTtc,
         // Breakdown au prorata

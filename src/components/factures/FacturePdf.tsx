@@ -11,6 +11,7 @@ import type { Facture, Client, LigneTag } from "@prisma/client";
 import { formatFactureNumero } from "@/lib/facture-numero";
 import { facturxMention } from "@/lib/facturx-tax";
 import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
+import { factureObjetDisplay } from "@/lib/facture-objet";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -126,6 +127,14 @@ const s = StyleSheet.create({
   },
   refLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#3b82f6", marginRight: 6 },
   refText: { fontSize: 8.5, color: "#1e293b", flex: 1 },
+
+  // Objet + description du projet (FEAT-FACTURE-OBJET-DESCRIPTION) —
+  // mêmes styles que DevisPdf.
+  objetRow: { flexDirection: "row", marginBottom: 10 },
+  objetLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#64748b", marginRight: 6 },
+  objetText: { fontSize: 9, color: "#1e293b", flex: 1 },
+  descriptionBlock: { marginBottom: 16 },
+  descriptionText: { fontSize: 8.5, color: "#64748b", lineHeight: 1.6, fontStyle: "italic" },
 
   // Tableau montants
   amountsBlock: { marginBottom: 20 },
@@ -320,6 +329,14 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
   } else {
     ligneDescription = isAvoir ? "Avoir" : "Prestation";
   }
+  // Objet propre à la facture (snapshot) : prioritaire sur l'objet live du
+  // devis, qui n'est alors plus répété dans la ligne « Réf. ». Pièces sans
+  // objet (antérieures à la feature, récap) : rendu inchangé.
+  const {
+    objet: objetFacture,
+    description: descriptionFacture,
+    refSuffix,
+  } = factureObjetDisplay(facture, ligneRef);
 
   // TOTAL HT affiche = base TVA = totalHt - remise (parite avec DevisPdf).
   // Sur les factures sans remise, totalHtNet === totalHt → aucune regression.
@@ -333,7 +350,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
     <Document
       title={titreDoc}
       author={facture.nomEmetteur}
-      subject={ligneRef || ligneDescription}
+      subject={objetFacture || ligneRef || ligneDescription}
       creator="ProdBill"
     >
       <Page size="A4" style={s.page}>
@@ -398,8 +415,21 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
             <Text style={s.refLabel}>Réf. :</Text>
             <Text style={s.refText}>
               {ligneDescription}
-              {ligneRef ? ` — ${ligneRef}` : ""}
+              {refSuffix ? ` — ${refSuffix}` : ""}
             </Text>
+          </View>
+        )}
+
+        {/* ── Objet + description du projet (snapshot, rien si vide) ── */}
+        {objetFacture && (
+          <View style={s.objetRow}>
+            <Text style={s.objetLabel}>Objet :</Text>
+            <Text style={s.objetText}>{objetFacture}</Text>
+          </View>
+        )}
+        {descriptionFacture && (
+          <View style={s.descriptionBlock}>
+            <Text style={s.descriptionText}>{descriptionFacture}</Text>
           </View>
         )}
 

@@ -150,8 +150,11 @@ export default async function FactureDetailPage({
                   className="text-blue-600 hover:text-blue-700"
                 >
                   {facture.devis.numero}
-                </Link>{" "}
-                — {facture.devis.objet}
+                </Link>
+                {/* Objet live du devis seulement si la facture n'a pas son
+                    propre objet (pièces antérieures à la feature : rendu
+                    inchangé) — sinon affiché ci-dessous, sans doublon. */}
+                {!facture.objet && <> — {facture.devis.objet}</>}
               </p>
             )}
             {isRecap && (
@@ -168,6 +171,15 @@ export default async function FactureDetailPage({
                     </Link>
                   </span>
                 ))}
+              </p>
+            )}
+            {/* FEAT-FACTURE-OBJET-DESCRIPTION — snapshot, rien si vide */}
+            {facture.objet && (
+              <p className="text-slate-500 mt-1">{facture.objet}</p>
+            )}
+            {facture.descriptionProjet && (
+              <p className="text-sm text-slate-400 italic mt-1 whitespace-pre-line">
+                {facture.descriptionProjet}
               </p>
             )}
           </div>
