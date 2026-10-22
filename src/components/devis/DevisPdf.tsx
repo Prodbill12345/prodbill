@@ -14,6 +14,7 @@ import type {
   Company,
 } from "@prisma/client";
 import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
+import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 
 export type DevisForPdf = Devis & {
   client: Client;
@@ -215,6 +216,7 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
   const { showTva, showTtc } = devisRecapVisibility(company);
 
   const titreDoc = devis.numero ? `DEVIS N° ${devis.numero}` : "DEVIS (Brouillon)";
+  const periodeTexte = formatPeriodeExploitation(devis);
 
   const adresseCompany = [company.address, `${company.postalCode} ${company.city}`]
     .filter((s) => s.trim())
@@ -330,23 +332,16 @@ export function DevisPdf({ devis }: { devis: DevisForPdf }) {
         )}
 
         {/* ── Période d'exploitation (ticket #69) ──────────────────
-            Affichée seulement si au moins un des 3 champs est rempli.
-            3 formats :
-              - 2 dates + libellé : "du DD/MM/YYYY au DD/MM/YYYY — Libellé"
-              - 2 dates seules    : "du DD/MM/YYYY au DD/MM/YYYY"
-              - Libellé seul      : "Libellé"
-            Le schéma Zod garantit qu'on n'a jamais une seule date orpheline. */}
-        {(devis.periodeExploitationDebut ||
-          devis.periodeExploitationFin ||
-          devis.periodeExploitationLibelle) && (
+            Texte via formatPeriodeExploitation (du X au Y / à partir du X /
+            jusqu'au Y, + libellé). Une date orpheline ou invalide en base
+            ne produit jamais « Invalid Date ». */}
+        {periodeTexte && (
           <View style={{ marginBottom: 16 }}>
             <Text style={{ fontSize: 8.5, color: "#64748b", lineHeight: 1.6 }}>
               <Text style={{ fontFamily: "Helvetica-Bold", color: "#475569" }}>
                 Période d&apos;exploitation :{" "}
               </Text>
-              {devis.periodeExploitationDebut && devis.periodeExploitationFin
-                ? `du ${fmtDate(devis.periodeExploitationDebut)} au ${fmtDate(devis.periodeExploitationFin)}${devis.periodeExploitationLibelle ? ` — ${devis.periodeExploitationLibelle}` : ""}`
-                : devis.periodeExploitationLibelle}
+              {periodeTexte}
             </Text>
           </View>
         )}

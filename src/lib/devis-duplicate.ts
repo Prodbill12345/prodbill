@@ -30,6 +30,7 @@
  */
 
 import type { Devis, DevisSection, DevisLigne, Prisma } from "@prisma/client";
+import { snapshotPeriodeExploitation } from "./periode-exploitation";
 
 export type DevisSourceForDuplicate = Devis & {
   sections: (DevisSection & { lignes: DevisLigne[] })[];
@@ -109,9 +110,8 @@ export function buildDuplicatedDevisData(
     dateSeance:   source.dateSeance,
 
     // ─── Periode d'exploitation (ticket #69) ────────────────────────────
-    periodeExploitationDebut:    source.periodeExploitationDebut,
-    periodeExploitationFin:      source.periodeExploitationFin,
-    periodeExploitationLibelle:  source.periodeExploitationLibelle,
+    // Dates invalides du source → null (BUG-FACTURE-PERIODE-FIN-INVALIDE)
+    ...snapshotPeriodeExploitation(source),
 
     // ─── Notes + suivi budgetaire ───────────────────────────────────────
     notes:    source.notes,

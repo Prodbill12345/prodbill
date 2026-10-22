@@ -6,6 +6,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { DevisBuilder } from "@/components/devis/DevisBuilder";
+import { toValidPeriodeDate } from "@/lib/periode-exploitation";
 
 export default async function ModifierDevisPage({
   params,
@@ -74,12 +75,12 @@ export default async function ModifierDevisPage({
     dateSeance: devis.dateSeance
       ? devis.dateSeance.toISOString().slice(0, 10)
       : null,
-    periodeExploitationDebut: devis.periodeExploitationDebut
-      ? devis.periodeExploitationDebut.toISOString().slice(0, 10)
-      : null,
-    periodeExploitationFin: devis.periodeExploitationFin
-      ? devis.periodeExploitationFin.toISOString().slice(0, 10)
-      : null,
+    // Date invalide en base (ex. année 42027) → champ vide à ressaisir, au
+    // lieu d'un RangeError sur toISOString() (BUG-FACTURE-PERIODE-FIN-INVALIDE).
+    periodeExploitationDebut:
+      toValidPeriodeDate(devis.periodeExploitationDebut)?.toISOString().slice(0, 10) ?? null,
+    periodeExploitationFin:
+      toValidPeriodeDate(devis.periodeExploitationFin)?.toISOString().slice(0, 10) ?? null,
     periodeExploitationLibelle: devis.periodeExploitationLibelle,
     notes: devis.notes,
     remise: devis.remise ?? 0,

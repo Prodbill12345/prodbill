@@ -568,6 +568,8 @@ export function DevisBuilder({
                   <input
                     type="date"
                     {...register("periodeExploitationDebut")}
+                    min="1900-01-01"
+                    max="2100-12-31"
                     placeholder="Du"
                     aria-label="Date de début d'exploitation"
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -583,6 +585,8 @@ export function DevisBuilder({
                   <input
                     type="date"
                     {...register("periodeExploitationFin")}
+                    min="1900-01-01"
+                    max="2100-12-31"
                     placeholder="Au"
                     aria-label="Date de fin d'exploitation"
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

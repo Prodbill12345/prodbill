@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Mail, AlertTriangle, FileText, ExternalLink } from "lucide-react";
 import { formatEuros, formatPct, formatQuantite } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
+import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 import {
   FACTURE_STATUT_COLORS,
   FACTURE_STATUT_LABELS,
@@ -272,25 +273,13 @@ export default async function FactureDetailPage({
             {/* Période d'exploitation — snapshot du devis source à
                 l'émission. Lecture seule (immuabilité légale comme le
                 reste de la facture). Ticket #69. */}
-            {(facture.periodeExploitationDebut ||
-              facture.periodeExploitationFin ||
-              facture.periodeExploitationLibelle) && (
+            {formatPeriodeExploitation(facture) && (
               <div className="mt-3 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
                 <p className="text-xs text-slate-400 leading-tight">
                   Période d&apos;exploitation
                 </p>
                 <p className="text-sm text-slate-700 mt-0.5">
-                  {facture.periodeExploitationDebut && facture.periodeExploitationFin ? (
-                    <>
-                      du {formatDate(facture.periodeExploitationDebut)}{" "}
-                      au {formatDate(facture.periodeExploitationFin)}
-                      {facture.periodeExploitationLibelle && (
-                        <> — {facture.periodeExploitationLibelle}</>
-                      )}
-                    </>
-                  ) : (
-                    facture.periodeExploitationLibelle
-                  )}
+                  {formatPeriodeExploitation(facture)}
                 </p>
               </div>
             )}

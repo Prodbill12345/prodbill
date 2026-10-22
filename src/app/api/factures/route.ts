@@ -4,6 +4,7 @@ import { getNextDevisNumero } from "@/lib/numbering";
 import { logAudit } from "@/lib/audit";
 import { computeFactureTotalsFromDevis } from "@/lib/invoice-totals";
 import { isDevisFacturable } from "@/lib/devis-facturable";
+import { snapshotPeriodeExploitation } from "@/lib/periode-exploitation";
 import {
   getFacturationState,
   toFactureForFacturation,
@@ -173,9 +174,9 @@ export async function POST(req: Request) {
         // chaque facture acompte/solde — si le devis est modifié entre
         // deux émissions, la 2e facture reflète l'état au moment de
         // son émission. Immuable ensuite via le verrouillage EMISE.
-        periodeExploitationDebut: devis.periodeExploitationDebut,
-        periodeExploitationFin: devis.periodeExploitationFin,
-        periodeExploitationLibelle: devis.periodeExploitationLibelle,
+        // Date invalide/hors bornes côté devis → null, jamais Invalid Date
+        // (BUG-FACTURE-PERIODE-FIN-INVALIDE).
+        ...snapshotPeriodeExploitation(devis),
         tva,
         totalTtc,
         // Breakdown au prorata

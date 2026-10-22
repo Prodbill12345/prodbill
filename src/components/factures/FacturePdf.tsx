@@ -10,6 +10,7 @@ import type { Facture, Client, LigneTag } from "@prisma/client";
 
 import { formatFactureNumero } from "@/lib/facture-numero";
 import { facturxMention } from "@/lib/facturx-tax";
+import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -292,6 +293,8 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
     : `${docTitreLabel} (Brouillon)`;
   // Mention Factur-X en pied de page : pièces émises uniquement.
   const mentionFacturx = facturxMention(facture);
+  // Période d'exploitation (#69) : texte unique, null si rien d'exploitable.
+  const periodeTexte = formatPeriodeExploitation(facture);
 
   const adresseClient = [
     client.address,
@@ -421,17 +424,13 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
         )}
 
         {/* ── Période d'exploitation (snapshot du devis, ticket #69) ── */}
-        {(facture.periodeExploitationDebut ||
-          facture.periodeExploitationFin ||
-          facture.periodeExploitationLibelle) && (
+        {periodeTexte && (
           <View style={{ marginBottom: 14 }}>
             <Text style={{ fontSize: 8.5, color: "#64748b", lineHeight: 1.6 }}>
               <Text style={{ fontFamily: "Helvetica-Bold", color: "#475569" }}>
                 Période d&apos;exploitation :{" "}
               </Text>
-              {facture.periodeExploitationDebut && facture.periodeExploitationFin
-                ? `du ${fmtDate(facture.periodeExploitationDebut)} au ${fmtDate(facture.periodeExploitationFin)}${facture.periodeExploitationLibelle ? ` — ${facture.periodeExploitationLibelle}` : ""}`
-                : facture.periodeExploitationLibelle}
+              {periodeTexte}
             </Text>
           </View>
         )}

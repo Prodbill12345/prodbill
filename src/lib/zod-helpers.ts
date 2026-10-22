@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { isPeriodeDateString } from "@/lib/periode-exploitation";
 
 /**
  * FK optionnelle envoyée par un `<select>` HTML. Convertit la chaîne
@@ -24,6 +25,17 @@ export const optionalFkId = z
   .optional()
   .transform((v) => (v === "" || v === null ? undefined : v));
 
+// BUG-FACTURE-PERIODE-FIN-INVALIDE : vide autorisé (période optionnelle),
+// sinon YYYY-MM-DD réel avec une année à 4 chiffres dans les bornes — un
+// « 42027-07-14 » saisi au clavier passait la comparaison lexicographique.
+const periodeDate = z
+  .string()
+  .refine((v) => v.trim() === "" || isPeriodeDateString(v.trim()), {
+    message: "Date invalide (année attendue entre 1900 et 2100)",
+  })
+  .optional()
+  .nullable();
+
 /**
  * Champs Zod pour la période d'exploitation (ticket #69).
  * À étaler dans un schéma de devis (client ou API) :
@@ -35,8 +47,8 @@ export const optionalFkId = z
  * côté API au moment du prisma.create/update.
  */
 export const periodeExploitationFields = {
-  periodeExploitationDebut: z.string().optional().nullable(),
-  periodeExploitationFin: z.string().optional().nullable(),
+  periodeExploitationDebut: periodeDate,
+  periodeExploitationFin: periodeDate,
   periodeExploitationLibelle: z
     .string()
     .max(255, "Libellé max 255 caractères")

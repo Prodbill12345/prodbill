@@ -147,6 +147,9 @@ export async function POST(req: Request) {
         // Mention TVA custom : pertinente seulement si taux=0. Les devis ayant
         // le même taux (garde-fou), on prend celle du 1er.
         tvaMention: ref.tvaMention,
+        // Période d'exploitation : volontairement NON copiée (validé Vanda,
+        // 22/10/2026). N devis = N périodes, pas de période agrégée sur une
+        // facture récap — les champs periodeExploitation* restent null.
         tva: totals.tva,
         totalTtc: totals.totalTtc,
         sousTotal: totals.sousTotal,
