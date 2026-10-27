@@ -146,8 +146,8 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
       {/* Vérification SIRET */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-blue-900 mb-3">
+      <div className="bg-status-info-bg border border-status-info-bg rounded-[var(--radius-card)] p-5">
+        <h3 className="text-sm font-semibold text-brand-ink mb-3">
           Remplissage automatique via SIRET
         </h3>
         <div className="flex gap-2">
@@ -156,14 +156,14 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
             value={siretQuery}
             onChange={(e) => setSiretQuery(e.target.value)}
             placeholder="Ex : 12345678900012"
-            className="flex-1 px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-3 py-2 bg-brand-paper border border-status-info-bg rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), lookupSiret())}
           />
           <button
             type="button"
             onClick={lookupSiret}
             disabled={siretLoading || !siretQuery.trim()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-brand-cream rounded-[var(--radius-control)] text-sm font-medium hover:bg-brand-ink disabled:opacity-50 transition-colors"
           >
             {siretLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -178,8 +178,8 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
           <div
             className={`mt-3 flex items-start gap-2 text-sm ${
               siretResult.status === "ok"
-                ? "text-green-700"
-                : "text-red-700"
+                ? "text-brand-pistachio-ink"
+                : "text-brand-coral-ink"
             }`}
           >
             {siretResult.status === "ok" ? (
@@ -197,42 +197,42 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
       </div>
 
       {/* Informations générales */}
-      <section className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-        <h3 className="font-semibold text-slate-900">Informations générales</h3>
+      <section className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+        <h3 className="font-semibold text-brand-ink">Informations générales</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Nom / Raison sociale *
             </label>
             <input
               {...register("name")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="Société Dupont Productions"
             />
             {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.name.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               SIRET
             </label>
             <input
               {...register("siret")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="123 456 789 00012"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               N° TVA intracommunautaire
             </label>
             <input
               {...register("tvaIntra")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="FR12345678901"
             />
           </div>
@@ -240,80 +240,80 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
       </section>
 
       {/* Coordonnées */}
-      <section className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-        <h3 className="font-semibold text-slate-900">Coordonnées</h3>
+      <section className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+        <h3 className="font-semibold text-brand-ink">Coordonnées</h3>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Adresse *
             </label>
             <input
               {...register("address")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="12 rue de la Paix"
             />
             {errors.address && (
-              <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.address.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Code postal
             </label>
             <input
               {...register("postalCode")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="75001"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Ville
             </label>
             <input
               {...register("city")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="Paris"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Email
             </label>
             <input
               {...register("email")}
               type="email"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="contact@societe.fr"
             />
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.email.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Téléphone
             </label>
             <input
               {...register("phone")}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="+33 1 23 45 67 89"
             />
           </div>
 
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Notes internes
             </label>
             <textarea
               {...register("notes")}
               rows={3}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
               placeholder="Informations complémentaires..."
             />
           </div>
@@ -324,14 +324,14 @@ export function ClientForm({ initialData }: ClientFormProps = {}) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+          className="px-5 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-brand-surface transition-colors"
         >
           Annuler
         </button>
         <button
           type="submit"
           disabled={submitting}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-brand-blue rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors"
         >
           {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
           {isEdit ? "Enregistrer les modifications" : "Créer le client"}

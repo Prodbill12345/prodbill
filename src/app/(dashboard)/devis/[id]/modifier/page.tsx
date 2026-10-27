@@ -110,12 +110,12 @@ export default async function ModifierDevisPage({
       <div>
         <Link
           href={`/devis/${id}`}
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-brand-ink-muted hover:text-brand-ink mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           {devis.numero ?? "Brouillon"}
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">
           Modifier le devis{devis.numero ? ` ${devis.numero}` : ""}
         </h1>
       </div>

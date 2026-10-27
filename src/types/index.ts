@@ -180,12 +180,13 @@ export const LIGNE_TAG_LABELS: Record<LigneTag, string> = {
   AGENT: "Agent (10%)",
 };
 
+// DA ProdBill (phase 2) : teintes douces de la palette, texte AA.
 export const LIGNE_TAG_COLORS: Record<LigneTag, string> = {
-  ARTISTE: "bg-purple-100 text-purple-800",
-  TECHNICIEN_HCS: "bg-blue-100 text-blue-800",
-  STUDIO: "bg-teal-100 text-teal-800",
-  MUSIQUE: "bg-pink-100 text-pink-800",
-  AGENT: "bg-amber-100 text-amber-800",
+  ARTISTE: "bg-status-info-bg text-brand-blue",
+  TECHNICIEN_HCS: "bg-brand-surface text-brand-ink",
+  STUDIO: "bg-status-success-bg text-brand-ink",
+  MUSIQUE: "bg-status-danger-bg text-brand-ink",
+  AGENT: "bg-status-partial-bg text-brand-ink",
 };
 
 export const DEVIS_STATUT_LABELS: Record<DevisStatut, string> = {

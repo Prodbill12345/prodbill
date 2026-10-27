@@ -23,16 +23,16 @@ export function FactureBdcField({ factureId, initialValue, isLocked }: FactureBd
   if (isLocked) {
     if (!initialValue) return null;
     return (
-      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
-        <span className="text-xs font-medium text-slate-400 shrink-0">N° BDC</span>
-        <span className="text-sm text-slate-700 font-mono">{initialValue}</span>
+      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-brand-rule">
+        <span className="text-xs font-medium text-brand-ink-muted shrink-0">N° BDC</span>
+        <span className="text-sm text-brand-ink font-mono">{initialValue}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
-      <label className="text-xs font-medium text-slate-400 shrink-0">N° BDC</label>
+    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-brand-rule">
+      <label className="text-xs font-medium text-brand-ink-muted shrink-0">N° BDC</label>
       <input
         type="text"
         value={value}
@@ -40,7 +40,7 @@ export function FactureBdcField({ factureId, initialValue, isLocked }: FactureBd
         onBlur={(e) => handleSave(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
         placeholder="Ex : BDC-2025-042"
-        className="flex-1 px-2 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+        className="flex-1 px-2 py-1 text-sm border border-brand-rule rounded-md focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-paper"
       />
     </div>
   );

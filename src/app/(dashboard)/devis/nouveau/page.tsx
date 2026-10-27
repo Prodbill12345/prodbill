@@ -46,17 +46,17 @@ export default async function NouveauDevisPage() {
       <div>
         <Link
           href="/devis"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-brand-ink-muted hover:text-brand-ink mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           Devis
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Nouveau devis</h1>
+        <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">Nouveau devis</h1>
       </div>
 
       {clients.length === 0 ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-          <p className="text-amber-800 font-medium">
+        <div className="bg-status-partial-bg border border-status-partial-bg rounded-[var(--radius-card)] p-6">
+          <p className="text-brand-ink font-medium">
             Aucun client trouvé.{" "}
             <Link href="/clients/nouveau" className="underline hover:no-underline">
               Créez d&apos;abord un client

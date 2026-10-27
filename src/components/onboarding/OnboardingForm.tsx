@@ -76,17 +76,17 @@ export function OnboardingForm({ userName }: { userName: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-brand-cream flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl mb-4">
-            <Building2 className="w-7 h-7 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-blue rounded-[var(--radius-card)] mb-4">
+            <Building2 className="w-7 h-7 text-brand-cream" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-3xl font-bold text-brand-ink">
             Bienvenue, {userName} 👋
           </h1>
-          <p className="text-slate-500 mt-2">
+          <p className="text-brand-ink-muted mt-2">
             Configurons votre espace ProdBill en 3 minutes
           </p>
         </div>
@@ -99,17 +99,17 @@ export function OnboardingForm({ userName }: { userName: string }) {
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                     step > s.id
-                      ? "bg-green-500 text-white"
+                      ? "bg-brand-pistachio text-brand-ink"
                       : step === s.id
-                      ? "bg-blue-600 text-white ring-4 ring-blue-100"
-                      : "bg-slate-100 text-slate-400"
+                      ? "bg-brand-blue text-brand-cream ring-4 ring-status-info-bg"
+                      : "bg-brand-surface text-brand-ink-muted"
                   }`}
                 >
                   {step > s.id ? <Check className="w-4 h-4" /> : s.id}
                 </div>
                 <span
                   className={`text-xs mt-1 font-medium ${
-                    step === s.id ? "text-blue-600" : "text-slate-400"
+                    step === s.id ? "text-brand-blue" : "text-brand-ink-muted"
                   }`}
                 >
                   {s.label}
@@ -118,7 +118,7 @@ export function OnboardingForm({ userName }: { userName: string }) {
               {i < STEPS.length - 1 && (
                 <div
                   className={`w-16 h-0.5 mx-2 mb-4 transition-all ${
-                    step > s.id ? "bg-green-400" : "bg-slate-200"
+                    step > s.id ? "bg-brand-pistachio" : "bg-brand-rule"
                   }`}
                 />
               )}
@@ -127,63 +127,63 @@ export function OnboardingForm({ userName }: { userName: string }) {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-8">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-8">
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Step 1 — Identité société */}
             {step === 1 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-brand-ink">
                     Identité de votre société
                   </h2>
-                  <p className="text-sm text-slate-400 mt-0.5">
+                  <p className="text-sm text-brand-ink-muted mt-0.5">
                     Ces informations apparaîtront sur vos devis et factures
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-brand-ink mb-1.5">
                     Raison sociale *
                   </label>
                   <input
                     {...register("companyName")}
                     autoFocus
                     placeholder="Ex : Studio Lumière Productions SAS"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition"
                   />
                   {errors.companyName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.companyName.message}</p>
+                    <p className="text-brand-coral-ink text-xs mt-1">{errors.companyName.message}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       SIRET
                     </label>
                     <input
                       {...register("siret")}
                       placeholder="123 456 789 00012"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                     {errors.siret && (
-                      <p className="text-red-500 text-xs mt-1">{errors.siret.message}</p>
+                      <p className="text-brand-coral-ink text-xs mt-1">{errors.siret.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       N° TVA intracommunautaire
                     </label>
                     <input
                       {...register("tvaIntra")}
                       placeholder="FR12345678901"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
+                <p className="text-xs text-brand-ink-muted bg-brand-surface rounded-[var(--radius-control)] px-3 py-2">
                   💡 Ces informations peuvent être complétées ou modifiées plus tard dans
                   les Paramètres.
                 </p>
@@ -194,75 +194,75 @@ export function OnboardingForm({ userName }: { userName: string }) {
             {step === 2 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-brand-ink">
                     Coordonnées
                   </h2>
-                  <p className="text-sm text-slate-400 mt-0.5">
+                  <p className="text-sm text-brand-ink-muted mt-0.5">
                     Adresse et contact de votre société
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-brand-ink mb-1.5">
                     Adresse *
                   </label>
                   <input
                     {...register("address")}
                     autoFocus
                     placeholder="12 rue de la Paix"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                   />
                   {errors.address && (
-                    <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+                    <p className="text-brand-coral-ink text-xs mt-1">{errors.address.message}</p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       Code postal
                     </label>
                     <input
                       {...register("postalCode")}
                       placeholder="75001"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       Ville
                     </label>
                     <input
                       {...register("city")}
                       placeholder="Paris"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       Email de facturation *
                     </label>
                     <input
                       {...register("email")}
                       type="email"
                       placeholder="compta@studio.fr"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                      <p className="text-brand-coral-ink text-xs mt-1">{errors.email.message}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <label className="block text-sm font-medium text-brand-ink mb-1.5">
                       Téléphone
                     </label>
                     <input
                       {...register("phone")}
                       placeholder="+33 1 23 45 67 89"
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                     />
                   </div>
                 </div>
@@ -273,44 +273,44 @@ export function OnboardingForm({ userName }: { userName: string }) {
             {step === 3 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-brand-ink">
                     Coordonnées bancaires
                   </h2>
-                  <p className="text-sm text-slate-400 mt-0.5">
+                  <p className="text-sm text-brand-ink-muted mt-0.5">
                     Apparaissent sur vos factures pour faciliter le virement
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-brand-ink mb-1.5">
                     IBAN
                   </label>
                   <input
                     {...register("iban")}
                     autoFocus
                     placeholder="FR76 3000 6000 0112 3456 7890 189"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium text-brand-ink mb-1.5">
                     BIC / SWIFT
                   </label>
                   <input
                     {...register("bic")}
                     placeholder="BNPAFRPP"
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                    className="w-full px-3.5 py-2.5 border border-brand-rule rounded-[var(--radius-card)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
                   />
                 </div>
 
-                <p className="text-xs text-slate-400 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
+                <p className="text-xs text-brand-ink-muted bg-status-info-bg border border-status-info-bg rounded-[var(--radius-control)] px-3 py-2.5">
                   🔒 Ces données sont stockées de manière sécurisée et ne sont jamais
                   partagées. Vous pouvez les ajouter plus tard dans les Paramètres.
                 </p>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+                  <div className="bg-status-danger-bg border border-status-danger-bg rounded-[var(--radius-control)] px-4 py-3 text-sm text-brand-coral-ink">
                     {error}
                   </div>
                 )}
@@ -318,12 +318,12 @@ export function OnboardingForm({ userName }: { userName: string }) {
             )}
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-brand-rule">
               {step > 1 ? (
                 <button
                   type="button"
                   onClick={() => setStep((s) => s - 1)}
-                  className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-brand-ink-muted hover:text-brand-ink transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Retour
@@ -336,7 +336,7 @@ export function OnboardingForm({ userName }: { userName: string }) {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-brand-blue text-brand-cream rounded-[var(--radius-card)] text-sm font-semibold hover:bg-brand-ink transition-colors"
                 >
                   Suivant
                   <ChevronRight className="w-4 h-4" />
@@ -345,7 +345,7 @@ export function OnboardingForm({ userName }: { userName: string }) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-brand-blue text-brand-cream rounded-[var(--radius-card)] text-sm font-semibold hover:bg-brand-ink disabled:opacity-50 transition-colors"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -360,7 +360,7 @@ export function OnboardingForm({ userName }: { userName: string }) {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center text-xs text-brand-ink-muted mt-6">
           ProdBill — Facturation audiovisuelle professionnelle
         </p>
       </div>

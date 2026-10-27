@@ -138,20 +138,20 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-          <h2 className="text-base font-semibold text-slate-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-rule shrink-0">
+          <h2 className="text-base font-semibold text-brand-ink">
             Créer un nouveau client
           </h2>
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-40"
+            className="text-brand-ink-muted hover:text-brand-ink transition-colors disabled:opacity-40"
           >
             <X className="w-5 h-5" />
           </button>
@@ -164,8 +164,8 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
           className="overflow-y-auto px-6 py-5 space-y-6 flex-1"
         >
           {/* SIRET */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">
+          <div className="bg-status-info-bg border border-status-info-bg rounded-[var(--radius-card)] p-4">
+            <h3 className="text-sm font-semibold text-brand-ink mb-2">
               Remplissage automatique via SIRET
             </h3>
             <div className="flex gap-2">
@@ -174,14 +174,14 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
                 value={siretQuery}
                 onChange={(e) => setSiretQuery(e.target.value)}
                 placeholder="Ex : 12345678900012"
-                className="flex-1 px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 bg-brand-paper border border-status-info-bg rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), lookupSiret())}
               />
               <button
                 type="button"
                 onClick={lookupSiret}
                 disabled={siretLoading || !siretQuery.trim()}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-brand-cream rounded-[var(--radius-control)] text-sm font-medium hover:bg-brand-ink disabled:opacity-50 transition-colors"
               >
                 {siretLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -195,7 +195,7 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
             {siretResult && (
               <div
                 className={`mt-3 flex items-start gap-2 text-sm ${
-                  siretResult.status === "ok" ? "text-green-700" : "text-red-700"
+                  siretResult.status === "ok" ? "text-brand-pistachio-ink" : "text-brand-coral-ink"
                 }`}
               >
                 {siretResult.status === "ok" ? (
@@ -214,42 +214,42 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
 
           {/* Informations générales */}
           <section className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-sm font-semibold text-brand-ink">
               Informations générales
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Nom / Raison sociale *
                 </label>
                 <input
                   {...register("name")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="Société Dupont Productions"
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                  <p className="text-brand-coral-ink text-xs mt-1">{errors.name.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   SIRET
                 </label>
                 <input
                   {...register("siret")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="123 456 789 00012"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   N° TVA intracommunautaire
                 </label>
                 <input
                   {...register("tvaIntra")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="FR12345678901"
                 />
               </div>
@@ -258,78 +258,78 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
 
           {/* Coordonnées */}
           <section className="space-y-4">
-            <h3 className="text-sm font-semibold text-slate-900">Coordonnées</h3>
+            <h3 className="text-sm font-semibold text-brand-ink">Coordonnées</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Adresse *
                 </label>
                 <input
                   {...register("address")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="12 rue de la Paix"
                 />
                 {errors.address && (
-                  <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+                  <p className="text-brand-coral-ink text-xs mt-1">{errors.address.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Code postal
                 </label>
                 <input
                   {...register("postalCode")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="75001"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Ville
                 </label>
                 <input
                   {...register("city")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="Paris"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Email
                 </label>
                 <input
                   {...register("email")}
                   type="email"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="contact@societe.fr"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                  <p className="text-brand-coral-ink text-xs mt-1">{errors.email.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Téléphone
                 </label>
                 <input
                   {...register("phone")}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   placeholder="+33 1 23 45 67 89"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Notes internes
                 </label>
                 <textarea
                   {...register("notes")}
                   rows={2}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
                   placeholder="Informations complémentaires..."
                 />
               </div>
@@ -337,7 +337,7 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
           </section>
 
           {submitError && (
-            <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="flex items-start gap-2 px-4 py-3 bg-status-danger-bg border border-status-danger-bg rounded-[var(--radius-control)] text-sm text-brand-coral-ink">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{submitError}</span>
             </div>
@@ -345,12 +345,12 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
         </form>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50 shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-brand-rule bg-brand-surface shrink-0">
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors disabled:opacity-40"
+            className="px-4 py-2 text-sm font-medium text-brand-ink-muted hover:text-brand-ink transition-colors disabled:opacity-40"
           >
             Annuler
           </button>
@@ -358,7 +358,7 @@ export function ClientFormModal({ open, onClose, onCreated }: ClientFormModalPro
             type="submit"
             form="client-form-modal"
             disabled={submitting}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-brand-blue text-brand-cream text-sm font-medium rounded-[var(--radius-control)] hover:bg-brand-ink disabled:opacity-50 transition-colors"
           >
             {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
             {submitting ? "Création…" : "Créer le client"}

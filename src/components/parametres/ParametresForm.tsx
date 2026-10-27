@@ -160,32 +160,32 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
 
   const fieldProps = (disabled = false) => ({
     disabled: !canEdit || disabled,
-    className: `w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      !canEdit ? "bg-slate-50 text-slate-500 cursor-not-allowed" : ""
+    className: `w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue ${
+      !canEdit ? "bg-brand-surface text-brand-ink-muted cursor-not-allowed" : ""
     }`,
   });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {!canEdit && (
-        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
+        <div className="flex items-center gap-2 bg-status-partial-bg border border-status-partial-bg rounded-[var(--radius-control)] px-4 py-3 text-sm text-brand-ink">
           <Lock className="w-4 h-4 shrink-0" />
           Seul un administrateur peut modifier les paramètres de la société.
         </div>
       )}
 
       {/* Logo */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
         <div>
-          <h3 className="font-semibold text-slate-900">Logo de la société</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h3 className="font-semibold text-brand-ink">Logo de la société</h3>
+          <p className="text-xs text-brand-ink-muted mt-0.5">
             PNG ou JPG, max 2 Mo — affiché en haut à gauche sur tous les PDFs
           </p>
         </div>
 
         <div className="flex items-start gap-5">
           {/* Aperçu */}
-          <div className="w-28 h-16 border border-dashed border-slate-200 rounded-lg flex items-center justify-center bg-slate-50 shrink-0 overflow-hidden">
+          <div className="w-28 h-16 border border-dashed border-brand-rule rounded-[var(--radius-control)] flex items-center justify-center bg-brand-surface shrink-0 overflow-hidden">
             {logoUrl ? (
               <Image
                 src={logoUrl}
@@ -196,7 +196,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
                 unoptimized
               />
             ) : (
-              <span className="text-xs text-slate-400 text-center px-2">
+              <span className="text-xs text-brand-ink-muted text-center px-2">
                 Aperçu logo
               </span>
             )}
@@ -215,7 +215,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
               />
               <label
                 htmlFor="logo-upload"
-                className={`inline-flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors ${
+                className={`inline-flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-brand-surface cursor-pointer transition-colors ${
                   logoUploading ? "opacity-50 pointer-events-none" : ""
                 }`}
               >
@@ -231,7 +231,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
                 <button
                   type="button"
                   onClick={removeLogo}
-                  className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-brand-coral-ink hover:text-brand-coral transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                   Supprimer le logo
@@ -239,7 +239,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
               )}
 
               {logoError && (
-                <p className="text-red-500 text-xs">{logoError}</p>
+                <p className="text-brand-coral-ink text-xs">{logoError}</p>
               )}
             </div>
           )}
@@ -247,20 +247,20 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
       </div>
 
       {/* Identité société */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-        <h3 className="font-semibold text-slate-900">Identité de la société</h3>
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+        <h3 className="font-semibold text-brand-ink">Identité de la société</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Raison sociale *
             </label>
             <input {...register("name")} {...fieldProps()} />
             {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.name.message}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               SIRET *
             </label>
             <input
@@ -269,11 +269,11 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
               className={fieldProps().className + " font-mono"}
             />
             {errors.siret && (
-              <p className="text-red-500 text-xs mt-1">{errors.siret.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.siret.message}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               N° TVA intracommunautaire *
             </label>
             <input
@@ -283,31 +283,31 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Adresse *
             </label>
             <input {...register("address")} {...fieldProps()} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Code postal
             </label>
             <input {...register("postalCode")} {...fieldProps()} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Ville
             </label>
             <input {...register("city")} {...fieldProps()} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Email
             </label>
             <input {...register("email")} type="email" {...fieldProps()} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Téléphone
             </label>
             <input {...register("phone")} {...fieldProps()} />
@@ -316,11 +316,11 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
       </div>
 
       {/* Coordonnées bancaires */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-        <h3 className="font-semibold text-slate-900">Coordonnées bancaires</h3>
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+        <h3 className="font-semibold text-brand-ink">Coordonnées bancaires</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Nom de la banque
             </label>
             <input
@@ -330,7 +330,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               IBAN *
             </label>
             <input
@@ -342,11 +342,11 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
               placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
             />
             {errors.iban && (
-              <p className="text-red-500 text-xs mt-1">{errors.iban.message}</p>
+              <p className="text-brand-coral-ink text-xs mt-1">{errors.iban.message}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               BIC / SWIFT *
             </label>
             <input
@@ -360,12 +360,12 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
       </div>
 
       {/* Conditions de paiement */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
         <div>
-          <h3 className="font-semibold text-slate-900">
+          <h3 className="font-semibold text-brand-ink">
             Conditions de paiement
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-brand-ink-muted mt-0.5">
             Mention obligatoire art. L441-9 Code de commerce — apparaît sur
             toutes les factures
           </p>
@@ -374,17 +374,17 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
           {...register("conditionsPaiement")}
           rows={4}
           disabled={!canEdit}
-          className={`w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-            !canEdit ? "bg-slate-50 text-slate-500 cursor-not-allowed" : ""
+          className={`w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none ${
+            !canEdit ? "bg-brand-surface text-brand-ink-muted cursor-not-allowed" : ""
           }`}
         />
       </div>
 
       {/* Taux par défaut */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
         <div>
-          <h3 className="font-semibold text-slate-900">Taux par défaut</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h3 className="font-semibold text-brand-ink">Taux par défaut</h3>
+          <p className="text-xs text-brand-ink-muted mt-0.5">
             Ces taux sont appliqués à la création d&apos;un devis
             (surchargeables par devis ou par client)
           </p>
@@ -397,7 +397,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             { name: "defaultTauxMarge" as const, label: "Marge" },
           ].map(({ name, label }) => (
             <div key={name}>
-              <label className="block text-xs font-medium text-slate-500 mb-1">
+              <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                 {label}
               </label>
               <InputPct
@@ -410,17 +410,17 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             </div>
           ))}
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-brand-ink-muted">
           ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
         </p>
       </div>
 
       {/* Personnalisation */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-        <h3 className="font-semibold text-slate-900">Personnalisation</h3>
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+        <h3 className="font-semibold text-brand-ink">Personnalisation</h3>
         <div className="flex items-center gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Couleur principale
             </label>
             <div className="flex items-center gap-2">
@@ -428,9 +428,9 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
                 type="color"
                 {...register("primaryColor")}
                 disabled={!canEdit}
-                className="w-10 h-10 rounded cursor-pointer border border-slate-200"
+                className="w-10 h-10 rounded cursor-pointer border border-brand-rule"
               />
-              <span className="text-sm font-mono text-slate-500">
+              <span className="text-sm font-mono text-brand-ink-muted">
                 {primaryColor}
               </span>
             </div>
@@ -443,7 +443,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-brand-blue rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -453,7 +453,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             Enregistrer
           </button>
           {saved && (
-            <span className="text-sm text-green-600 font-medium">
+            <span className="text-sm text-brand-pistachio-ink font-medium">
               ✓ Paramètres sauvegardés
             </span>
           )}

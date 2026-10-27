@@ -118,7 +118,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
     <div className="flex gap-2 flex-wrap justify-end">
       <Link
         href={`/devis/${devis.id}/modifier`}
-        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink-muted hover:bg-brand-surface transition-colors"
       >
         <Pencil className="w-4 h-4" />
         Modifier
@@ -129,14 +129,14 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
           {/* Valider = feu vert interne (Vanda), sans envoi mail (#96). */}
           <button
             onClick={() => action("valider", "valider")}
-            className="flex items-center gap-2 px-3 py-2 bg-teal-600 rounded-lg text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-brand-pistachio rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-[#A4C64C] transition-colors"
           >
             {isLoading("valider") ?? <ShieldCheck className="w-4 h-4" />}
             Valider
           </button>
           <button
             onClick={() => action("envoyer", "envoyer")}
-            className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-status-info-bg rounded-[var(--radius-control)] text-sm font-medium text-brand-blue hover:bg-status-info-bg transition-colors"
           >
             {isLoading("envoyer") ?? <Send className="w-4 h-4" />}
             Envoyer
@@ -147,7 +147,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
       {devis.statut === "VALIDE" && (
         <button
           onClick={() => action("devalider", "devalider")}
-          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink-muted hover:bg-brand-surface transition-colors"
         >
           {isLoading("devalider") ?? <Undo2 className="w-4 h-4" />}
           Annuler la validation
@@ -158,14 +158,14 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
         <>
           <button
             onClick={() => action("accepter", "accepter")}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 rounded-lg text-sm font-medium text-white hover:bg-green-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 bg-brand-blue rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-ink transition-colors"
           >
             {isLoading("accepter") ?? <CheckCircle className="w-4 h-4" />}
             Marquer accepté
           </button>
           <button
             onClick={() => action("refuser", "refuser")}
-            className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-status-danger-bg rounded-[var(--radius-control)] text-sm font-medium text-brand-coral-ink hover:bg-status-danger-bg transition-colors"
           >
             {isLoading("refuser") ?? <XCircle className="w-4 h-4" />}
             Marquer refusé
@@ -186,7 +186,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
                 facturation.acompteBlockedReason ??
                 undefined
               }
-              className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-slate-100 text-xs font-medium text-slate-600"
+              className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-[var(--radius-control)] bg-brand-surface text-xs font-medium text-brand-ink-muted"
             >
               <Lock className="w-3.5 h-3.5" />
               {facturation.solde.exists ? "Facturé" : "Acompte facturé"}
@@ -200,14 +200,14 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
               value={acomptePct}
               onChange={(e) => setAcomptePct(Number(e.target.value))}
               disabled={!facturation.canCreateAcompte}
-              className="w-14 text-center border border-slate-200 rounded-l-lg px-2 py-2 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-14 text-center border border-brand-rule rounded-l-lg px-2 py-2 text-sm text-brand-ink focus:outline-none focus:ring-1 focus:ring-brand-blue disabled:opacity-40 disabled:cursor-not-allowed"
               title="Pourcentage de l'acompte"
             />
             <button
               onClick={() => facturation.canCreateAcompte && createFacture("ACOMPTE")}
               disabled={!facturation.canCreateAcompte}
               title={facturation.acompteBlockedReason ?? "Générer une facture d'acompte"}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 rounded-r-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
+              className="flex items-center gap-2 px-3 py-2 bg-brand-blue rounded-r-lg text-sm font-medium text-brand-cream hover:bg-brand-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-brand-blue"
             >
               {isLoading("facture-ACOMPTE") ?? <Receipt className="w-4 h-4" />}
               Acompte {acomptePct}%
@@ -217,7 +217,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
             onClick={() => facturation.canCreateSolde && createFacture("SOLDE")}
             disabled={!facturation.canCreateSolde}
             title={facturation.soldeBlockedReason ?? "Générer la facture de solde"}
-            className="flex items-center gap-2 px-3 py-2 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            className="flex items-center gap-2 px-3 py-2 border border-status-info-bg rounded-[var(--radius-control)] text-sm font-medium text-brand-blue hover:bg-status-info-bg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
             {isLoading("facture-SOLDE") ?? <Receipt className="w-4 h-4" />}
             Facture solde
@@ -228,7 +228,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
       {/* Motif du blocage en clair sous les boutons — un tooltip seul est
           invisible au tactile et trop discret pour expliquer la sortie. */}
       {facturation.isInvoiced && isDevisFacturable(devis.statut) && (
-        <p className="w-full text-right text-xs text-slate-500 order-last">
+        <p className="w-full text-right text-xs text-brand-ink-muted order-last">
           {facturation.soldeBlockedReason ?? facturation.acompteBlockedReason}
         </p>
       )}
@@ -240,7 +240,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
         onClick={dupliquer}
         disabled={loading === "dupliquer"}
         title="Créer un brouillon copié à partir de ce devis"
-        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-brand-surface transition-colors disabled:opacity-50"
       >
         {isLoading("dupliquer") ?? <Copy className="w-4 h-4" />}
         Dupliquer
@@ -248,7 +248,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
 
       <button
         onClick={() => setShowPdfModal(true)}
-        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-brand-surface transition-colors"
       >
         <FileDown className="w-4 h-4" />
         PDF
@@ -261,7 +261,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
         onClick={() => canDelete && setShowDeleteConfirm(true)}
         disabled={!canDelete}
         title={deleteDisabledReason ?? "Supprimer ce devis"}
-        className="flex items-center gap-2 px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        className="flex items-center gap-2 px-3 py-2 border border-status-danger-bg rounded-[var(--radius-control)] text-sm font-medium text-brand-coral-ink hover:bg-status-danger-bg transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         <Trash2 className="w-4 h-4" />
         Supprimer
@@ -278,37 +278,37 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
 
       {showDeleteConfirm && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/40 backdrop-blur-sm"
           onClick={(e) =>
             e.target === e.currentTarget &&
             loading !== "delete" &&
             setShowDeleteConfirm(false)
           }
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+          <div className="bg-brand-paper rounded-[var(--radius-card)] w-full max-w-md mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-brand-rule flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-status-danger-bg flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-brand-coral-ink" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-slate-900">
+                <h2 className="text-base font-semibold text-brand-ink">
                   Supprimer ce devis ?
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-brand-ink-muted mt-1">
                   Êtes-vous sûr de vouloir supprimer le devis{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-brand-ink">
                     {devis.numero ?? "(brouillon)"}
                   </span>{" "}
                   ? Cette action est définitive.
                 </p>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 bg-brand-surface">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={loading === "delete"}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors disabled:opacity-40"
+                className="px-4 py-2 text-sm font-medium text-brand-ink-muted hover:text-brand-ink transition-colors disabled:opacity-40"
               >
                 Annuler
               </button>
@@ -316,7 +316,7 @@ export function DevisActions({ devis, facturation }: DevisActionsProps) {
                 type="button"
                 onClick={deleteDevis}
                 disabled={loading === "delete"}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-brand-coral text-brand-cream text-sm font-medium rounded-[var(--radius-control)] hover:bg-brand-coral-ink disabled:opacity-50 transition-colors"
               >
                 {loading === "delete" && (
                   <Loader2 className="w-4 h-4 animate-spin" />

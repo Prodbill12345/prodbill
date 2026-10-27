@@ -91,16 +91,16 @@ export function DocumentsSection({ canEdit }: DocumentsSectionProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6">
+    <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">Documents joints</h2>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h2 className="text-base font-semibold text-brand-ink">Documents joints</h2>
+          <p className="text-sm text-brand-ink-muted mt-0.5">
             PDF réutilisables (CGV, RGPD…) à joindre lors de la génération de PDF.
           </p>
         </div>
         {canEdit && (
-          <label className={`flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
+          <label className={`flex items-center gap-2 px-3 py-2 bg-brand-blue text-brand-cream text-sm font-medium rounded-[var(--radius-control)] hover:bg-brand-ink transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
             {uploading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
@@ -120,27 +120,27 @@ export function DocumentsSection({ canEdit }: DocumentsSectionProps) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+          <Loader2 className="w-5 h-5 animate-spin text-brand-ink-muted" />
         </div>
       ) : documents.length === 0 ? (
-        <div className="text-center py-8 text-slate-400">
+        <div className="text-center py-8 text-brand-ink-muted">
           <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
           <p className="text-sm">Aucun document enregistré</p>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-50">
+        <ul className="divide-y divide-brand-rule">
           {documents.map((doc) => (
             <li key={doc.id} className="flex items-center gap-3 py-3">
-              <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <FileText className="w-4 h-4 text-brand-ink-muted flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{doc.name}</p>
-                <p className="text-xs text-slate-400">Ajouté le {formatDate(doc.createdAt)}</p>
+                <p className="text-sm font-medium text-brand-ink truncate">{doc.name}</p>
+                <p className="text-xs text-brand-ink-muted">Ajouté le {formatDate(doc.createdAt)}</p>
               </div>
               {canEdit && (
                 <button
                   onClick={() => handleDelete(doc.id)}
                   disabled={deleting === doc.id}
-                  className="flex-shrink-0 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                  className="flex-shrink-0 text-brand-ink-muted hover:text-brand-coral transition-colors disabled:opacity-40"
                   title="Supprimer"
                 >
                   {deleting === doc.id ? (

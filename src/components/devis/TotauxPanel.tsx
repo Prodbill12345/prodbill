@@ -59,10 +59,10 @@ export function TotauxPanel({ result, taux, tauxTva }: TotauxPanelProps) {
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100">
-        <h3 className="font-semibold text-slate-900">Récapitulatif</h3>
-        <p className="text-xs text-slate-400 mt-0.5">
+    <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+      <div className="px-5 py-4 border-b border-brand-rule">
+        <h3 className="font-semibold text-brand-ink">Récapitulatif</h3>
+        <p className="text-xs text-brand-ink-muted mt-0.5">
           CS Artistes exclus de la base marge
         </p>
       </div>
@@ -70,7 +70,7 @@ export function TotauxPanel({ result, taux, tauxTva }: TotauxPanelProps) {
         {rows.map((row, i) => (
           <div key={i}>
             {row.separator && i > 0 && (
-              <div className="border-t border-slate-100 my-2" />
+              <div className="border-t border-brand-rule my-2" />
             )}
             <div
               className={`flex items-center justify-between py-1 ${
@@ -80,10 +80,10 @@ export function TotauxPanel({ result, taux, tauxTva }: TotauxPanelProps) {
               <span
                 className={`text-sm ${
                   row.highlight
-                    ? "text-slate-900"
+                    ? "text-brand-ink"
                     : row.sub
-                    ? "text-slate-500 pl-3"
-                    : "text-slate-700"
+                    ? "text-brand-ink-muted pl-3"
+                    : "text-brand-ink"
                 }`}
               >
                 {row.label}
@@ -91,14 +91,14 @@ export function TotauxPanel({ result, taux, tauxTva }: TotauxPanelProps) {
               <span
                 className={`text-sm tabular-nums ${
                   row.highlight
-                    ? "text-slate-900"
+                    ? "text-brand-ink"
                     : row.negative
-                    ? "text-red-600"
-                    : "text-slate-700"
+                    ? "text-brand-coral-ink"
+                    : "text-brand-ink"
                 }`}
               >
                 {row.value === 0 && row.sub ? (
-                  <span className="text-slate-300">—</span>
+                  <span className="text-brand-ink-subtle">—</span>
                 ) : row.negative ? (
                   `-${formatEuros(row.value)}`
                 ) : (

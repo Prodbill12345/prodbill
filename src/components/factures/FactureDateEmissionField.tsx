@@ -51,9 +51,9 @@ export function FactureDateEmissionField({
   }
 
   return (
-    <div className="space-y-2 mt-2 pt-2 border-t border-slate-100">
+    <div className="space-y-2 mt-2 pt-2 border-t border-brand-rule">
       <div className="flex items-center gap-2">
-        <label className="text-xs font-medium text-slate-400 shrink-0">
+        <label className="text-xs font-medium text-brand-ink-muted shrink-0">
           Date d&apos;émission
         </label>
         <input
@@ -61,12 +61,12 @@ export function FactureDateEmissionField({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onBlur={(e) => handleSave(e.target.value)}
-          className="px-2 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+          className="px-2 py-1 text-sm border border-brand-rule rounded-md focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-paper"
         />
       </div>
       {isPostEmission && (
-        <div className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
-          <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0 text-amber-600" />
+        <div className="flex items-start gap-1.5 text-[11px] text-brand-ink bg-status-partial-bg border border-status-partial-bg rounded-md px-2 py-1.5">
+          <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0 text-brand-ink" />
           <span>
             Cette facture est <strong>{statut.toLowerCase().replace("_", " ")}</strong>.
             Modifier la date d&apos;émission peut violer l&apos;immutabilité légale

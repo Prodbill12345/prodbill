@@ -78,26 +78,26 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
   return (
     /* Overlay */
     <div
-      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-brand-ink/40 z-50 flex items-center justify-center p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-rule">
           <div>
-            <h2 className="font-semibold text-slate-900">
+            <h2 className="font-semibold text-brand-ink">
               Enregistrer un paiement
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-brand-ink-muted mt-0.5">
               Facture {formatFactureNumero(facture)} — Reste dû :{" "}
-              <span className="font-medium text-slate-700">
+              <span className="font-medium text-brand-ink">
                 {formatEuros(facture.resteAPayer)}
               </span>
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-brand-ink-muted hover:text-brand-ink transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -107,7 +107,7 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
         <form onSubmit={submit} className="px-6 py-5 space-y-4">
           {/* Montant */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Montant reçu (TTC) *
             </label>
             <div className="relative">
@@ -119,15 +119,15 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
                 value={montant}
                 onChange={(e) => setMontant(e.target.value)}
                 required
-                className="w-full pl-3 pr-10 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-3 pr-10 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 placeholder="0,00"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-ink-muted text-sm">
                 €
               </span>
             </div>
             {parseFloat(montant) >= facture.resteAPayer && (
-              <p className="text-xs text-green-600 mt-1 font-medium">
+              <p className="text-xs text-brand-pistachio-ink mt-1 font-medium">
                 ✓ Soldera intégralement la facture
               </p>
             )}
@@ -135,7 +135,7 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
 
           {/* Date */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Date de réception *
             </label>
             <input
@@ -144,19 +144,19 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
               onChange={(e) => setDate(e.target.value)}
               required
               max={today}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
           </div>
 
           {/* Mode */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Mode de paiement *
             </label>
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-3 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue bg-brand-paper"
             >
               {MODES.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -168,34 +168,34 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
 
           {/* Référence */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Référence bancaire
             </label>
             <input
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               placeholder="REF-12345 (optionnel)"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-brand-ink mb-1">
               Notes
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
               placeholder="Informations complémentaires (optionnel)"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+            <p className="text-sm text-brand-coral-ink bg-status-danger-bg border border-status-danger-bg rounded-[var(--radius-control)] px-3 py-2">
               {error}
             </p>
           )}
@@ -204,14 +204,14 @@ export function PaiementModal({ facture, onClose, onSuccess }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex-1 px-4 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink hover:bg-brand-surface transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-blue rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               Enregistrer

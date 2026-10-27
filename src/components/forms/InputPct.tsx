@@ -39,11 +39,11 @@ export const InputPct = forwardRef<HTMLInputElement, InputPctProps>(
           disabled={disabled}
           aria-invalid={invalid || undefined}
           className={cn(
-            "w-full pl-3 pr-8 py-2 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "w-full pl-3 pr-8 py-2 border rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue",
             invalid
-              ? "border-red-300 focus:ring-red-500"
-              : "border-slate-200",
-            disabled && "bg-slate-50 text-slate-500 cursor-not-allowed",
+              ? "border-status-danger-bg focus:ring-brand-coral"
+              : "border-brand-rule",
+            disabled && "bg-brand-surface text-brand-ink-muted cursor-not-allowed",
             className
           )}
           {...rest}
@@ -51,7 +51,7 @@ export const InputPct = forwardRef<HTMLInputElement, InputPctProps>(
         <span
           className={cn(
             "absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium pointer-events-none select-none",
-            disabled ? "text-slate-300" : "text-slate-400"
+            disabled ? "text-brand-ink-subtle" : "text-brand-ink-muted"
           )}
         >
           %

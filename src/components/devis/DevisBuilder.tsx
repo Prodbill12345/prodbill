@@ -443,23 +443,23 @@ export function DevisBuilder({
       {/* Garde-fou : devis Caleson import historique non encore réparé.
           Voir src/lib/historical-import.ts + BUG #4. Non bloquant. */}
       {historicalImportWarning && (
-        <div className="col-span-3 sticky top-0 z-30 bg-amber-50 border border-amber-300 rounded-xl px-5 py-4 shadow-sm">
+        <div className="col-span-3 sticky top-0 z-30 bg-status-partial-bg border border-status-partial-bg rounded-[var(--radius-card)] px-5 py-4">
           <div className="flex items-start gap-3">
             <AlertTriangle
-              className="w-5 h-5 text-amber-600 shrink-0 mt-0.5"
+              className="w-5 h-5 text-brand-ink shrink-0 mt-0.5"
               strokeWidth={2}
             />
-            <div className="flex-1 text-sm text-amber-900">
+            <div className="flex-1 text-sm text-brand-ink">
               <p className="font-semibold mb-1">
                 Devis issu de l&apos;import historique
               </p>
-              <p className="text-amber-800 leading-relaxed">
+              <p className="text-brand-ink leading-relaxed">
                 Ce devis a été importé depuis votre ancien système et n&apos;a
                 jamais été modifié depuis. Ses composantes FG / Marge peuvent
                 ne pas correspondre aux taux affichés. Avant toute
                 modification :
               </p>
-              <ul className="list-disc ml-5 mt-2 space-y-0.5 text-amber-800">
+              <ul className="list-disc ml-5 mt-2 space-y-0.5 text-brand-ink">
                 <li>
                   Vérifie que les taux FG et Marge correspondent bien au PDF
                   d&apos;origine
@@ -480,12 +480,12 @@ export function DevisBuilder({
       {/* Colonne principale (2/3) */}
       <div className="col-span-2 space-y-5">
         {/* En-tête du devis */}
-        <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
-          <h3 className="font-semibold text-slate-900">Informations générales</h3>
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
+          <h3 className="font-semibold text-brand-ink">Informations générales</h3>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Client *
               </label>
               {(() => {
@@ -506,7 +506,7 @@ export function DevisBuilder({
                       }
                       clientIdField.onChange(e);
                     }}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue bg-brand-paper"
                   >
                     <option value="">Sélectionner un client...</option>
                     {sortedClients.map((c) => (
@@ -520,47 +520,47 @@ export function DevisBuilder({
                 );
               })()}
               {errors.clientId && (
-                <p className="text-red-500 text-xs mt-1">{errors.clientId.message}</p>
+                <p className="text-brand-coral-ink text-xs mt-1">{errors.clientId.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Date d&apos;émission
               </label>
               <input
                 type="date"
                 {...register("dateEmission")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Validité jusqu&apos;au
               </label>
               <input
                 type="date"
                 {...register("dateValidite")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Date de la séance
               </label>
               <input
                 type="date"
                 {...register("dateSeance")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             {/* Période d'exploitation (ticket #69). Sous-section dédiée
                 en col-span-2 avec 3 inputs en grille interne (stack mobile). */}
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Période d&apos;exploitation
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -572,11 +572,11 @@ export function DevisBuilder({
                     max="2100-12-31"
                     placeholder="Du"
                     aria-label="Date de début d'exploitation"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
-                  <p className="text-xs text-slate-400 mt-0.5">Du</p>
+                  <p className="text-xs text-brand-ink-muted mt-0.5">Du</p>
                   {"periodeExploitationDebut" in errors && errors.periodeExploitationDebut && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-brand-coral-ink text-xs mt-1">
                       {errors.periodeExploitationDebut.message as string}
                     </p>
                   )}
@@ -589,11 +589,11 @@ export function DevisBuilder({
                     max="2100-12-31"
                     placeholder="Au"
                     aria-label="Date de fin d'exploitation"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
-                  <p className="text-xs text-slate-400 mt-0.5">Au</p>
+                  <p className="text-xs text-brand-ink-muted mt-0.5">Au</p>
                   {"periodeExploitationFin" in errors && errors.periodeExploitationFin && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-brand-coral-ink text-xs mt-1">
                       {errors.periodeExploitationFin.message as string}
                     </p>
                   )}
@@ -605,72 +605,72 @@ export function DevisBuilder({
                     placeholder="Libellé (ex: Web Global + TV France)"
                     maxLength={255}
                     aria-label="Libellé de la période d'exploitation"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
-                  <p className="text-xs text-slate-400 mt-0.5">Libellé (optionnel)</p>
+                  <p className="text-xs text-brand-ink-muted mt-0.5">Libellé (optionnel)</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 mt-1.5">
+              <p className="text-xs text-brand-ink-muted mt-1.5">
                 Optionnel — durée pendant laquelle le client peut exploiter la production.
               </p>
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Objet du devis *
               </label>
               <input
                 {...register("objet")}
                 placeholder="Ex : Production du spot TV Marque X"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
               {errors.objet && (
-                <p className="text-red-500 text-xs mt-1">{errors.objet.message}</p>
+                <p className="text-brand-coral-ink text-xs mt-1">{errors.objet.message}</p>
               )}
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Description du projet
               </label>
               <textarea
                 {...register("description")}
                 rows={3}
                 placeholder="Décrivez le projet, le contexte, les détails importants..."
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
               />
             </div>
 
             {/* Champs d'identification */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Nom du projet
               </label>
               <input
                 {...register("nomProjet")}
                 placeholder="Ex : Campagne TV Été 2025"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Numéro de devis
               </label>
               <input
                 {...register("refDevis")}
                 placeholder="Ex : DEV-2025-001"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
+              <label className="block text-sm font-medium text-brand-ink mb-1">
                 Année
               </label>
               <select
                 {...register("annee")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue bg-brand-paper"
               >
                 <option value="">—</option>
                 {[2023, 2024, 2025, 2026, 2027].map((y) => (
@@ -699,8 +699,8 @@ export function DevisBuilder({
         </div>
 
         {/* Taux */}
-        <div className="bg-white rounded-xl border border-slate-100 p-6">
-          <h3 className="font-semibold text-slate-900 mb-4">Taux appliqués</h3>
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6">
+          <h3 className="font-semibold text-brand-ink mb-4">Taux appliqués</h3>
           <div className="grid grid-cols-5 gap-3">
             {[
               { name: "tauxCsComedien" as const, label: "CS Comédiens" },
@@ -709,7 +709,7 @@ export function DevisBuilder({
               { name: "tauxMarge" as const, label: "Marge" },
             ].map(({ name, label }) => (
               <div key={name}>
-                <label className="block text-xs font-medium text-slate-500 mb-1">
+                <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                   {label}
                 </label>
                 <InputPct
@@ -723,7 +723,7 @@ export function DevisBuilder({
             {/* TVA — dropdown (taux fixes, pas un input libre). Préserve la
                 valeur courante si non-standard via une 5e option dynamique. */}
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1">
+              <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                 TVA
               </label>
               <TvaDropdown
@@ -732,25 +732,25 @@ export function DevisBuilder({
               />
             </div>
           </div>
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-brand-ink-muted mt-2">
             ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
           </p>
 
           {/* Mention TVA conditionnelle — affichée UNIQUEMENT si TVA=0 */}
           {Number(watchedValues.tauxTva) === 0 && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <label className="block text-xs font-medium text-slate-500 mb-1">
+            <div className="mt-4 pt-4 border-t border-brand-rule">
+              <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                 Mention TVA (affichée sur le PDF)
               </label>
               <input
                 type="text"
                 {...register("tvaMention")}
                 placeholder="Art. 293 B du CGI"
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
-              <p className="text-xs text-slate-400 mt-1">
-                Par défaut : <code className="bg-slate-50 px-1 rounded">Art. 293 B du CGI</code> (franchise en base).
-                Modifiable : étranger UE = <code className="bg-slate-50 px-1 rounded">Art. 196 directive 2006/112/CE</code>, etc.
+              <p className="text-xs text-brand-ink-muted mt-1">
+                Par défaut : <code className="bg-brand-surface px-1 rounded">Art. 293 B du CGI</code> (franchise en base).
+                Modifiable : étranger UE = <code className="bg-brand-surface px-1 rounded">Art. 196 directive 2006/112/CE</code>, etc.
               </p>
             </div>
           )}
@@ -781,7 +781,7 @@ export function DevisBuilder({
             onClick={() =>
               appendSection({ titre: "", lignes: [] })
             }
-            className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-blue-300 hover:text-blue-500 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 border-2 border-dashed border-brand-rule rounded-[var(--radius-card)] text-sm text-brand-ink-muted hover:border-status-info-bg hover:text-brand-blue transition-colors flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Ajouter une section
@@ -789,11 +789,11 @@ export function DevisBuilder({
         </div>
 
         {/* Remise exceptionnelle */}
-        <div className="bg-white rounded-xl border border-slate-100 p-6">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6">
+          <label className="block text-sm font-medium text-brand-ink mb-1">
             Remise exceptionnelle
           </label>
-          <p className="text-xs text-slate-400 mb-3">Montant déduit du Total HT — TVA et TTC recalculés</p>
+          <p className="text-xs text-brand-ink-muted mb-3">Montant déduit du Total HT — TVA et TTC recalculés</p>
           <div className="flex items-center gap-2 max-w-xs">
             <input
               {...register("remise")}
@@ -801,21 +801,21 @@ export function DevisBuilder({
               min="0"
               step="0.01"
               placeholder="0,00"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
             />
-            <span className="text-sm text-slate-500 shrink-0">€</span>
+            <span className="text-sm text-brand-ink-muted shrink-0">€</span>
           </div>
         </div>
 
         {/* Notes */}
-        <div className="bg-white rounded-xl border border-slate-100 p-6">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6">
+          <label className="block text-sm font-medium text-brand-ink mb-2">
             Notes / Conditions particulières
           </label>
           <textarea
             {...register("notes")}
             rows={4}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
             placeholder="Conditions particulières, délais, informations complémentaires..."
           />
         </div>
@@ -825,13 +825,13 @@ export function DevisBuilder({
           <button
             type="button"
             onClick={() => setShowTemplateModal(true)}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+            className="flex items-center gap-2 text-sm text-brand-ink-muted hover:text-brand-blue transition-colors"
           >
             <BookmarkPlus className="w-4 h-4" />
             Sauvegarder comme modèle
           </button>
           {templateSaved && (
-            <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+            <span className="flex items-center gap-1.5 text-sm text-brand-pistachio-ink font-medium">
               <CheckCircle2 className="w-4 h-4" />
               Modèle enregistré
             </span>
@@ -841,26 +841,26 @@ export function DevisBuilder({
 
       {/* Modal — Sauvegarder comme modèle */}
       {showTemplateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/40 backdrop-blur-sm">
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule w-full max-w-md mx-4 p-6 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">Sauvegarder comme modèle</h2>
+              <h2 className="text-lg font-semibold text-brand-ink">Sauvegarder comme modèle</h2>
               <button
                 type="button"
                 onClick={() => setShowTemplateModal(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-brand-ink-muted hover:text-brand-ink transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-brand-ink-muted">
               La structure des sections et lignes sera sauvegardée <strong>sans les prix</strong>.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-brand-ink mb-1">
                   Nom du modèle *
                 </label>
                 <input
@@ -868,21 +868,21 @@ export function DevisBuilder({
                   value={templateName}
                   onChange={(e) => setTemplateName(e.target.value)}
                   placeholder="Ex : Spot TV 30s avec comédien"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Description <span className="text-slate-400 font-normal">(optionnel)</span>
+                <label className="block text-sm font-medium text-brand-ink mb-1">
+                  Description <span className="text-brand-ink-muted font-normal">(optionnel)</span>
                 </label>
                 <textarea
                   value={templateDesc}
                   onChange={(e) => setTemplateDesc(e.target.value)}
                   placeholder="Décrivez les cas d'usage de ce modèle..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
                 />
               </div>
 
@@ -891,14 +891,14 @@ export function DevisBuilder({
                   type="checkbox"
                   checked={templateShared}
                   onChange={(e) => setTemplateShared(e.target.checked)}
-                  className="w-4 h-4 rounded accent-blue-600"
+                  className="w-4 h-4 rounded accent-brand-blue"
                 />
                 <div>
-                  <span className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-sm font-medium text-brand-ink flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-brand-ink-muted" />
                     Partager avec mon équipe
                   </span>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-brand-ink-muted mt-0.5">
                     Visible par tous les membres de votre société
                   </p>
                 </div>
@@ -909,7 +909,7 @@ export function DevisBuilder({
               <button
                 type="button"
                 onClick={() => setShowTemplateModal(false)}
-                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                className="flex-1 px-4 py-2.5 border border-brand-rule rounded-[var(--radius-control)] text-sm font-medium text-brand-ink-muted hover:bg-brand-surface transition-colors"
               >
                 Annuler
               </button>
@@ -917,7 +917,7 @@ export function DevisBuilder({
                 type="button"
                 onClick={handleSaveTemplate}
                 disabled={!templateName.trim() || savingTemplate}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 rounded-lg text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-blue rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors"
               >
                 {savingTemplate ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookmarkPlus className="w-4 h-4" />}
                 Enregistrer
@@ -934,7 +934,7 @@ export function DevisBuilder({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 rounded-xl text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-brand-blue rounded-[var(--radius-card)] text-sm font-semibold text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors"
         >
           {submitting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -1103,23 +1103,23 @@ function SectionBlock({
     new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+    <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
       {/* En-tête section */}
-      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-slate-50">
-        <GripVertical className="w-4 h-4 text-slate-300 cursor-grab" />
+      <div className="flex items-center gap-3 px-5 py-3.5 border-b border-brand-rule">
+        <GripVertical className="w-4 h-4 text-brand-ink-subtle cursor-grab" />
         <input
           {...register(`sections.${sectionIndex}.titre`)}
-          className="flex-1 font-semibold text-slate-900 bg-transparent focus:outline-none focus:ring-0 placeholder:text-slate-400 text-sm"
+          className="flex-1 font-semibold text-brand-ink bg-transparent focus:outline-none focus:ring-0 placeholder:text-brand-ink-muted text-sm"
           placeholder="Titre de la section"
         />
-        <span className="text-sm font-medium text-slate-500 tabular-nums">
+        <span className="text-sm font-medium text-brand-ink-muted tabular-nums">
           {fmtEur(sectionTotal)}
         </span>
         {canRemove && (
           <button
             type="button"
             onClick={onRemove}
-            className="text-slate-300 hover:text-red-500 transition-colors"
+            className="text-brand-ink-subtle hover:text-brand-coral transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -1127,7 +1127,7 @@ function SectionBlock({
         <button
           type="button"
           onClick={onToggle}
-          className="text-slate-400 hover:text-slate-600 transition-colors"
+          className="text-brand-ink-muted hover:text-brand-ink transition-colors"
         >
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
@@ -1138,16 +1138,16 @@ function SectionBlock({
           {/* En-tête colonnes */}
           {fields.length > 0 && (
             <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 px-2 mb-1">
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-brand-ink-muted font-medium">
                 Libellé
                 {agentEnabled && sourceFields.length > 0 && (
-                  <span className="ml-2 text-amber-400 font-normal">✓ sélection agent</span>
+                  <span className="ml-2 text-brand-coral font-normal">✓ sélection agent</span>
                 )}
               </span>
-              <span className="text-xs text-slate-400 font-medium">Tag</span>
-              <span className="text-xs text-slate-400 font-medium text-right">Qté</span>
-              <span className="text-xs text-slate-400 font-medium text-right">P.U. HT</span>
-              <span className="text-xs text-slate-400 font-medium text-right">Total</span>
+              <span className="text-xs text-brand-ink-muted font-medium">Tag</span>
+              <span className="text-xs text-brand-ink-muted font-medium text-right">Qté</span>
+              <span className="text-xs text-brand-ink-muted font-medium text-right">P.U. HT</span>
+              <span className="text-xs text-brand-ink-muted font-medium text-right">Total</span>
               <span />
             </div>
           )}
@@ -1167,27 +1167,27 @@ function SectionBlock({
               return (
                 <div
                   key={field.id}
-                  className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center rounded-lg border border-amber-200 bg-amber-50 px-2 py-2"
+                  className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center rounded-[var(--radius-control)] border border-status-partial-bg bg-status-partial-bg px-2 py-2"
                 >
                   {/* hidden inputs pour que react-hook-form conserve les valeurs */}
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.tag`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.quantite`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.prixUnit`)} />
-                  <span className="text-sm text-amber-800 font-medium truncate px-0.5">
+                  <span className="text-sm text-brand-ink font-medium truncate px-0.5">
                     {ligne.libelle || "Agent Voix Off (10%)"}
                   </span>
-                  <span className="inline-flex items-center justify-center bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center justify-center bg-status-partial-bg text-brand-ink text-xs font-medium px-2 py-0.5 rounded-full">
                     Agent (10%)
                   </span>
-                  <span className="text-sm text-right tabular-nums text-amber-600">1</span>
-                  <span className="text-sm text-right tabular-nums text-amber-800 font-semibold">
+                  <span className="text-sm text-right tabular-nums text-brand-ink">1</span>
+                  <span className="text-sm text-right tabular-nums text-brand-ink font-semibold">
                     {new Intl.NumberFormat("fr-FR", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     }).format(pu)}{" €"}
                   </span>
-                  <span className="text-sm text-right tabular-nums text-amber-800 font-semibold">
+                  <span className="text-sm text-right tabular-nums text-brand-ink font-semibold">
                     {new Intl.NumberFormat("fr-FR", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -1196,7 +1196,7 @@ function SectionBlock({
                   <button
                     type="button"
                     onClick={() => removeLigne(li)}
-                    className="text-amber-300 hover:text-red-500 transition-colors flex items-center justify-center"
+                    className="text-brand-coral hover:text-brand-coral transition-colors flex items-center justify-center"
                     title="Retirer la ligne Agent"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -1227,7 +1227,7 @@ function SectionBlock({
                             return next;
                           })
                         }
-                        className="w-3.5 h-3.5 shrink-0 cursor-pointer accent-amber-500"
+                        className="w-3.5 h-3.5 shrink-0 cursor-pointer accent-brand-blue"
                         title="Inclure dans le calcul Agent Voix Off"
                       />
                     ) : (
@@ -1237,7 +1237,7 @@ function SectionBlock({
                     <input
                       {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)}
                       placeholder="Description de la prestation"
-                      className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 min-w-0 px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                     />
                     {/* Toggle horsMarge — exclut la ligne du calcul Marge/FG.
                         Discret par défaut, orange quand activé. Tickets #66-68. */}
@@ -1248,13 +1248,13 @@ function SectionBlock({
                       <input
                         type="checkbox"
                         {...register(`sections.${sectionIndex}.lignes.${li}.horsMarge`)}
-                        className="w-3 h-3 cursor-pointer accent-orange-500 shrink-0"
+                        className="w-3 h-3 cursor-pointer accent-brand-coral shrink-0"
                       />
                       <span
                         className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
                           ligne.horsMarge
-                            ? "text-orange-600"
-                            : "text-slate-300 group-hover:text-slate-500"
+                            ? "text-brand-coral-ink"
+                            : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
                         }`}
                       >
                         hors marge
@@ -1277,13 +1277,13 @@ function SectionBlock({
                         <input
                           type="checkbox"
                           {...register(`sections.${sectionIndex}.lignes.${li}.horsCS`)}
-                          className="w-3 h-3 cursor-pointer accent-rose-500 shrink-0"
+                          className="w-3 h-3 cursor-pointer accent-brand-ink shrink-0"
                         />
                         <span
                           className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
                             ligne.horsCS
-                              ? "text-rose-600"
-                              : "text-slate-300 group-hover:text-slate-500"
+                              ? "text-brand-coral-ink"
+                              : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
                           }`}
                         >
                           hors cs
@@ -1294,7 +1294,7 @@ function SectionBlock({
                   {tagValue === "ARTISTE" && comediens.length > 0 && (
                     <select
                       {...register(`sections.${sectionIndex}.lignes.${li}.comedienId`)}
-                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
+                      className="ml-5 px-2 py-0.5 border border-brand-rule rounded-md text-xs text-brand-ink-muted focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-surface"
                     >
                       <option value="">Comédien (optionnel)</option>
                       {comediens.map((c) => (
@@ -1307,7 +1307,7 @@ function SectionBlock({
                   {tagValue === "ARTISTE" && agents.length > 0 && (
                     <select
                       {...register(`sections.${sectionIndex}.lignes.${li}.agentId`)}
-                      className="ml-5 px-2 py-0.5 border border-slate-100 rounded-md text-xs text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-300 bg-slate-50"
+                      className="ml-5 px-2 py-0.5 border border-brand-rule rounded-md text-xs text-brand-ink-muted focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-surface"
                     >
                       <option value="">Associer un agent (optionnel)</option>
                       {agents.map((a) => (
@@ -1326,9 +1326,9 @@ function SectionBlock({
                   render={({ field: f }) => (
                     <select
                       {...f}
-                      className={`px-2 py-1.5 border rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`px-2 py-1.5 border rounded-[var(--radius-control)] text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue ${
                         LIGNE_TAG_COLORS[f.value as keyof typeof LIGNE_TAG_COLORS] ??
-                        "border-slate-200"
+                        "border-brand-rule"
                       }`}
                     >
                       {TAGS.map((t) => (
@@ -1350,16 +1350,16 @@ function SectionBlock({
                   step="any"
                   min="0"
                   {...register(`sections.${sectionIndex}.lignes.${li}.quantite`)}
-                  className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-2 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   {...register(`sections.${sectionIndex}.lignes.${li}.prixUnit`)}
-                  className="px-2 py-1.5 border border-slate-200 rounded-lg text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-2 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm text-right font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 />
-                <span className="text-sm text-right tabular-nums text-slate-600 font-medium">
+                <span className="text-sm text-right tabular-nums text-brand-ink-muted font-medium">
                   {/*
                     Affiche "0,00 €" si l'utilisateur a explicitement saisi
                     une valeur (y compris 0 — cas "ligne offerte" Réalisation,
@@ -1376,14 +1376,14 @@ function SectionBlock({
                         maximumFractionDigits: 2,
                       }).format(total)
                     ) : (
-                      <span className="text-slate-300">—</span>
+                      <span className="text-brand-ink-subtle">—</span>
                     );
                   })()}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeLigne(li)}
-                  className="text-slate-200 hover:text-red-500 transition-colors flex items-center justify-center"
+                  className="text-brand-ink-subtle hover:text-brand-coral transition-colors flex items-center justify-center"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -1392,8 +1392,8 @@ function SectionBlock({
               {/* ── Indexation annuelle (ARTISTE / MUSIQUE seulement) ── */}
               {isIndexable && (
                 indexedLineIds.has(field.id) ? (
-                  <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center ml-1 pl-3 border-l-2 border-violet-200 -mt-0.5 pb-0.5">
-                    <span className="text-xs text-violet-600 font-medium">
+                  <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center ml-1 pl-3 border-l-2 border-brand-rule -mt-0.5 pb-0.5">
+                    <span className="text-xs text-brand-ink-muted font-medium">
                       {tagValue === "ARTISTE" ? "Indexation annuelle artiste" : "Indexation annuelle musique"}
                     </span>
                     <div className="flex items-center gap-1">
@@ -1403,15 +1403,15 @@ function SectionBlock({
                         max="100"
                         step="0.1"
                         {...register(`sections.${sectionIndex}.lignes.${li}.tauxIndexation`)}
-                        className="w-16 px-2 py-1 border border-violet-200 rounded-lg text-xs text-right focus:outline-none focus:ring-1 focus:ring-violet-400"
+                        className="w-16 px-2 py-1 border border-brand-rule rounded-[var(--radius-control)] text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand-blue"
                       />
-                      <span className="text-xs text-violet-400">%</span>
+                      <span className="text-xs text-brand-ink-muted">%</span>
                     </div>
                     <span />{/* Qté */}
                     <span />{/* P.U. */}
-                    <span className="text-xs text-right tabular-nums text-violet-600 font-medium">
+                    <span className="text-xs text-right tabular-nums text-brand-ink-muted font-medium">
                       {indexationMontant === 0
-                        ? <span className="text-slate-300">—</span>
+                        ? <span className="text-brand-ink-subtle">—</span>
                         : fmtEur(indexationMontant)
                       }
                     </span>
@@ -1421,7 +1421,7 @@ function SectionBlock({
                         setValue(`sections.${sectionIndex}.lignes.${li}.tauxIndexation`, 0);
                         setIndexedLineIds((prev) => { const n = new Set(prev); n.delete(field.id); return n; });
                       }}
-                      className="text-violet-300 hover:text-red-500 transition-colors flex items-center justify-center"
+                      className="text-brand-ink-muted hover:text-brand-coral transition-colors flex items-center justify-center"
                       title="Retirer l'indexation"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -1431,7 +1431,7 @@ function SectionBlock({
                   <button
                     type="button"
                     onClick={() => setIndexedLineIds((prev) => { const n = new Set(prev); n.add(field.id); return n; })}
-                    className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-600 ml-1 transition-colors"
+                    className="flex items-center gap-1 text-xs text-brand-ink-muted hover:text-brand-ink ml-1 transition-colors"
                   >
                     <Plus className="w-3 h-3" />
                     {tagValue === "ARTISTE" ? "Indexation annuelle artiste" : "Indexation annuelle musique"}
@@ -1446,7 +1446,7 @@ function SectionBlock({
           <button
             type="button"
             onClick={() => append({ libelle: "", tag: "ARTISTE", quantite: 1, prixUnit: 0 })}
-            className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-700 mt-2 px-2 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-brand-blue hover:text-brand-blue mt-2 px-2 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             Ajouter une ligne
@@ -1457,17 +1457,17 @@ function SectionBlock({
             <button
               type="button"
               onClick={addAgentLine}
-              className="flex items-center gap-2 text-sm text-amber-700 hover:text-amber-900 px-3 py-1.5 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mt-1"
+              className="flex items-center gap-2 text-sm text-brand-ink hover:text-brand-ink px-3 py-1.5 rounded-[var(--radius-control)] border border-status-partial-bg bg-status-partial-bg hover:border-brand-ink-subtle transition-colors mt-1"
             >
               <Plus className="w-3.5 h-3.5" />
               Ajouter Agent Voix Off (10%)
-              <span className="text-xs text-amber-400 font-mono">= {fmtEur(agentPrix)}</span>
+              <span className="text-xs text-brand-coral font-mono">= {fmtEur(agentPrix)}</span>
             </button>
           )}
 
           {/* Résumé quand l'agent est actif */}
           {agentEnabled && sourceFields.length > 0 && (
-            <p className="text-xs text-amber-500 px-1 mt-0.5">
+            <p className="text-xs text-brand-coral px-1 mt-0.5">
               Agent calculé sur{" "}
               <span className="font-medium">{selectedForAgent.size} ligne{selectedForAgent.size > 1 ? "s" : ""}</span>{" "}
               cochée{selectedForAgent.size > 1 ? "s" : ""} ({fmtEur(selectedSourceTotal)}) → {fmtEur(agentPrix)}
@@ -1501,7 +1501,7 @@ function TvaDropdown({
     <select
       value={String(numValue)}
       onChange={(e) => onChange(Number(e.target.value))}
-      className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-full px-2 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-blue"
     >
       <option value="20">20 %</option>
       <option value="10">10 %</option>

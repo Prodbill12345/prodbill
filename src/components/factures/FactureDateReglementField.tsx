@@ -26,14 +26,14 @@ export function FactureDateReglementField({ factureId, initialValue }: FactureDa
   }
 
   return (
-    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
-      <label className="text-xs font-medium text-slate-400 shrink-0">Date de règlement</label>
+    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-brand-rule">
+      <label className="text-xs font-medium text-brand-ink-muted shrink-0">Date de règlement</label>
       <input
         type="date"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onBlur={(e) => handleSave(e.target.value)}
-        className="px-2 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+        className="px-2 py-1 text-sm border border-brand-rule rounded-md focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-paper"
       />
     </div>
   );

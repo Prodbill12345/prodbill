@@ -116,18 +116,18 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-ink/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-base font-semibold text-slate-900">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-rule">
+          <h2 className="text-base font-semibold text-brand-ink">
             Télécharger le PDF
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-brand-ink-muted hover:text-brand-ink transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -137,18 +137,18 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
         <div className="px-6 py-5">
           {loading ? (
             <div className="flex justify-center py-6">
-              <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+              <Loader2 className="w-5 h-5 animate-spin text-brand-ink-muted" />
             </div>
           ) : documents.length === 0 ? (
-            <p className="text-sm text-slate-500 py-2">
+            <p className="text-sm text-brand-ink-muted py-2">
               Aucun document joint disponible.{" "}
-              <a href="/parametres" className="text-blue-600 hover:underline">
+              <a href="/parametres" className="text-brand-blue hover:underline">
                 Ajouter des documents dans Paramètres
               </a>
             </p>
           ) : (
             <>
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-brand-ink-muted mb-4">
                 Sélectionnez les documents à joindre au PDF (optionnel) :
               </p>
               <ul className="space-y-2">
@@ -159,10 +159,10 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
                         type="checkbox"
                         checked={selected.has(doc.id)}
                         onChange={() => toggleDoc(doc.id)}
-                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 rounded border-brand-rule text-brand-blue focus:ring-brand-blue"
                       />
-                      <FileText className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                      <span className="text-sm text-slate-700 group-hover:text-slate-900 truncate">
+                      <FileText className="w-4 h-4 text-brand-ink-muted flex-shrink-0" />
+                      <span className="text-sm text-brand-ink group-hover:text-brand-ink truncate">
                         {doc.name}
                       </span>
                     </label>
@@ -174,10 +174,10 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-brand-rule bg-brand-surface">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-brand-ink-muted hover:text-brand-ink transition-colors"
           >
             Annuler
           </button>
@@ -185,7 +185,7 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
             <button
               onClick={generateFacturx}
               disabled={generatingFacturx}
-              className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 bg-white text-sm font-medium rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-status-info-bg text-brand-blue bg-brand-paper text-sm font-medium rounded-[var(--radius-control)] hover:bg-status-info-bg disabled:opacity-50 transition-colors"
             >
               {generatingFacturx ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -198,7 +198,7 @@ export function PdfModal({ type, id, numero, onClose }: PdfModalProps) {
           <button
             onClick={generate}
             disabled={generating}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-brand-blue text-brand-cream text-sm font-medium rounded-[var(--radius-control)] hover:bg-brand-ink disabled:opacity-50 transition-colors"
           >
             {generating ? (
               <Loader2 className="w-4 h-4 animate-spin" />
