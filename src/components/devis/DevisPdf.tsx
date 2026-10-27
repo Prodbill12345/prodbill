@@ -16,6 +16,7 @@ import type {
 import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
 import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 import "@/lib/pdf/fonts";
+import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
 
 export type DevisForPdf = Devis & {
@@ -241,7 +242,9 @@ const s = StyleSheet.create({
 
 // ─── composant ──────────────────────────────────────────────────────────────
 
-export function DevisPdf({ devis }: { devis: DevisForPdf }) {
+export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
+  // Textes en NFC : accents décomposés recomposés (affichage uniquement).
+  const devis = normalizeNfcDeep(devisBrut);
   const { company, client } = devis;
 
   // NONNA : masque TVA + TTC sur les devis (pur affichage). Cf. company flag.

@@ -13,6 +13,7 @@ import { facturxMention } from "@/lib/facturx-tax";
 import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 import { factureObjetDisplay } from "@/lib/facture-objet";
 import "@/lib/pdf/fonts";
+import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
 
 export type FactureForPdf = Facture & {
@@ -305,7 +306,9 @@ const s = StyleSheet.create({
 
 // ─── composant ──────────────────────────────────────────────────────────────
 
-export function FacturePdf({ facture }: { facture: FactureForPdf }) {
+export function FacturePdf({ facture: factureBrute }: { facture: FactureForPdf }) {
+  // Textes en NFC : accents décomposés recomposés (affichage uniquement).
+  const facture = normalizeNfcDeep(factureBrute);
   const { client, logoUrl } = facture;
   const isAvoir = facture.type === "AVOIR";
   // #99 : facture récapitulative = plusieurs devis sources (une ligne par
