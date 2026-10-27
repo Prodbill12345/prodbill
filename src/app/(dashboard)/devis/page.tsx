@@ -48,12 +48,12 @@ export default async function DevisPage() {
       {/* Header sticky */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Devis</h1>
-          <p className="text-slate-500 mt-0.5 text-sm">{devis.length} devis au total</p>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">Devis</h1>
+          <p className="text-brand-ink-muted mt-0.5 text-sm">{devis.length} devis au total</p>
         </div>
         <Link
           href="/devis/nouveau"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-900/20 hover:shadow-blue-900/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream bg-brand-blue hover:bg-brand-ink transition-all"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           Nouveau devis
@@ -61,19 +61,19 @@ export default async function DevisPage() {
       </div>
 
       {devis.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-16 text-center">
-          <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-indigo-300" />
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-16 text-center">
+          <div className="w-16 h-16 bg-brand-surface rounded-[var(--radius-card)] flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-brand-ink-muted" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-700 mb-2">
+          <h3 className="text-lg font-semibold text-brand-ink mb-2">
             Aucun devis
           </h3>
-          <p className="text-slate-400 mb-6 text-sm">
+          <p className="text-brand-ink-muted mb-6 text-sm">
             Créez votre premier devis pour commencer
           </p>
           <Link
             href="/devis/nouveau"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream bg-brand-blue hover:bg-brand-ink transition-all"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Nouveau devis

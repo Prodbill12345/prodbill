@@ -42,6 +42,10 @@ describe("contrastes AA (texte normal ≥ 4.5)", () => {
     ["accent / cream", colors.accent, colors.cream],
     ["cream / accent (grande carte bleue)", colors.cream, colors.accent],
     ["cream / ink (capsule de nav active)", colors.cream, colors.ink],
+    ["coralInk / cream (texte d'alerte)", colors.coralInk, colors.cream],
+    ["coralInk / paper", colors.coralInk, colors.paper],
+    ["pistachioInk / cream (texte positif)", colors.pistachioInk, colors.cream],
+    ["pistachioInk / paper", colors.pistachioInk, colors.paper],
   ])("%s", (_label, fg, bg) => {
     expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5);
   });

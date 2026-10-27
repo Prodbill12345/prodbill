@@ -85,52 +85,52 @@ export default async function PaiementsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Paiements</h1>
-        <p className="text-slate-500 mt-1">Suivi des encaissements</p>
+        <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">Paiements</h1>
+        <p className="text-brand-ink-muted mt-1">Suivi des encaissements</p>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-4 h-4 text-green-600" />
-            <p className="text-sm text-slate-500">Encaissé ce mois</p>
+            <CheckCircle2 className="w-4 h-4 text-brand-pistachio-ink" />
+            <p className="text-sm text-brand-ink-muted">Encaissé ce mois</p>
           </div>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">
             {formatEuros(encaisseMonth)}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-blue-600" />
-            <p className="text-sm text-slate-500">En attente</p>
+            <Clock className="w-4 h-4 text-brand-blue" />
+            <p className="text-sm text-brand-ink-muted">En attente</p>
           </div>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">
             {formatEuros(totalEnAttente)}
           </p>
         </div>
 
         <div
-          className={`rounded-xl border p-5 shadow-sm ${
+          className={`rounded-[var(--radius-card)] border p-5 ${
             enRetard.length > 0
-              ? "bg-red-50 border-red-100"
-              : "bg-white border-slate-100"
+              ? "bg-status-danger-bg border-status-danger-bg"
+              : "bg-brand-paper border-brand-rule"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle
-              className={`w-4 h-4 ${enRetard.length > 0 ? "text-red-600" : "text-slate-400"}`}
+              className={`w-4 h-4 ${enRetard.length > 0 ? "text-brand-coral-ink" : "text-brand-ink-muted"}`}
             />
             <p
-              className={`text-sm ${enRetard.length > 0 ? "text-red-600" : "text-slate-500"}`}
+              className={`text-sm ${enRetard.length > 0 ? "text-brand-coral-ink" : "text-brand-ink-muted"}`}
             >
               En retard ({enRetard.length})
             </p>
           </div>
           <p
-            className={`text-2xl font-bold ${
-              enRetard.length > 0 ? "text-red-700" : "text-slate-900"
+            className={`font-display text-2xl font-bold tracking-[-0.02em] ${
+              enRetard.length > 0 ? "text-brand-ink" : "text-brand-ink"
             }`}
           >
             {formatEuros(totalEnRetard)}
@@ -138,38 +138,38 @@ export default async function PaiementsPage() {
         </div>
 
         <div
-          className={`rounded-xl border p-5 shadow-sm ${
+          className={`rounded-[var(--radius-card)] border p-5 ${
             totalPenalites > 0
-              ? "bg-orange-50 border-orange-100"
-              : "bg-white border-slate-100"
+              ? "bg-status-partial-bg border-status-partial-bg"
+              : "bg-brand-paper border-brand-rule"
           }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle
-              className={`w-4 h-4 ${totalPenalites > 0 ? "text-orange-500" : "text-slate-400"}`}
+              className={`w-4 h-4 ${totalPenalites > 0 ? "text-brand-coral" : "text-brand-ink-muted"}`}
             />
             <p
-              className={`text-sm ${totalPenalites > 0 ? "text-orange-600" : "text-slate-500"}`}
+              className={`text-sm ${totalPenalites > 0 ? "text-brand-coral-ink" : "text-brand-ink-muted"}`}
             >
               Pénalités dues (15%/an)
             </p>
           </div>
           <p
-            className={`text-2xl font-bold ${
-              totalPenalites > 0 ? "text-orange-700" : "text-slate-900"
+            className={`font-display text-2xl font-bold tracking-[-0.02em] ${
+              totalPenalites > 0 ? "text-brand-ink" : "text-brand-ink"
             }`}
           >
             {formatEuros(totalPenalites)}
           </p>
           {totalPenalites > 0 && (
-            <p className="text-xs text-orange-500 mt-1">+ indemnité 40 € / facture</p>
+            <p className="text-xs text-brand-coral-ink mt-1">+ indemnité 40 € / facture</p>
           )}
         </div>
       </div>
 
       {/* Alerte factures en retard */}
       {enRetard.length > 0 && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-3.5 text-sm text-red-800">
+        <div className="flex items-center gap-3 bg-status-danger-bg border border-status-danger-bg rounded-[var(--radius-card)] px-5 py-3.5 text-sm text-brand-ink">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <span>
             <strong>{enRetard.length} facture{enRetard.length > 1 ? "s" : ""}</strong> dépassent
@@ -185,51 +185,51 @@ export default async function PaiementsPage() {
       <PaiementsClient factures={factures} />
 
       {/* Historique paiements */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Historique des paiements</h2>
-          <span className="text-xs text-slate-400">{paiementsRecents.length} entrées récentes</span>
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-brand-rule">
+          <h2 className="font-semibold text-brand-ink">Historique des paiements</h2>
+          <span className="text-xs text-brand-ink-muted">{paiementsRecents.length} entrées récentes</span>
         </div>
         {paiementsRecents.length === 0 ? (
-          <p className="px-5 py-10 text-center text-slate-400 text-sm">
+          <p className="px-5 py-10 text-center text-brand-ink-muted text-sm">
             Aucun paiement enregistré
           </p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Date</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Facture</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Client</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Mode</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Référence</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Montant</th>
+              <tr className="border-b border-brand-rule">
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Date</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Facture</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Client</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Mode</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Référence</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Montant</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-brand-rule">
               {paiementsRecents.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-3.5 text-sm text-slate-500">
+                <tr key={p.id} className="hover:bg-brand-surface">
+                  <td className="px-5 py-3.5 text-sm text-brand-ink-muted">
                     {formatDate(p.date)}
                   </td>
                   <td className="px-5 py-3.5">
                     <Link
                       href={`/factures/${p.factureId}`}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="text-sm font-medium text-brand-blue hover:text-brand-blue"
                     >
                       {formatFactureNumero(p.facture)}
                     </Link>
                   </td>
-                  <td className="px-5 py-3.5 text-sm text-slate-700">
+                  <td className="px-5 py-3.5 text-sm text-brand-ink">
                     {p.facture.client.name}
                   </td>
-                  <td className="px-5 py-3.5 text-sm text-slate-500 capitalize">
+                  <td className="px-5 py-3.5 text-sm text-brand-ink-muted capitalize">
                     {p.mode ?? "—"}
                   </td>
-                  <td className="px-5 py-3.5 text-sm text-slate-400 font-mono">
+                  <td className="px-5 py-3.5 text-sm text-brand-ink-muted font-mono">
                     {p.reference ?? "—"}
                   </td>
-                  <td className="px-5 py-3.5 text-sm font-semibold text-right tabular-nums text-green-700">
+                  <td className="px-5 py-3.5 text-sm font-semibold text-right tabular-nums text-brand-pistachio-ink">
                     +{formatEuros(p.montant)}
                   </td>
                 </tr>

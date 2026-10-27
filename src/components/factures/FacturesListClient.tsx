@@ -6,7 +6,9 @@ import Link from "next/link";
 import { ChevronRight, AlertCircle, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
-import { FACTURE_STATUT_COLORS, FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
+import { FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { FACTURE_STATUT_TONE } from "@/design/status";
 import { formatFactureNumero } from "@/lib/facture-numero";
 import type { FactureStatut, FactureType } from "@prisma/client";
 import {
@@ -98,10 +100,10 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
         filteredCount={sorted.length}
       />
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/60">
+            <tr className="border-b border-brand-rule bg-brand-surface/60">
               <SortableTh label="Numéro" sortKey="numero" sort={sort} onClick={handleSortClick} />
               <SortableTh label="Client" sortKey="client" sort={sort} onClick={handleSortClick} />
               <SortableTh label="Type" sortKey="type" sort={sort} onClick={handleSortClick} />
@@ -115,10 +117,10 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
               <th className="w-10"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+          <tbody className="divide-y divide-brand-rule">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={11} className="px-5 py-10 text-center text-sm text-slate-400">
+                <td colSpan={11} className="px-5 py-10 text-center text-sm text-brand-ink-muted">
                   {hasFilters ? "Aucune facture correspondant aux filtres" : "Aucune facture"}
                 </td>
               </tr>
@@ -133,45 +135,46 @@ export function FacturesListClient({ factures, availableYears }: FacturesListCli
                 return (
                   <tr
                     key={f.id}
-                    className={`transition-colors group ${isRetard ? "hover:bg-red-50/40 bg-red-50/20" : "hover:bg-emerald-50/20"}`}
+                    className={`transition-colors group ${isRetard ? "hover:bg-status-danger-bg/50 bg-status-danger-bg/25" : "hover:bg-brand-surface/60"}`}
                   >
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3.5">
                       <Link
                         href={`/factures/${f.id}`}
-                        className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1.5"
+                        className="font-semibold text-brand-ink group-hover:text-brand-blue transition-colors flex items-center gap-1.5"
                       >
-                        {isRetard && <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />}
+                        {isRetard && <AlertCircle className="w-3.5 h-3.5 text-brand-coral shrink-0" />}
                         {formatFactureNumero(f)}
                       </Link>
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-600">{f.client.name}</td>
-                    <td className="px-5 py-4 text-sm text-slate-400">{FACTURE_TYPE_LABELS[f.type]}</td>
-                    <td className="px-5 py-4 text-sm text-slate-400 text-center tabular-nums">
-                      {annee ?? <span className="text-slate-300">—</span>}
+                    <td className="px-4 py-3.5 text-sm text-brand-ink-muted">{f.client.name}</td>
+                    <td className="px-4 py-3.5 text-sm text-brand-ink-muted">{FACTURE_TYPE_LABELS[f.type]}</td>
+                    <td className="px-4 py-3.5 text-sm text-brand-ink-muted text-center tabular-nums">
+                      {annee ?? <span className="text-brand-ink-subtle">—</span>}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-400 font-mono text-xs">
-                      {f.numeroBdc ?? <span className="text-slate-300">—</span>}
+                    <td
+                      className="px-4 py-3.5 text-sm text-brand-ink-muted font-mono text-xs max-w-[9rem] truncate"
+                      title={f.numeroBdc ?? undefined}
+                    >
+                      {f.numeroBdc ?? <span className="text-brand-ink-subtle">—</span>}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-400">{formatDate(f.dateEmission)}</td>
-                    <td className={`px-5 py-4 text-sm font-medium ${isRetard ? "text-red-600" : "text-slate-400 font-normal"}`}>
+                    <td className="px-4 py-3.5 text-sm text-brand-ink-muted">{formatDate(f.dateEmission)}</td>
+                    <td className={`px-4 py-3.5 text-sm font-medium ${isRetard ? "text-brand-coral-ink" : "text-brand-ink-muted font-normal"}`}>
                       {formatDate(f.dateEcheance)}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-400">
-                      {f.dateReglement ? formatDate(f.dateReglement) : <span className="text-slate-200">—</span>}
+                    <td className="px-4 py-3.5 text-sm text-brand-ink-muted">
+                      {f.dateReglement ? formatDate(f.dateReglement) : <span className="text-brand-ink-subtle">—</span>}
                     </td>
-                    <td className="px-5 py-4 text-right">
-                      <p className="text-sm font-semibold text-slate-900 tabular-nums">{formatEuros(f.totalTtc)}</p>
+                    <td className="px-4 py-3.5 text-right">
+                      <p className="text-sm font-semibold text-brand-ink tabular-nums">{formatEuros(f.totalTtc)}</p>
                       {totalPaye > 0 && totalPaye < f.totalTtc && (
-                        <p className="text-xs text-slate-400 tabular-nums">Payé : {formatEuros(totalPaye)}</p>
+                        <p className="text-xs text-brand-ink-muted tabular-nums">Payé : {formatEuros(totalPaye)}</p>
                       )}
                     </td>
-                    <td className="px-5 py-4">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${FACTURE_STATUT_COLORS[f.statut]}`}>
-                        {FACTURE_STATUT_LABELS[f.statut]}
-                      </span>
+                    <td className="px-4 py-3.5">
+                      <StatusBadge tone={FACTURE_STATUT_TONE[f.statut]} label={FACTURE_STATUT_LABELS[f.statut]} />
                     </td>
                     <td className="px-3 py-4">
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-brand-ink-subtle group-hover:text-brand-ink-muted transition-colors" />
                     </td>
                   </tr>
                 );
@@ -203,12 +206,12 @@ function SortableTh({
   const thAlign = align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
 
   return (
-    <th className={`${thAlign} px-5 py-3.5 text-xs font-semibold uppercase tracking-wider`}>
+    <th className={`${thAlign} px-4 py-3 text-[10px] font-medium uppercase tracking-[0.15em]`}>
       <button
         type="button"
         onClick={() => onClick(sortKey)}
-        className={`inline-flex items-center gap-1.5 ${alignCls} ${
-          isActive ? "text-emerald-700" : "text-slate-400 hover:text-slate-700"
+        className={`inline-flex items-center gap-1.5 uppercase tracking-[0.15em] ${alignCls} ${
+          isActive ? "text-brand-ink" : "text-brand-ink-muted hover:text-brand-ink"
         } transition-colors cursor-pointer`}
       >
         <span>{label}</span>

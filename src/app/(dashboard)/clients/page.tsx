@@ -17,13 +17,14 @@ export default async function ClientsPage() {
 
   // Generate a consistent color from client name
   const colors = [
-    { bg: "bg-violet-100", text: "text-violet-700" },
-    { bg: "bg-blue-100", text: "text-blue-700" },
-    { bg: "bg-emerald-100", text: "text-emerald-700" },
-    { bg: "bg-amber-100", text: "text-amber-700" },
-    { bg: "bg-rose-100", text: "text-rose-700" },
-    { bg: "bg-indigo-100", text: "text-indigo-700" },
-    { bg: "bg-teal-100", text: "text-teal-700" },
+    // Palette DA : teintes douces + encre (contrastes AA vérifiés).
+    { bg: "bg-status-info-bg", text: "text-brand-blue" },
+    { bg: "bg-status-success-bg", text: "text-brand-ink" },
+    { bg: "bg-status-partial-bg", text: "text-brand-ink" },
+    { bg: "bg-status-danger-bg", text: "text-brand-ink" },
+    { bg: "bg-brand-surface", text: "text-brand-ink" },
+    { bg: "bg-brand-pistachio", text: "text-brand-ink" },
+    { bg: "bg-brand-ink", text: "text-brand-cream" },
   ];
 
   function clientColor(name: string) {
@@ -35,14 +36,14 @@ export default async function ClientsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Clients</h1>
-          <p className="text-slate-500 mt-0.5 text-sm">
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">Clients</h1>
+          <p className="text-brand-ink-muted mt-0.5 text-sm">
             {clients.length} client{clients.length > 1 ? "s" : ""}
           </p>
         </div>
         <Link
           href="/clients/nouveau"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-md shadow-violet-900/20 hover:shadow-violet-900/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream bg-brand-blue hover:bg-brand-ink transition-all"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           Nouveau client
@@ -50,19 +51,19 @@ export default async function ClientsPage() {
       </div>
 
       {clients.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-16 text-center">
-          <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Users className="w-8 h-8 text-violet-300" />
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-16 text-center">
+          <div className="w-16 h-16 bg-brand-surface rounded-[var(--radius-card)] flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-brand-ink-muted" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-700 mb-2">
+          <h3 className="text-lg font-semibold text-brand-ink mb-2">
             Aucun client
           </h3>
-          <p className="text-slate-400 mb-6 text-sm">
+          <p className="text-brand-ink-muted mb-6 text-sm">
             Ajoutez votre premier client pour commencer
           </p>
           <Link
             href="/clients/nouveau"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 shadow-md transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream bg-brand-blue hover:bg-brand-ink transition-all"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             Nouveau client
@@ -76,22 +77,22 @@ export default async function ClientsPage() {
               <Link
                 key={client.id}
                 href={`/clients/${client.id}`}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:border-violet-200 hover:shadow-md transition-all group"
+                className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5 hover:border-brand-ink-subtle transition-all group"
               >
                 <div className="flex items-start gap-3 mb-3">
                   <div
-                    className={`w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}
+                    className={`w-10 h-10 rounded-[var(--radius-card)] ${color.bg} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}
                   >
                     <span className={`${color.text} font-bold text-sm`}>
                       {client.name.slice(0, 2).toUpperCase()}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1 pt-0.5">
-                    <h3 className="font-semibold text-slate-900 group-hover:text-violet-700 transition-colors truncate">
+                    <h3 className="font-semibold text-brand-ink group-hover:text-brand-blue transition-colors truncate">
                       {client.name}
                     </h3>
                     {client.siret && (
-                      <p className="text-xs text-slate-400 mt-0.5 font-mono truncate">
+                      <p className="text-xs text-brand-ink-muted mt-0.5 font-mono truncate">
                         {client.siret}
                       </p>
                     )}
@@ -99,17 +100,17 @@ export default async function ClientsPage() {
                 </div>
 
                 {client.email && (
-                  <p className="text-sm text-slate-500 truncate mb-3">{client.email}</p>
+                  <p className="text-sm text-brand-ink-muted truncate mb-3">{client.email}</p>
                 )}
 
-                <div className="flex gap-4 pt-3 border-t border-slate-50">
+                <div className="flex gap-4 pt-3 border-t border-brand-rule">
                   <div className="text-center">
-                    <p className="text-base font-bold text-slate-800">{client._count.devis}</p>
-                    <p className="text-xs text-slate-400">devis</p>
+                    <p className="text-base font-bold text-brand-ink">{client._count.devis}</p>
+                    <p className="text-xs text-brand-ink-muted">devis</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-base font-bold text-slate-800">{client._count.factures}</p>
-                    <p className="text-xs text-slate-400">factures</p>
+                    <p className="text-base font-bold text-brand-ink">{client._count.factures}</p>
+                    <p className="text-xs text-brand-ink-muted">factures</p>
                   </div>
                 </div>
               </Link>

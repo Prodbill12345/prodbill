@@ -197,6 +197,8 @@ export const DEVIS_STATUT_LABELS: Record<DevisStatut, string> = {
   EXPIRE: "Expiré",
 };
 
+/** @deprecated Affichage : StatusBadge + src/design/status.ts (DA phase 2).
+ *  Conservé pour le test de distinction VALIDE/ACCEPTE (#96). */
 export const DEVIS_STATUT_COLORS: Record<DevisStatut, string> = {
   BROUILLON: "bg-gray-100 text-gray-700",
   VALIDE: "bg-teal-100 text-teal-700",
@@ -215,6 +217,7 @@ export const FACTURE_STATUT_LABELS: Record<FactureStatut, string> = {
   ANNULEE: "Annulée",
 };
 
+/** @deprecated Affichage : StatusBadge + src/design/status.ts (DA phase 2). */
 export const FACTURE_STATUT_COLORS: Record<FactureStatut, string> = {
   BROUILLON: "bg-gray-100 text-gray-700",
   EMISE: "bg-blue-100 text-blue-700",

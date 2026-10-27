@@ -5,7 +5,9 @@ import Link from "next/link";
 import { ChevronLeft, FileDown, Send, CheckCircle, Receipt, Info } from "lucide-react";
 import { formatEuros, formatPct, formatQuantite } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
-import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
+import { DEVIS_STATUT_LABELS, LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { DEVIS_STATUT_TONE } from "@/design/status";
 import { DevisActions } from "@/components/devis/DevisActions";
 import { devisRecapVisibility } from "@/lib/devis-recap-visibility";
 import { formatTvaLabel } from "@/lib/tva-label";
@@ -106,11 +108,7 @@ export default async function DevisDetailPage({
               <h1 className="text-2xl font-bold text-slate-900">
                 {devis.numero ?? "Brouillon"}
               </h1>
-              <span
-                className={`text-xs font-medium px-2.5 py-1 rounded-full ${DEVIS_STATUT_COLORS[devis.statut]}`}
-              >
-                {DEVIS_STATUT_LABELS[devis.statut]}
-              </span>
+              <StatusBadge tone={DEVIS_STATUT_TONE[devis.statut]} label={DEVIS_STATUT_LABELS[devis.statut]} />
             </div>
             <p className="text-slate-500 mt-1">{devis.objet}</p>
             {/* Mention "Dupliqué depuis ..." si le devis a été créé via

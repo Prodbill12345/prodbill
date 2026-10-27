@@ -35,6 +35,11 @@ export const colors = {
   coral: "#FF6846",
   /** Vert pistache — mascotte, pastille « payé / accepté ». Jamais en texte. */
   pistachio: "#B7D85D",
+  /** Rouge orangé assombri, pour du TEXTE d'alerte (retard, erreur) : AA sur
+   *  crème (5.3) et papier. */
+  coralInk: "#B83A1E",
+  /** Pistache assombri, pour du TEXTE positif (payé, bénéfice) : AA (5.7). */
+  pistachioInk: "#4F6A12",
   /** Rose tendre — petites touches. */
   rose: "#FFBBD3",
   /** Bordures et filets. */
@@ -130,6 +135,8 @@ export const cssVars: Record<string, string> = {
   "--color-brand-coral": colors.coral,
   "--color-brand-pistachio": colors.pistachio,
   "--color-brand-rose": colors.rose,
+  "--color-brand-coral-ink": colors.coralInk,
+  "--color-brand-pistachio-ink": colors.pistachioInk,
   "--color-brand-rule": colors.rule,
   "--color-brand-surface": colors.surface,
   "--color-status-neutral-bg": statusTones.neutral.bg,
@@ -140,6 +147,7 @@ export const cssVars: Record<string, string> = {
   "--color-status-success-dot": statusTones.success.dot,
   "--color-status-danger-bg": statusTones.danger.bg,
   "--color-status-danger-dot": statusTones.danger.dot,
+  "--color-status-partial-bg": statusTones.partial.bg,
   "--font-display": fontStacks.display,
   "--font-text": fontStacks.text,
   "--font-editorial": fontStacks.editorial,

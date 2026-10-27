@@ -5,12 +5,9 @@ import Link from "next/link";
 import { ChevronLeft, FileText, Mail, Phone, MapPin, Pencil } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
-import {
-  DEVIS_STATUT_COLORS,
-  DEVIS_STATUT_LABELS,
-  FACTURE_STATUT_COLORS,
-  FACTURE_STATUT_LABELS,
-} from "@/types";
+import { DEVIS_STATUT_LABELS, FACTURE_STATUT_LABELS } from "@/types";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { DEVIS_STATUT_TONE, FACTURE_STATUT_TONE } from "@/design/status";
 
 export default async function ClientDetailPage({
   params,
@@ -212,9 +209,7 @@ export default async function ClientDetailPage({
                         {formatEuros(d.totalTtc)}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${DEVIS_STATUT_COLORS[d.statut]}`}>
-                          {DEVIS_STATUT_LABELS[d.statut]}
-                        </span>
+                        <StatusBadge tone={DEVIS_STATUT_TONE[d.statut]} label={DEVIS_STATUT_LABELS[d.statut]} />
                       </td>
                     </tr>
                   ))}
@@ -258,9 +253,7 @@ export default async function ClientDetailPage({
                         {formatEuros(f.totalTtc)}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${FACTURE_STATUT_COLORS[f.statut]}`}>
-                          {FACTURE_STATUT_LABELS[f.statut]}
-                        </span>
+                        <StatusBadge tone={FACTURE_STATUT_TONE[f.statut]} label={FACTURE_STATUT_LABELS[f.statut]} />
                       </td>
                     </tr>
                   ))}

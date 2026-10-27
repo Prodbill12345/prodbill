@@ -6,7 +6,9 @@ import Link from "next/link";
 import { ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Receipt, X, Loader2 } from "lucide-react";
 import { formatEuros } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
-import { DEVIS_STATUT_COLORS, DEVIS_STATUT_LABELS } from "@/types";
+import { DEVIS_STATUT_LABELS } from "@/types";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { DEVIS_STATUT_TONE } from "@/design/status";
 import { isDevisFacturable } from "@/lib/devis-facturable";
 import {
   getFacturationState,
@@ -190,19 +192,19 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
 
       {/* #99 : barre d'action facture récapitulative (apparaît dès 1 sélection) */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-blue-200 bg-blue-50/70">
+        <div className="flex items-center gap-4 px-5 py-3 rounded-[var(--radius-card)] border border-status-info-bg bg-status-info-bg/70">
           <div className="flex-1 min-w-0 text-sm">
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-brand-ink">
               {selected.size} devis sélectionné{selected.size > 1 ? "s" : ""}
             </span>
             {selectedClientName && (
-              <span className="text-slate-500"> · {selectedClientName}</span>
+              <span className="text-brand-ink-muted"> · {selectedClientName}</span>
             )}
             {recapError ? (
-              <span className="block text-red-600 mt-0.5">{recapError}</span>
+              <span className="block text-brand-coral-ink mt-0.5">{recapError}</span>
             ) : (
               selected.size < 2 && (
-                <span className="block text-slate-500 mt-0.5">
+                <span className="block text-brand-ink-muted mt-0.5">
                   Sélectionnez au moins 2 devis du même client.
                 </span>
               )
@@ -211,7 +213,7 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
           <button
             type="button"
             onClick={clearSelection}
-            className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+            className="inline-flex items-center gap-1 text-sm text-brand-ink-muted hover:text-brand-ink"
           >
             <X className="w-4 h-4" />
             Annuler
@@ -220,7 +222,7 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
             type="button"
             onClick={handleFacturerSelection}
             disabled={selected.size < 2 || submitting}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-control)] text-sm font-semibold text-brand-cream bg-brand-blue hover:bg-brand-ink disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Receipt className="w-4 h-4" />}
             Facturer la sélection ({selected.size})
@@ -228,10 +230,10 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/60">
+            <tr className="border-b border-brand-rule bg-brand-surface/60">
               <th className="w-10 px-4 py-3.5"></th>
               <SortableTh label="Référence" sortKey="numero" sort={sort} onClick={handleSortClick} />
               <SortableTh label="Client" sortKey="client" sort={sort} onClick={handleSortClick} />
@@ -243,10 +245,10 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
               <th className="w-10"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+          <tbody className="divide-y divide-brand-rule">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-5 py-10 text-center text-sm text-slate-400">
+                <td colSpan={9} className="px-5 py-10 text-center text-sm text-brand-ink-muted">
                   {hasFilters ? "Aucun devis correspondant aux filtres" : "Aucun devis"}
                 </td>
               </tr>
@@ -263,7 +265,7 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
                 return (
                 <tr
                   key={d.id}
-                  className={`hover:bg-blue-50/30 transition-colors group ${isChecked ? "bg-blue-50/50" : ""}`}
+                  className={`hover:bg-brand-surface/60 transition-colors group ${isChecked ? "bg-status-info-bg/50" : ""}`}
                 >
                   <td className="px-4 py-4">
                     <input
@@ -278,33 +280,31 @@ export function DevisListClient({ devis, availableYears }: DevisListClientProps)
                             ? "Un autre client est déjà sélectionné"
                             : "Sélectionner pour une facture récapitulative"
                       }
-                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                      className="w-4 h-4 rounded border-brand-rule text-brand-blue focus:ring-brand-blue disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                     />
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3.5">
                     <Link
                       href={`/devis/${d.id}`}
-                      className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors"
+                      className="font-semibold text-brand-ink group-hover:text-brand-blue transition-colors"
                     >
-                      {d.numero ?? <span className="text-slate-400 font-normal italic">Brouillon</span>}
+                      {d.numero ?? <span className="text-brand-ink-muted font-normal italic">Brouillon</span>}
                     </Link>
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-600">{d.client.name}</td>
-                  <td className="px-5 py-4 text-sm text-slate-500 max-w-xs truncate">{d.objet}</td>
-                  <td className="px-5 py-4 text-sm text-slate-400 text-center tabular-nums">
-                    {d.annee ?? (d.dateEmission?.getUTCFullYear() ?? <span className="text-slate-300">—</span>)}
+                  <td className="px-4 py-3.5 text-sm text-brand-ink-muted">{d.client.name}</td>
+                  <td className="px-4 py-3.5 text-sm text-brand-ink-muted max-w-[14rem] xl:max-w-xs truncate">{d.objet}</td>
+                  <td className="px-4 py-3.5 text-sm text-brand-ink-muted text-center tabular-nums">
+                    {d.annee ?? (d.dateEmission?.getUTCFullYear() ?? <span className="text-brand-ink-subtle">—</span>)}
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-400">{formatDate(d.dateEmission ?? d.updatedAt)}</td>
-                  <td className="px-5 py-4 text-sm font-semibold text-slate-900 text-right tabular-nums">
+                  <td className="px-4 py-3.5 text-sm text-brand-ink-muted">{formatDate(d.dateEmission ?? d.updatedAt)}</td>
+                  <td className="px-4 py-3.5 text-sm font-semibold text-brand-ink text-right tabular-nums">
                     {formatEuros(d.totalTtc)}
                   </td>
-                  <td className="px-5 py-4">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${DEVIS_STATUT_COLORS[d.statut]}`}>
-                      {DEVIS_STATUT_LABELS[d.statut]}
-                    </span>
+                  <td className="px-4 py-3.5">
+                    <StatusBadge tone={DEVIS_STATUT_TONE[d.statut]} label={DEVIS_STATUT_LABELS[d.statut]} />
                   </td>
                   <td className="px-3 py-4">
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-brand-ink-subtle group-hover:text-brand-ink-muted transition-colors" />
                   </td>
                 </tr>
                 );
@@ -336,12 +336,12 @@ function SortableTh({
   const thAlign = align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
 
   return (
-    <th className={`${thAlign} px-5 py-3.5 text-xs font-semibold uppercase tracking-wider`}>
+    <th className={`${thAlign} px-4 py-3 text-[10px] font-medium uppercase tracking-[0.15em]`}>
       <button
         type="button"
         onClick={() => onClick(sortKey)}
-        className={`inline-flex items-center gap-1.5 ${alignCls} ${
-          isActive ? "text-blue-700" : "text-slate-400 hover:text-slate-700"
+        className={`inline-flex items-center gap-1.5 uppercase tracking-[0.15em] ${alignCls} ${
+          isActive ? "text-brand-blue" : "text-brand-ink-muted hover:text-brand-ink"
         } transition-colors cursor-pointer`}
       >
         <span>{label}</span>

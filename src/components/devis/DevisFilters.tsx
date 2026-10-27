@@ -53,16 +53,16 @@ export function DevisFiltersBar({
   return (
     <div className="space-y-2">
       {/* Barre principale */}
-      <div className="bg-white rounded-xl border border-slate-100 px-4 py-3 flex gap-3 items-center flex-wrap shadow-sm">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule px-4 py-3 flex gap-3 items-center flex-wrap">
         {/* Recherche libre */}
         <div className="relative flex-1 min-w-64 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-brand-ink-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Rechercher numéro, client, objet…"
             value={filters.q ?? ""}
             onChange={(e) => set("q", e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
         </div>
 
@@ -70,7 +70,7 @@ export function DevisFiltersBar({
         <select
           value={filters.statut ?? ""}
           onChange={(e) => set("statut", (e.target.value || undefined) as DevisStatut | undefined)}
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-blue"
         >
           <option value="">Tous les statuts</option>
           {(Object.entries(DEVIS_STATUT_LABELS) as [DevisStatut, string][]).map(([k, v]) => (
@@ -84,7 +84,7 @@ export function DevisFiltersBar({
           onChange={(e) =>
             set("annee", e.target.value ? parseInt(e.target.value, 10) : undefined)
           }
-          className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-blue"
         >
           <option value="">Toutes les années</option>
           {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
@@ -94,22 +94,22 @@ export function DevisFiltersBar({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-[var(--radius-control)] text-sm font-medium transition-colors ${
             open || advancedCount > 0
-              ? "border-blue-200 bg-blue-50 text-blue-700"
-              : "border-slate-200 text-slate-600 hover:bg-slate-50"
+              ? "border-status-info-bg bg-status-info-bg text-brand-blue"
+              : "border-brand-rule text-brand-ink-muted hover:bg-brand-surface"
           }`}
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           Filtres
           {advancedCount > 0 && (
-            <span className="text-xs bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center">
+            <span className="text-xs bg-brand-blue text-brand-cream rounded-full w-4 h-4 flex items-center justify-center">
               {advancedCount}
             </span>
           )}
         </button>
 
-        <span className="text-xs text-slate-400 ml-auto tabular-nums">
+        <span className="text-xs text-brand-ink-muted ml-auto tabular-nums">
           {filteredCount} / {totalCount} résultat{filteredCount > 1 ? "s" : ""}
         </span>
 
@@ -117,7 +117,7 @@ export function DevisFiltersBar({
           <button
             type="button"
             onClick={clearAll}
-            className="text-xs text-slate-400 hover:text-slate-700 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+            className="text-xs text-brand-ink-muted hover:text-brand-ink px-2 py-1.5 rounded-[var(--radius-control)] hover:bg-brand-surface transition-colors"
           >
             Effacer
           </button>
@@ -153,13 +153,13 @@ export function DevisFiltersBar({
 
       {/* Panneau avancé */}
       {open && (
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm space-y-4">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm text-slate-700">Filtres avancés</h3>
+            <h3 className="font-semibold text-sm text-brand-ink">Filtres avancés</h3>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-slate-400 hover:text-slate-700 p-1 rounded"
+              className="text-brand-ink-muted hover:text-brand-ink p-1 rounded"
               aria-label="Fermer le panneau de filtres avancés"
             >
               <X className="w-4 h-4" />
@@ -169,27 +169,27 @@ export function DevisFiltersBar({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Date émission range */}
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-500">Date d&apos;émission — de</label>
+              <label className="block text-xs font-medium text-brand-ink-muted">Date d&apos;émission — de</label>
               <input
                 type="date"
                 value={filters.dateEmissionFrom ?? ""}
                 onChange={(e) => set("dateEmissionFrom", e.target.value || undefined)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-500">Date d&apos;émission — à</label>
+              <label className="block text-xs font-medium text-brand-ink-muted">Date d&apos;émission — à</label>
               <input
                 type="date"
                 value={filters.dateEmissionTo ?? ""}
                 onChange={(e) => set("dateEmissionTo", e.target.value || undefined)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             {/* TTC range */}
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-500">Total TTC — min (€)</label>
+              <label className="block text-xs font-medium text-brand-ink-muted">Total TTC — min (€)</label>
               <input
                 type="number"
                 inputMode="numeric"
@@ -197,11 +197,11 @@ export function DevisFiltersBar({
                 placeholder="0"
                 value={filters.totalTtcMin ?? ""}
                 onChange={(e) => set("totalTtcMin", e.target.value === "" ? undefined : Number(e.target.value))}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-500">Total TTC — max (€)</label>
+              <label className="block text-xs font-medium text-brand-ink-muted">Total TTC — max (€)</label>
               <input
                 type="number"
                 inputMode="numeric"
@@ -209,19 +209,19 @@ export function DevisFiltersBar({
                 placeholder="∞"
                 value={filters.totalTtcMax ?? ""}
                 onChange={(e) => set("totalTtcMax", e.target.value === "" ? undefined : Number(e.target.value))}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
 
             {/* N° BDC */}
             <div className="space-y-1 md:col-span-2">
-              <label className="block text-xs font-medium text-slate-500">N° BDC</label>
+              <label className="block text-xs font-medium text-brand-ink-muted">N° BDC</label>
               <input
                 type="text"
                 placeholder="BDC-26-…"
                 value={filters.bdcNumero ?? ""}
                 onChange={(e) => set("bdcNumero", e.target.value || undefined)}
-                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
           </div>
@@ -233,12 +233,12 @@ export function DevisFiltersBar({
 
 function Pill({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 bg-status-info-bg text-brand-blue border border-status-info-bg px-2 py-0.5 rounded-full">
       {label}
       <button
         type="button"
         onClick={onClear}
-        className="hover:bg-blue-100 rounded-full p-0.5"
+        className="hover:bg-brand-paper rounded-full p-0.5"
         aria-label={`Retirer le filtre ${label}`}
       >
         <X className="w-2.5 h-2.5" />

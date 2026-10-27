@@ -13,6 +13,10 @@ import {
   Mic2,
 } from "lucide-react";
 import { sortByLabelFr } from "@/lib/sort-by-name";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { DEVIS_STATUT_TONE } from "@/design/status";
+import type { StatusTone } from "@/design/tokens";
+import type { DevisStatut } from "@prisma/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -104,25 +108,21 @@ const STATUT_LABELS: Record<string, string> = {
   EXPIRE: "Expiré",
 };
 
-const STATUT_COLORS: Record<string, string> = {
-  BROUILLON: "bg-slate-100 text-slate-500",
-  ENVOYE: "bg-blue-50 text-blue-600",
-  ACCEPTE: "bg-emerald-50 text-emerald-700",
-  REFUSE: "bg-red-50 text-red-600",
-  EXPIRE: "bg-orange-50 text-orange-600",
-};
+// Ton DA du badge (src/design/status.ts) ; statut inconnu → neutre.
+const statutTone = (s: string): StatusTone =>
+  DEVIS_STATUT_TONE[s as DevisStatut] ?? "neutral";
 
 function ProgressBar({ value }: { value: number }) {
   const pct = Math.min(value, 100);
   const color =
     pct >= 80
-      ? "bg-emerald-500"
+      ? "bg-brand-pistachio"
       : pct >= 50
-      ? "bg-amber-500"
-      : "bg-red-500";
+      ? "bg-brand-rose"
+      : "bg-brand-coral";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+      <div className="flex-1 bg-brand-surface rounded-full h-1.5 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${color}`}
           style={{ width: `${pct}%` }}
@@ -131,10 +131,10 @@ function ProgressBar({ value }: { value: number }) {
       <span
         className={`text-xs font-semibold tabular-nums ${
           pct >= 80
-            ? "text-emerald-600"
+            ? "text-brand-pistachio-ink"
             : pct >= 50
-            ? "text-amber-600"
-            : "text-red-500"
+            ? "text-brand-ink"
+            : "text-brand-coral-ink"
         }`}
       >
         {Math.round(value)}%
@@ -373,12 +373,12 @@ export function BudgetClient({
       {/* Titre */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Suivi Budgétaire</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Exercice {annee}</p>
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">Suivi Budgétaire</h1>
+          <p className="text-sm text-brand-ink-muted mt-0.5">Exercice {annee}</p>
         </div>
         <a
           href={`/api/budget/export?annee=${annee}`}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-lg text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-ink rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-blue transition-colors"
         >
           <Download className="w-4 h-4" />
           Exporter tout
@@ -388,34 +388,34 @@ export function BudgetClient({
       {/* ──────────────────────────────────────────────────────────────────────
           Section A — Budget Prévisionnel CA
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-            <Target className="w-4 h-4 text-emerald-600" />
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
+        <div className="px-6 py-4 border-b border-brand-rule flex items-center gap-3">
+          <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-surface flex items-center justify-center">
+            <Target className="w-4 h-4 text-brand-ink" />
           </div>
           <div>
-            <h2 className="font-semibold text-slate-900">Budget Prévisionnel CA</h2>
-            <p className="text-xs text-slate-400">Objectifs de chiffre d&apos;affaires par client (compte 7)</p>
+            <h2 className="font-semibold text-brand-ink">Budget Prévisionnel CA</h2>
+            <p className="text-xs text-brand-ink-muted">Objectifs de chiffre d&apos;affaires par client (compte 7)</p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Libellé</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Commercial</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Prévisionnel</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">CA Réalisé</th>
-                <th className="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-40">% Atteinte</th>
+              <tr className="border-b border-brand-rule bg-brand-surface/60">
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Client</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Libellé</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Commercial</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Prévisionnel</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">CA Réalisé</th>
+                <th className="px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em] w-40">% Atteinte</th>
                 <th className="w-10" />
               </tr>
             </thead>
             <tbody>
               {lignes.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-5 py-8 text-center text-sm text-brand-ink-muted">
                     Aucune ligne — ajoutez un objectif ci-dessous.
                   </td>
                 </tr>
@@ -424,9 +424,9 @@ export function BudgetClient({
                 const ca = caParClient[ligne.clientId] ?? 0;
                 const pct = ligne.montantPrevisionnel > 0 ? (ca / ligne.montantPrevisionnel) * 100 : 0;
                 return (
-                  <tr key={ligne.id} className="border-b border-slate-50 hover:bg-slate-50/40">
-                    <td className="px-5 py-3.5 text-sm font-medium text-slate-700">{ligne.client.name}</td>
-                    <td className="px-5 py-3.5 text-sm text-slate-600">{ligne.libelle}</td>
+                  <tr key={ligne.id} className="border-b border-brand-rule hover:bg-brand-surface/40">
+                    <td className="px-5 py-3.5 text-sm font-medium text-brand-ink">{ligne.client.name}</td>
+                    <td className="px-5 py-3.5 text-sm text-brand-ink-muted">{ligne.libelle}</td>
                     <td className="px-2 py-2.5">
                       <input
                         type="text"
@@ -434,11 +434,11 @@ export function BudgetClient({
                         onBlur={(e) => handleUpdateCommercial(ligne.id, e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
                         placeholder="—"
-                        className="w-full px-2 py-1 text-sm text-slate-600 border-0 bg-transparent hover:bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-300 rounded-md min-w-[100px]"
+                        className="w-full px-2 py-1 text-sm text-brand-ink-muted border-0 bg-transparent hover:bg-brand-surface focus:bg-brand-paper focus:outline-none focus:ring-1 focus:ring-brand-blue rounded-md min-w-[100px]"
                       />
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(ligne.montantPrevisionnel)}</td>
-                    <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-600">{fmtEur(ca)}</td>
+                    <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-brand-ink">{fmtEur(ligne.montantPrevisionnel)}</td>
+                    <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink-muted">{fmtEur(ca)}</td>
                     <td className="px-5 py-3.5">
                       <ProgressBar value={pct} />
                     </td>
@@ -446,7 +446,7 @@ export function BudgetClient({
                       <button
                         onClick={() => handleRemoveLigne(ligne.id)}
                         disabled={savingBudget}
-                        className="text-slate-200 hover:text-red-500 transition-colors"
+                        className="text-brand-ink-subtle hover:text-brand-coral transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -457,10 +457,10 @@ export function BudgetClient({
             </tbody>
             {lignes.length > 0 && (
               <tfoot>
-                <tr className="bg-slate-50 border-t border-slate-200">
-                  <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Total</td>
-                  <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">{fmtEur(totalPrev)}</td>
-                  <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">{fmtEur(totalRealise)}</td>
+                <tr className="bg-brand-surface border-t border-brand-rule">
+                  <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-brand-ink-muted uppercase">Total</td>
+                  <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-brand-ink">{fmtEur(totalPrev)}</td>
+                  <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-brand-ink">{fmtEur(totalRealise)}</td>
                   <td className="px-5 py-3">
                     <ProgressBar value={pctGlobal} />
                   </td>
@@ -472,14 +472,14 @@ export function BudgetClient({
         </div>
 
         {/* Formulaire ajout */}
-        <div className="px-5 py-4 border-t border-slate-100 bg-slate-50/40">
+        <div className="px-5 py-4 border-t border-brand-rule bg-brand-surface/40">
           <div className="flex gap-2 items-end">
             <div className="flex-shrink-0 w-44">
-              <label className="block text-xs text-slate-500 mb-1">Client</label>
+              <label className="block text-xs text-brand-ink-muted mb-1">Client</label>
               <select
                 value={newClientId}
                 onChange={(e) => setNewClientId(e.target.value)}
-                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm bg-brand-paper focus:outline-none focus:ring-2 focus:ring-brand-blue"
               >
                 {sortedClients.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -487,29 +487,29 @@ export function BudgetClient({
               </select>
             </div>
             <div className="flex-1">
-              <label className="block text-xs text-slate-500 mb-1">Libellé</label>
+              <label className="block text-xs text-brand-ink-muted mb-1">Libellé</label>
               <input
                 type="text"
                 value={newLibelle}
                 onChange={(e) => setNewLibelle(e.target.value)}
                 placeholder="Ex : Production spots TV"
-                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 onKeyDown={(e) => e.key === "Enter" && handleAddLigne()}
               />
             </div>
             <div className="w-32">
-              <label className="block text-xs text-slate-500 mb-1">Commercial</label>
+              <label className="block text-xs text-brand-ink-muted mb-1">Commercial</label>
               <input
                 type="text"
                 value={newCommercial}
                 onChange={(e) => setNewCommercial(e.target.value)}
                 placeholder="Ex : Sophie"
-                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                 onKeyDown={(e) => e.key === "Enter" && handleAddLigne()}
               />
             </div>
             <div className="w-36">
-              <label className="block text-xs text-slate-500 mb-1">Montant prévisionnel</label>
+              <label className="block text-xs text-brand-ink-muted mb-1">Montant prévisionnel</label>
               <div className="flex items-center gap-1">
                 <input
                   type="number"
@@ -518,16 +518,16 @@ export function BudgetClient({
                   placeholder="0,00"
                   min="0"
                   step="100"
-                  className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   onKeyDown={(e) => e.key === "Enter" && handleAddLigne()}
                 />
-                <span className="text-slate-400 text-xs shrink-0">€</span>
+                <span className="text-brand-ink-muted text-xs shrink-0">€</span>
               </div>
             </div>
             <button
               onClick={handleAddLigne}
               disabled={savingBudget || !newLibelle.trim() || !newMontant || !newClientId}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 rounded-lg text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-blue rounded-[var(--radius-control)] text-sm font-medium text-brand-cream hover:bg-brand-ink disabled:opacity-50 transition-colors shrink-0"
             >
               {savingBudget ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
               Ajouter
@@ -539,15 +539,15 @@ export function BudgetClient({
       {/* ──────────────────────────────────────────────────────────────────────
           Section B — Suivi PIPE Devis
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
+        <div className="px-6 py-4 border-b border-brand-rule flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-surface flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-brand-blue" />
             </div>
             <div>
-              <h2 className="font-semibold text-slate-900">Suivi PIPE Devis</h2>
-              <p className="text-xs text-slate-400">Probabilité de closing par devis</p>
+              <h2 className="font-semibold text-brand-ink">Suivi PIPE Devis</h2>
+              <p className="text-xs text-brand-ink-muted">Probabilité de closing par devis</p>
             </div>
           </div>
           {/* Filtres statut + année */}
@@ -559,8 +559,8 @@ export function BudgetClient({
                   onClick={() => setPipeFilter(s)}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                     pipeFilter === s
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-500 hover:bg-slate-100"
+                      ? "bg-brand-blue text-brand-cream"
+                      : "text-brand-ink-muted hover:bg-brand-surface"
                   }`}
                 >
                   {s === "tous" ? "Tous" : STATUT_LABELS[s]}
@@ -568,13 +568,13 @@ export function BudgetClient({
               ))}
             </div>
             {anneesDisponibles.length > 0 && (
-              <div className="flex gap-1 border-l border-slate-200 pl-3">
+              <div className="flex gap-1 border-l border-brand-rule pl-3">
                 <button
                   onClick={() => setPipeAnneeFilter(null)}
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                     pipeAnneeFilter === null
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-500 hover:bg-slate-100"
+                      ? "bg-brand-ink text-brand-cream"
+                      : "text-brand-ink-muted hover:bg-brand-surface"
                   }`}
                 >
                   Toutes
@@ -585,8 +585,8 @@ export function BudgetClient({
                     onClick={() => setPipeAnneeFilter(a)}
                     className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                       pipeAnneeFilter === a
-                        ? "bg-slate-700 text-white"
-                        : "text-slate-500 hover:bg-slate-100"
+                        ? "bg-brand-ink text-brand-cream"
+                        : "text-brand-ink-muted hover:bg-brand-surface"
                     }`}
                   >
                     {a}
@@ -600,38 +600,36 @@ export function BudgetClient({
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Devis</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant HT</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
-                <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider w-28">% PIPE</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant pondéré</th>
+              <tr className="border-b border-brand-rule bg-brand-surface/60">
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Devis</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Client</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Montant HT</th>
+                <th className="text-center px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Statut</th>
+                <th className="text-center px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em] w-28">% PIPE</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Montant pondéré</th>
               </tr>
             </thead>
             <tbody>
               {devisFiltres.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">Aucun devis</td>
+                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-brand-ink-muted">Aucun devis</td>
                 </tr>
               )}
               {devisFiltres.map((d) => {
                 const pipe = d.tauxPipe ?? 0;
                 const pondere = (d.totalHt * pipe) / 100;
                 return (
-                  <tr key={d.id} className="border-b border-slate-50 hover:bg-slate-50/40">
+                  <tr key={d.id} className="border-b border-brand-rule hover:bg-brand-surface/40">
                     <td className="px-5 py-3.5">
-                      <a href={`/devis/${d.id}`} className="text-sm font-medium text-blue-600 hover:underline">
+                      <a href={`/devis/${d.id}`} className="text-sm font-medium text-brand-blue hover:underline">
                         {d.numero ?? "Brouillon"}
                       </a>
-                      <p className="text-xs text-slate-400 truncate max-w-xs">{d.objet}</p>
+                      <p className="text-xs text-brand-ink-muted truncate max-w-xs">{d.objet}</p>
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-slate-600">{d.client.name}</td>
-                    <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(d.totalHt)}</td>
+                    <td className="px-5 py-3.5 text-sm text-brand-ink-muted">{d.client.name}</td>
+                    <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-brand-ink">{fmtEur(d.totalHt)}</td>
                     <td className="px-5 py-3.5 text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUT_COLORS[d.statut] ?? "bg-slate-100 text-slate-500"}`}>
-                        {STATUT_LABELS[d.statut] ?? d.statut}
-                      </span>
+                      <StatusBadge tone={statutTone(d.statut)} label={STATUT_LABELS[d.statut] ?? d.statut} />
                     </td>
                     <td className="px-3 py-3.5">
                       <div className="flex items-center gap-1.5 justify-center">
@@ -641,24 +639,24 @@ export function BudgetClient({
                           max={100}
                           defaultValue={pipe}
                           onBlur={(e) => handlePipeChange(d.id, e.target.value)}
-                          className="w-14 px-2 py-1 border border-slate-200 rounded-md text-xs text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-blue-400"
+                          className="w-14 px-2 py-1 border border-brand-rule rounded-md text-xs text-center tabular-nums focus:outline-none focus:ring-1 focus:ring-brand-blue"
                         />
-                        <span className="text-xs text-slate-400">%</span>
+                        <span className="text-xs text-brand-ink-muted">%</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-600">
-                      {pondere > 0 ? fmtEur(pondere) : <span className="text-slate-300">—</span>}
+                    <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink-muted">
+                      {pondere > 0 ? fmtEur(pondere) : <span className="text-brand-ink-subtle">—</span>}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-slate-50 border-t border-slate-200">
-                <td colSpan={5} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">
+              <tr className="bg-brand-surface border-t border-brand-rule">
+                <td colSpan={5} className="px-5 py-3 text-xs font-semibold text-brand-ink-muted uppercase">
                   Total pondéré
                 </td>
-                <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">
+                <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-brand-ink">
                   {fmtEur(totalPondere)}
                 </td>
               </tr>
@@ -670,43 +668,43 @@ export function BudgetClient({
       {/* ──────────────────────────────────────────────────────────────────────
           Section C — Bénéfice Net
       ────────────────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-            <DollarSign className="w-4 h-4 text-violet-600" />
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
+        <div className="px-6 py-4 border-b border-brand-rule flex items-center gap-3">
+          <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-surface flex items-center justify-center">
+            <DollarSign className="w-4 h-4 text-brand-ink" />
           </div>
           <div>
-            <h2 className="font-semibold text-slate-900">Bénéfice Net</h2>
-            <p className="text-xs text-slate-400">Total HT moins salaires artistes, indexations, CS et agent</p>
+            <h2 className="font-semibold text-brand-ink">Bénéfice Net</h2>
+            <p className="text-xs text-brand-ink-muted">Total HT moins salaires artistes, indexations, CS et agent</p>
           </div>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-4 gap-4 p-6 border-b border-slate-100">
-          <div className="bg-slate-50 rounded-xl p-4">
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Total HT</p>
-            <p className="text-xl font-bold text-slate-900 tabular-nums">{fmtEur(totalHtGlobal)}</p>
+        <div className="grid grid-cols-4 gap-4 p-6 border-b border-brand-rule">
+          <div className="bg-brand-surface rounded-[var(--radius-card)] p-4">
+            <p className="text-xs text-brand-ink-muted font-medium uppercase tracking-wider mb-1">Total HT</p>
+            <p className="text-xl font-bold text-brand-ink tabular-nums">{fmtEur(totalHtGlobal)}</p>
           </div>
-          <div className="bg-red-50 rounded-xl p-4">
-            <p className="text-xs text-red-500 font-medium uppercase tracking-wider mb-1">Coûts artistes</p>
-            <p className="text-xl font-bold text-red-700 tabular-nums">{fmtEur(coutsArtistesGlobal)}</p>
-            <p className="text-xs text-red-400 mt-0.5">Salaires + indexation + CS + agent</p>
+          <div className="bg-brand-surface rounded-[var(--radius-card)] p-4">
+            <p className="text-xs text-brand-ink-muted font-medium uppercase tracking-wider mb-1">Coûts artistes</p>
+            <p className="font-display text-xl font-bold text-brand-ink tabular-nums">{fmtEur(coutsArtistesGlobal)}</p>
+            <p className="text-xs text-brand-ink-muted mt-0.5">Salaires + indexation + CS + agent</p>
           </div>
-          <div className={`rounded-xl p-4 ${beneficeNetGlobal >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-            <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${beneficeNetGlobal >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+          <div className={`rounded-[var(--radius-card)] p-4 ${beneficeNetGlobal >= 0 ? "bg-status-success-bg" : "bg-status-danger-bg"}`}>
+            <p className={`text-xs font-medium uppercase tracking-wider mb-1 text-brand-ink-muted`}>
               Bénéfice net
             </p>
-            <p className={`text-xl font-bold tabular-nums ${beneficeNetGlobal >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+            <p className={`font-display text-xl font-bold tabular-nums ${beneficeNetGlobal >= 0 ? "text-brand-ink" : "text-brand-coral-ink"}`}>
               {fmtEur(beneficeNetGlobal)}
             </p>
           </div>
-          <div className="bg-violet-50 rounded-xl p-4">
-            <p className="text-xs text-violet-500 font-medium uppercase tracking-wider mb-1">Marge nette</p>
+          <div className="bg-status-info-bg rounded-[var(--radius-card)] p-4">
+            <p className="text-xs text-brand-blue font-medium uppercase tracking-wider mb-1">Marge nette</p>
             <div className="flex items-end gap-2">
-              <p className="text-xl font-bold text-violet-700 tabular-nums">{fmtPct(margeNettePct)}</p>
+              <p className="font-display text-xl font-bold text-brand-blue tabular-nums">{fmtPct(margeNettePct)}</p>
               {margeNettePct >= 0
-                ? <TrendingUp className="w-4 h-4 text-violet-500 mb-0.5" />
-                : <TrendingDown className="w-4 h-4 text-red-500 mb-0.5" />
+                ? <TrendingUp className="w-4 h-4 text-brand-blue mb-0.5" />
+                : <TrendingDown className="w-4 h-4 text-brand-coral-ink mb-0.5" />
               }
             </div>
           </div>
@@ -716,41 +714,41 @@ export function BudgetClient({
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Devis</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Client</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Total HT</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Salaires</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Indexation</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">CS Art.</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Agent</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Bénéfice</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Marge</th>
+              <tr className="border-b border-brand-rule bg-brand-surface/60">
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Devis</th>
+                <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Client</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Total HT</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Salaires</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Indexation</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">CS Art.</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Agent</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Bénéfice</th>
+                <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Marge</th>
               </tr>
             </thead>
             <tbody>
               {beneficeRows.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-5 py-8 text-center text-sm text-slate-400">Aucun devis</td>
+                  <td colSpan={9} className="px-5 py-8 text-center text-sm text-brand-ink-muted">Aucun devis</td>
                 </tr>
               )}
               {beneficeRows.map(({ d, salaires, indexation, csArtistes, agent, couts, benefice, marge }) => (
-                <tr key={d.id} className="border-b border-slate-50 hover:bg-slate-50/40">
+                <tr key={d.id} className="border-b border-brand-rule hover:bg-brand-surface/40">
                   <td className="px-5 py-3.5">
-                    <a href={`/devis/${d.id}`} className="text-sm font-medium text-blue-600 hover:underline">
+                    <a href={`/devis/${d.id}`} className="text-sm font-medium text-brand-blue hover:underline">
                       {d.numero ?? "Brouillon"}
                     </a>
                   </td>
-                  <td className="px-5 py-3.5 text-sm text-slate-600">{d.client.name}</td>
-                  <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(d.totalHt)}</td>
-                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-red-500">{salaires > 0 ? fmtEur(salaires) : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-violet-500">{indexation > 0 ? fmtEur(indexation) : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-orange-500">{csArtistes > 0 ? fmtEur(csArtistes) : <span className="text-slate-300">—</span>}</td>
-                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-amber-600">{agent > 0 ? fmtEur(agent) : <span className="text-slate-300">—</span>}</td>
-                  <td className={`px-5 py-3.5 text-sm text-right tabular-nums font-semibold ${benefice >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                  <td className="px-5 py-3.5 text-sm text-brand-ink-muted">{d.client.name}</td>
+                  <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-brand-ink">{fmtEur(d.totalHt)}</td>
+                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink">{salaires > 0 ? fmtEur(salaires) : <span className="text-brand-ink-subtle">—</span>}</td>
+                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink">{indexation > 0 ? fmtEur(indexation) : <span className="text-brand-ink-subtle">—</span>}</td>
+                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink">{csArtistes > 0 ? fmtEur(csArtistes) : <span className="text-brand-ink-subtle">—</span>}</td>
+                  <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink">{agent > 0 ? fmtEur(agent) : <span className="text-brand-ink-subtle">—</span>}</td>
+                  <td className={`px-5 py-3.5 text-sm text-right tabular-nums font-semibold ${benefice >= 0 ? "text-brand-pistachio-ink" : "text-brand-coral-ink"}`}>
                     {fmtEur(benefice)}
                   </td>
-                  <td className={`px-5 py-3.5 text-sm text-right tabular-nums ${marge >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                  <td className={`px-5 py-3.5 text-sm text-right tabular-nums ${marge >= 0 ? "text-brand-pistachio-ink" : "text-brand-coral-ink"}`}>
                     {fmtPct(marge)}
                   </td>
                 </tr>
@@ -764,60 +762,60 @@ export function BudgetClient({
           Section D — Suivi par agent
       ────────────────────────────────────────────────────────────────────── */}
       {agents.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
-              <Mic2 className="w-4 h-4 text-rose-500" />
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
+          <div className="px-6 py-4 border-b border-brand-rule flex items-center gap-3">
+            <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-surface flex items-center justify-center">
+              <Mic2 className="w-4 h-4 text-brand-ink" />
             </div>
             <div>
-              <h2 className="font-semibold text-slate-900">Suivi par agent</h2>
-              <p className="text-xs text-slate-400">Montant des lignes associées et commission estimée</p>
+              <h2 className="font-semibold text-brand-ink">Suivi par agent</h2>
+              <p className="text-xs text-brand-ink-muted">Montant des lignes associées et commission estimée</p>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/60">
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Agent</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Agence</th>
-                  <th className="text-center px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Nb devis</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant HT total</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Taux</th>
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Commission estimée</th>
+                <tr className="border-b border-brand-rule bg-brand-surface/60">
+                  <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Agent</th>
+                  <th className="text-left px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Agence</th>
+                  <th className="text-center px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Nb devis</th>
+                  <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Montant HT total</th>
+                  <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Taux</th>
+                  <th className="text-right px-5 py-3 text-[10px] font-medium text-brand-ink-muted uppercase tracking-[0.15em]">Commission estimée</th>
                 </tr>
               </thead>
               <tbody>
                 {agentStats.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-8 text-center text-sm text-slate-400">
+                    <td colSpan={6} className="px-5 py-8 text-center text-sm text-brand-ink-muted">
                       Aucun agent associé à des lignes de devis
                     </td>
                   </tr>
                 ) : (
                   agentStats.map(({ agent, nbDevis, montantHt, commission, comedienStats }) => (
                     <React.Fragment key={agent.id}>
-                      <tr className="border-b border-slate-50 hover:bg-slate-50/40">
-                        <td className="px-5 py-3.5 text-sm font-medium text-slate-800">
+                      <tr className="border-b border-brand-rule hover:bg-brand-surface/40">
+                        <td className="px-5 py-3.5 text-sm font-medium text-brand-ink">
                           {agent.prenom ? `${agent.prenom} ${agent.nom}` : agent.nom}
                         </td>
-                        <td className="px-5 py-3.5 text-sm text-slate-500">
-                          {agent.agence ?? <span className="text-slate-300">—</span>}
+                        <td className="px-5 py-3.5 text-sm text-brand-ink-muted">
+                          {agent.agence ?? <span className="text-brand-ink-subtle">—</span>}
                         </td>
-                        <td className="px-5 py-3.5 text-sm text-center tabular-nums text-slate-600">{nbDevis}</td>
-                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-slate-700">{fmtEur(montantHt)}</td>
-                        <td className="px-5 py-3.5 text-sm text-right tabular-nums text-slate-500">{agent.tauxCommission}%</td>
-                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-semibold text-rose-600">{fmtEur(commission)}</td>
+                        <td className="px-5 py-3.5 text-sm text-center tabular-nums text-brand-ink-muted">{nbDevis}</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-medium text-brand-ink">{fmtEur(montantHt)}</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums text-brand-ink-muted">{agent.tauxCommission}%</td>
+                        <td className="px-5 py-3.5 text-sm text-right tabular-nums font-semibold text-brand-ink">{fmtEur(commission)}</td>
                       </tr>
                       {comedienStats.map(({ comedien, montant, nb }) => (
-                        <tr key={`${agent.id}-${comedien.id}`} className="border-b border-slate-50 bg-slate-50/30">
-                          <td className="pl-10 pr-5 py-2 text-xs text-slate-500 flex items-center gap-1.5">
-                            <span className="text-slate-300">↳</span>
+                        <tr key={`${agent.id}-${comedien.id}`} className="border-b border-brand-rule bg-brand-surface/30">
+                          <td className="pl-10 pr-5 py-2 text-xs text-brand-ink-muted flex items-center gap-1.5">
+                            <span className="text-brand-ink-subtle">↳</span>
                             {comedien.prenom} {comedien.nom}
                           </td>
                           <td />
-                          <td className="px-5 py-2 text-xs text-center tabular-nums text-slate-400">{nb}</td>
-                          <td className="px-5 py-2 text-xs text-right tabular-nums text-slate-500">{fmtEur(montant)}</td>
+                          <td className="px-5 py-2 text-xs text-center tabular-nums text-brand-ink-muted">{nb}</td>
+                          <td className="px-5 py-2 text-xs text-right tabular-nums text-brand-ink-muted">{fmtEur(montant)}</td>
                           <td colSpan={2} />
                         </tr>
                       ))}
@@ -827,13 +825,13 @@ export function BudgetClient({
               </tbody>
               {agentStats.length > 0 && (
                 <tfoot>
-                  <tr className="bg-slate-50 border-t border-slate-200">
-                    <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Total</td>
-                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-slate-800">
+                  <tr className="bg-brand-surface border-t border-brand-rule">
+                    <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-brand-ink-muted uppercase">Total</td>
+                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-brand-ink">
                       {fmtEur(agentStats.reduce((s, r) => s + r.montantHt, 0))}
                     </td>
                     <td />
-                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-rose-700">
+                    <td className="px-5 py-3 text-sm text-right tabular-nums font-bold text-brand-ink">
                       {fmtEur(agentStats.reduce((s, r) => s + r.commission, 0))}
                     </td>
                   </tr>

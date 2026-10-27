@@ -6,11 +6,9 @@ import { ChevronLeft, Mail, AlertTriangle, FileText, ExternalLink } from "lucide
 import { formatEuros, formatPct, formatQuantite } from "@/lib/calculations";
 import { formatDate } from "@/lib/utils";
 import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
-import {
-  FACTURE_STATUT_COLORS,
-  FACTURE_STATUT_LABELS,
-  FACTURE_TYPE_LABELS,
-} from "@/types";
+import { FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
+import { StatusBadge } from "@/components/brand/StatusBadge";
+import { FACTURE_STATUT_TONE } from "@/design/status";
 import { formatFactureNumero } from "@/lib/facture-numero";
 import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
 import { FactureActions } from "@/components/factures/FactureActions";
@@ -127,11 +125,7 @@ export default async function FactureDetailPage({
               <h1 className="text-2xl font-bold text-slate-900">
                 {formatFactureNumero(facture)}
               </h1>
-              <span
-                className={`text-xs font-medium px-2.5 py-1 rounded-full ${FACTURE_STATUT_COLORS[facture.statut]}`}
-              >
-                {FACTURE_STATUT_LABELS[facture.statut]}
-              </span>
+              <StatusBadge tone={FACTURE_STATUT_TONE[facture.statut]} label={FACTURE_STATUT_LABELS[facture.statut]} />
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
                 {FACTURE_TYPE_LABELS[facture.type]}
               </span>

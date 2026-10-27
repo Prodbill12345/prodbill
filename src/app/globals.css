@@ -27,6 +27,8 @@
   --color-brand-coral: #FF6846;
   --color-brand-pistachio: #B7D85D;
   --color-brand-rose: #FFBBD3;
+  --color-brand-coral-ink: #B83A1E;
+  --color-brand-pistachio-ink: #4F6A12;
   --color-brand-rule: #DEDED2;
   --color-brand-surface: #EDEEE2;
 
@@ -38,6 +40,7 @@
   --color-status-success-dot: #8DB136;
   --color-status-danger-bg: #FFE1D8;
   --color-status-danger-dot: #FF6846;
+  --color-status-partial-bg: #FFE4ED;
 
   --radius-card: 14px;
   --radius-control: 10px;
