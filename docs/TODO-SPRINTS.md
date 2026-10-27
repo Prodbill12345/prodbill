@@ -371,3 +371,51 @@ le tableau restant tel quel au-dessus de `md`.
 - Le tableau desktop est inchangé
 
 ---
+
+## Après C-REDESIGN-PHASE2-APP — C-PDF-ACCENT-PAR-COMPANY
+
+Ouvert le 27/10/2026 (demande Vanda, arbitrage Rose : après l'étape 6).
+
+Permettre à chaque société de choisir la couleur d'accent de ses
+documents clients (PDF devis / facture / avoir / conteneur Factur-X), au
+lieu du bleu signature unique. Aujourd'hui l'accent des PDF vient de
+`colors.accent` (src/design/tokens.ts) : numéro du document, libellés de
+section en capitales espacées, total final.
+
+### Périmètre
+
+- Champ `accentColor` sur `Company` (migration additive, nullable ;
+  NULL = bleu signature actuel, rendu inchangé).
+- Palette CURÉE de 4-5 accents (pas de sélecteur libre), chacun testé :
+  AA sur crème (≥ 4.5 — texte du numéro et des libellés) et assez
+  distinct de l'encre #25251F pour rester un accent. Candidats mesurés le
+  27/10 (contraste sur crème · contraste vs encre) :
+  Klein #2115ED (8.0 · 1.76), Bordeaux #8A1F2D (8.3 · 1.70),
+  Vert sapin #1F5A3D (7.4 · 1.90), Pétrole #0E5A6B (7.2 · 1.98),
+  Prune #5B2A6E (9.6 · 1.47). Écartés : Wine #5E1A1A (1.20 vs encre)
+  et Olive #3A3D2B (1.38) — AA mais trop proches de l'encre, l'accent ne
+  se distingue plus du texte (cf. aperçus « variantes-accent » du 27/10).
+  Liste finale à valider par Rose + Vanda sur rendu PDF réel.
+- Templates DevisPdf / FacturePdf : accent lu depuis la société (devis :
+  `company` ; facture : à snapshotter à l'émission comme les autres
+  mentions émetteur, pour qu'un changement d'accent ne modifie pas le
+  rendu d'une pièce émise — cf. immuabilité).
+- Choix dans Paramètres : pastilles de la palette + aperçu en direct.
+
+### Dépendance
+
+Découpler d'abord les tons sémantiques des badges de l'accent de marque
+(voir reco « variantes d'accent » : `statusTones.info` ne doit plus
+dériver de `colors.accent`). Sans ça, un accent bordeaux fait ressembler
+« Envoyé » à une alerte. Concerne l'app ; les PDF n'ont pas de badges de
+statut mais le même principe s'applique au repli des tons.
+
+### Acceptance criteria
+
+- Société sans accent choisi : PDF identiques au pixel près à aujourd'hui
+- Chaque accent de la palette : test AA automatisé sur crème
+- Facture émise : l'accent est figé (changer l'accent de la société ne
+  change pas le PDF d'une pièce déjà émise)
+- Caleson et NONNA : rendu vérifié à l'œil (devis, facture, avoir)
+
+---
