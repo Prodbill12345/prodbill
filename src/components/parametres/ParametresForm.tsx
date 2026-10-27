@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Save, Lock, Upload, X } from "lucide-react";
+import { Loader2, Save, Lock, Upload, X, Info } from "lucide-react";
 import Image from "next/image";
 import type { Company, Role } from "@/types";
 import { InputPct } from "@/components/forms/InputPct";
@@ -410,8 +410,9 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
             </div>
           ))}
         </div>
-        <p className="text-xs text-brand-ink-muted">
-          ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
+        <p className="text-xs text-brand-ink-muted flex items-center gap-1.5">
+          <Info className="w-3.5 h-3.5 shrink-0" />
+          Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
         </p>
       </div>
 

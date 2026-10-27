@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useFieldArray, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Loader2, BookmarkPlus, X, Users, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { calculerDevis, calculerLigne } from "@/lib/calculations";
 import { TotauxPanel } from "./TotauxPanel";
 import { LIGNE_TAG_LABELS, LIGNE_TAG_COLORS } from "@/types";
@@ -732,8 +732,9 @@ export function DevisBuilder({
               />
             </div>
           </div>
-          <p className="text-xs text-brand-ink-muted mt-2">
-            ℹ️ Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
+          <p className="text-xs text-brand-ink-muted mt-2 flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 shrink-0" />
+            Entrez le pourcentage (ex : 5 pour 5%, accepte 5,5 ou 5.5)
           </p>
 
           {/* Mention TVA conditionnelle — affichée UNIQUEMENT si TVA=0 */}

@@ -1,8 +1,9 @@
 import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import { formatEuros } from "@/lib/calculations";
-import { Receipt, TrendingUp, Clock } from "lucide-react";
+import { TrendingUp, Clock } from "lucide-react";
 import { FacturesListClient } from "@/components/factures/FacturesListClient";
+import { Mascot } from "@/components/brand/Mascot";
 
 export default async function FacturesPage() {
   const user = await getCurrentUser();
@@ -77,10 +78,8 @@ export default async function FacturesPage() {
 
       {factures.length === 0 ? (
         <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-16 text-center">
-          <div className="w-16 h-16 bg-brand-surface rounded-[var(--radius-card)] flex items-center justify-center mx-auto mb-4">
-            <Receipt className="w-8 h-8 text-brand-ink-muted" />
-          </div>
-          <h3 className="text-lg font-semibold text-brand-ink mb-2">Aucune facture</h3>
+          <Mascot size={88} className="mx-auto mb-4" />
+          <h3 className="font-display text-lg font-semibold text-brand-ink mb-2">Aucune facture</h3>
           <p className="text-brand-ink-muted text-sm">Les factures sont générées depuis les devis acceptés</p>
         </div>
       ) : (

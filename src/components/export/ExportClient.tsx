@@ -71,8 +71,8 @@ export function ExportClient() {
     {
       id: "excel",
       icon: FileSpreadsheet,
-      color: "text-green-600 bg-green-50 border-green-100",
-      btnColor: "bg-green-600 hover:bg-green-700",
+      color: "text-brand-pistachio-ink bg-status-success-bg border-status-success-bg",
+      btnColor: "bg-brand-blue hover:bg-brand-ink",
       label: "Export Excel (.xlsx)",
       description:
         "4 onglets : Factures · Paiements · CA mensuel · Devis",
@@ -82,8 +82,8 @@ export function ExportClient() {
     {
       id: "csv",
       icon: FileText,
-      color: "text-blue-600 bg-blue-50 border-blue-100",
-      btnColor: "bg-blue-600 hover:bg-blue-700",
+      color: "text-brand-blue bg-status-info-bg border-status-info-bg",
+      btnColor: "bg-brand-blue hover:bg-brand-ink",
       label: "Export CSV",
       description:
         "Toutes les factures, une ligne par facture, compatible Excel",
@@ -93,8 +93,8 @@ export function ExportClient() {
     {
       id: "fec",
       icon: BookOpen,
-      color: "text-purple-600 bg-purple-50 border-purple-100",
-      btnColor: "bg-purple-600 hover:bg-purple-700",
+      color: "text-brand-blue bg-status-info-bg border-status-info-bg",
+      btnColor: "bg-brand-blue hover:bg-brand-ink",
       label: "Export FEC",
       description:
         "Fichier des Écritures Comptables — format légal (arrêté 29/07/2013) pour expert-comptable",
@@ -107,10 +107,10 @@ export function ExportClient() {
   return (
     <div className="space-y-6">
       {/* Sélecteur de période */}
-      <div className="bg-white rounded-xl border border-slate-100 p-6 space-y-4">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 space-y-4">
         <div className="flex items-center gap-2 mb-1">
-          <Calendar className="w-4 h-4 text-slate-400" />
-          <h2 className="font-semibold text-slate-900">Période d&apos;export</h2>
+          <Calendar className="w-4 h-4 text-brand-ink-muted" />
+          <h2 className="font-semibold text-brand-ink">Période d&apos;export</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -118,10 +118,10 @@ export function ExportClient() {
             <button
               key={p.value}
               onClick={() => setPeriode(p.value)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+              className={`px-3 py-2 rounded-[var(--radius-control)] text-sm font-medium border transition-colors ${
                 periode === p.value
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                  ? "bg-brand-blue text-brand-cream border-brand-blue"
+                  : "bg-brand-paper text-brand-ink-muted border-brand-rule hover:bg-brand-surface"
               }`}
             >
               {p.label}
@@ -132,33 +132,33 @@ export function ExportClient() {
         {periode === "personnalise" && (
           <div className="flex items-center gap-3 pt-1">
             <div className="flex-1">
-              <label className="block text-xs font-medium text-slate-500 mb-1">
+              <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                 Du
               </label>
               <input
                 type="date"
                 value={customDebut}
                 onChange={(e) => setCustomDebut(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
             <div className="flex-1">
-              <label className="block text-xs font-medium text-slate-500 mb-1">
+              <label className="block text-xs font-medium text-brand-ink-muted mb-1">
                 Au
               </label>
               <input
                 type="date"
                 value={customFin}
                 onChange={(e) => setCustomFin(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               />
             </div>
           </div>
         )}
 
-        <p className="text-xs text-slate-400 pt-1">
+        <p className="text-xs text-brand-ink-muted pt-1">
           Période sélectionnée :{" "}
-          <span className="font-medium text-slate-600">{rangeStr}</span>
+          <span className="font-medium text-brand-ink-muted">{rangeStr}</span>
         </p>
       </div>
 
@@ -169,28 +169,28 @@ export function ExportClient() {
           return (
             <div
               key={exp.id}
-              className={`bg-white rounded-xl border p-5 flex items-center gap-4 ${exp.color.split(" ").slice(2).join(" ")}`}
+              className={`bg-brand-paper rounded-[var(--radius-card)] border p-5 flex items-center gap-4 ${exp.color.split(" ").slice(2).join(" ")}`}
             >
-              <div className={`p-3 rounded-xl ${exp.color.split(" ").slice(0, 2).join(" ")} shrink-0`}>
+              <div className={`p-3 rounded-[var(--radius-card)] ${exp.color.split(" ").slice(0, 2).join(" ")} shrink-0`}>
                 <Icon className="w-5 h-5" />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-slate-900">{exp.label}</p>
+                  <p className="font-semibold text-brand-ink">{exp.label}</p>
                   {exp.badge && (
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-status-info-bg text-brand-blue">
                       {exp.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-slate-500 mt-0.5">{exp.description}</p>
+                <p className="text-sm text-brand-ink-muted mt-0.5">{exp.description}</p>
               </div>
 
               <a
                 href={exp.href}
                 download={exp.filename}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white transition-colors shrink-0 ${exp.btnColor}`}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-control)] text-sm font-medium text-brand-cream transition-colors shrink-0 ${exp.btnColor}`}
               >
                 <Download className="w-4 h-4" />
                 Exporter
@@ -201,8 +201,8 @@ export function ExportClient() {
       </div>
 
       {/* Note FEC */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500 space-y-1">
-        <p className="font-semibold text-slate-700">À propos du FEC</p>
+      <div className="bg-brand-surface border border-brand-rule rounded-[var(--radius-card)] p-4 text-xs text-brand-ink-muted space-y-1">
+        <p className="font-semibold text-brand-ink">À propos du FEC</p>
         <p>
           Le Fichier des Écritures Comptables est requis en cas de contrôle fiscal (art. L47 A LPF).
           Il contient les journaux de ventes (compte 411, 706, 445710) et de banque (compte 512).

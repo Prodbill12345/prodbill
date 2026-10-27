@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Building2, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Loader2, Building2, ChevronRight, ChevronLeft, Check, Info, Lock } from "lucide-react";
 
 const OnboardingSchema = z.object({
   companyName: z.string().min(1, "Nom de société requis"),
@@ -83,8 +83,8 @@ export function OnboardingForm({ userName }: { userName: string }) {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-blue rounded-[var(--radius-card)] mb-4">
             <Building2 className="w-7 h-7 text-brand-cream" />
           </div>
-          <h1 className="text-3xl font-bold text-brand-ink">
-            Bienvenue, {userName} 👋
+          <h1 className="font-display text-3xl font-bold tracking-[-0.02em] text-brand-ink">
+            Bienvenue, {userName}
           </h1>
           <p className="text-brand-ink-muted mt-2">
             Configurons votre espace ProdBill en 3 minutes
@@ -183,8 +183,9 @@ export function OnboardingForm({ userName }: { userName: string }) {
                   </div>
                 </div>
 
-                <p className="text-xs text-brand-ink-muted bg-brand-surface rounded-[var(--radius-control)] px-3 py-2">
-                  💡 Ces informations peuvent être complétées ou modifiées plus tard dans
+                <p className="text-xs text-brand-ink-muted bg-brand-surface rounded-[var(--radius-control)] px-3 py-2 flex items-start gap-1.5">
+                  <Info className="w-3.5 h-3.5 shrink-0 mt-px" />
+                  Ces informations peuvent être complétées ou modifiées plus tard dans
                   les Paramètres.
                 </p>
               </div>
@@ -304,8 +305,9 @@ export function OnboardingForm({ userName }: { userName: string }) {
                   />
                 </div>
 
-                <p className="text-xs text-brand-ink-muted bg-status-info-bg border border-status-info-bg rounded-[var(--radius-control)] px-3 py-2.5">
-                  🔒 Ces données sont stockées de manière sécurisée et ne sont jamais
+                <p className="text-xs text-brand-ink-muted bg-status-info-bg border border-status-info-bg rounded-[var(--radius-control)] px-3 py-2.5 flex items-start gap-1.5">
+                  <Lock className="w-3.5 h-3.5 shrink-0 mt-px" />
+                  Ces données sont stockées de manière sécurisée et ne sont jamais
                   partagées. Vous pouvez les ajouter plus tard dans les Paramètres.
                 </p>
 

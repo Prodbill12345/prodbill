@@ -44,12 +44,12 @@ export function ImpersonateButton({ companyId, companyName }: Props) {
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-700 bg-white border border-red-200 hover:bg-red-50 hover:border-red-300 disabled:opacity-60 transition-all"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-control)] text-xs font-semibold text-brand-coral-ink bg-brand-paper border border-status-danger-bg hover:bg-status-danger-bg hover:border-status-danger-bg disabled:opacity-60 transition-all"
       >
         <ArrowLeftRight className="w-3.5 h-3.5" strokeWidth={2.5} />
         {isPending ? "…" : "Impersonate"}
       </button>
-      {error && <span className="text-[10px] text-red-600">{error}</span>}
+      {error && <span className="text-[10px] text-brand-coral-ink">{error}</span>}
     </div>
   );
 }

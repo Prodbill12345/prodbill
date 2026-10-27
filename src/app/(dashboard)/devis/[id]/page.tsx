@@ -82,7 +82,7 @@ export default async function DevisDetailPage({
   return (
     <div className="space-y-6">
       {brouillonFacturesCount > 0 && (
-        <div className="flex items-start gap-2 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-800">
+        <div className="flex items-start gap-2 px-4 py-3 rounded-[var(--radius-card)] border border-status-partial-bg bg-status-partial-bg text-sm text-brand-ink">
           <Info className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Ce devis est lié à {brouillonFacturesCount} brouillon
@@ -97,7 +97,7 @@ export default async function DevisDetailPage({
       <div>
         <Link
           href="/devis"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-brand-ink-muted hover:text-brand-ink mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           Devis
@@ -105,25 +105,25 @@ export default async function DevisDetailPage({
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">
                 {devis.numero ?? "Brouillon"}
               </h1>
               <StatusBadge tone={DEVIS_STATUT_TONE[devis.statut]} label={DEVIS_STATUT_LABELS[devis.statut]} />
             </div>
-            <p className="text-slate-500 mt-1">{devis.objet}</p>
+            <p className="text-brand-ink-muted mt-1">{devis.objet}</p>
             {/* Mention "Dupliqué depuis ..." si le devis a été créé via
                 /api/devis/[id]/dupliquer. Ticket #93. */}
             {devis.devisSource && (
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-brand-ink-muted mt-1">
                 Dupliqué depuis{" "}
                 <Link
                   href={`/devis/${devis.devisSource.id}`}
-                  className="text-blue-600 hover:text-blue-700 hover:underline"
+                  className="text-brand-blue hover:text-brand-blue hover:underline"
                 >
                   {devis.devisSource.numero ?? "(brouillon)"}
                 </Link>
                 {devis.devisSource.objet && (
-                  <span className="text-slate-400"> — {devis.devisSource.objet}</span>
+                  <span className="text-brand-ink-muted"> — {devis.devisSource.objet}</span>
                 )}
               </p>
             )}
@@ -136,25 +136,25 @@ export default async function DevisDetailPage({
         {/* Contenu principal */}
         <div className="col-span-2 space-y-5">
           {/* Infos client */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
-            <h3 className="font-semibold text-slate-900 mb-3">Client</h3>
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+            <h3 className="font-semibold text-brand-ink mb-3">Client</h3>
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-medium text-slate-900">{devis.client.name}</p>
-                <p className="text-sm text-slate-500 mt-0.5">{devis.client.email}</p>
+                <p className="font-medium text-brand-ink">{devis.client.name}</p>
+                <p className="text-sm text-brand-ink-muted mt-0.5">{devis.client.email}</p>
                 {devis.client.siret && (
-                  <p className="text-xs text-slate-400 font-mono mt-1">
+                  <p className="text-xs text-brand-ink-muted font-mono mt-1">
                     SIRET {devis.client.siret}
                   </p>
                 )}
               </div>
-              <div className="text-right text-sm text-slate-500">
+              <div className="text-right text-sm text-brand-ink-muted">
                 <p>Créé le {formatDate(devis.createdAt)}</p>
                 {devis.dateValidite && (
                   <p>Valide jusqu&apos;au {formatDate(devis.dateValidite)}</p>
                 )}
                 {devis.bdc && (
-                  <p className="text-blue-600 font-medium mt-1">
+                  <p className="text-brand-blue font-medium mt-1">
                     BDC : {devis.bdc.numero}
                   </p>
                 )}
@@ -164,50 +164,50 @@ export default async function DevisDetailPage({
 
           {/* Sections et lignes */}
           {devis.sections.map((section) => (
-            <div key={section.id} className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-                <h4 className="font-semibold text-slate-800">{section.titre}</h4>
+            <div key={section.id} className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50">
+                <h4 className="font-semibold text-brand-ink">{section.titre}</h4>
               </div>
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Libellé
                     </th>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Tag
                     </th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Qté
                     </th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       P.U. HT
                     </th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Total HT
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-brand-rule">
                   {section.lignes.map((ligne) => (
                     <tr key={ligne.id}>
-                      <td className="px-5 py-3 text-sm text-slate-700">
+                      <td className="px-5 py-3 text-sm text-brand-ink">
                         {ligne.libelle}
                       </td>
                       <td className="px-5 py-3">
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${LIGNE_TAG_COLORS[ligne.tag]}`}
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${LIGNE_TAG_COLORS[ligne.tag]}`}
                         >
                           {LIGNE_TAG_LABELS[ligne.tag]}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                      <td className="px-5 py-3 text-sm text-right tabular-nums text-brand-ink-muted">
                         {formatQuantite(ligne.quantite)}
                       </td>
-                      <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                      <td className="px-5 py-3 text-sm text-right tabular-nums text-brand-ink-muted">
                         {formatEuros(ligne.prixUnit)}
                       </td>
-                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-slate-900">
+                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-brand-ink">
                         {formatEuros(ligne.total)}
                       </td>
                     </tr>
@@ -223,8 +223,8 @@ export default async function DevisDetailPage({
               On liste maintenant facturesLiees : le devis facturé reste
               visible et traçable dans son historique. */}
           {facturesLiees.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-100 p-5">
-              <h3 className="font-semibold text-slate-900 mb-3">Factures générées</h3>
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+              <h3 className="font-semibold text-brand-ink mb-3">Factures générées</h3>
               <div className="space-y-2">
                 {facturesLiees.map((f) => {
                   const isRecap = f.devisId === null && f._count.devisLinks >= 2;
@@ -232,21 +232,21 @@ export default async function DevisDetailPage({
                     <Link
                       key={f.id}
                       href={`/factures/${f.id}`}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-blue-50 transition-colors"
+                      className="flex items-center justify-between p-3 bg-brand-surface rounded-[var(--radius-control)] hover:bg-status-info-bg transition-colors"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Receipt className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="text-sm font-medium text-slate-700">
+                        <Receipt className="w-4 h-4 text-brand-ink-muted shrink-0" />
+                        <span className="text-sm font-medium text-brand-ink">
                           {f.numero ?? "Brouillon"}
                         </span>
-                        <span className="text-xs text-slate-400 truncate">
+                        <span className="text-xs text-brand-ink-muted truncate">
                           {FACTURE_TYPE_LABELS[f.type]}
                           {isRecap && " · récapitulative"}
                           {" · "}
                           {FACTURE_STATUT_LABELS[f.statut]}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-slate-900 shrink-0">
+                      <span className="text-sm font-semibold text-brand-ink shrink-0">
                         {formatEuros(f.totalTtc)}
                       </span>
                     </Link>
@@ -259,8 +259,8 @@ export default async function DevisDetailPage({
 
         {/* Panneau totaux */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
-            <h3 className="font-semibold text-slate-900 mb-4">Récapitulatif</h3>
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+            <h3 className="font-semibold text-brand-ink mb-4">Récapitulatif</h3>
             <div className="space-y-2 text-sm">
               {(
                 [
@@ -276,13 +276,13 @@ export default async function DevisDetailPage({
                 .filter((r) => r.alwaysShow || r.value !== 0)
                 .map((r) => (
                   <div key={r.label} className="flex justify-between">
-                    <span className="text-slate-500">{r.label}</span>
-                    <span className="tabular-nums text-slate-700">
+                    <span className="text-brand-ink-muted">{r.label}</span>
+                    <span className="tabular-nums text-brand-ink">
                       {formatEuros(r.value)}
                     </span>
                   </div>
                 ))}
-              <div className="border-t border-slate-100 pt-2 mt-2 space-y-1.5">
+              <div className="border-t border-brand-rule pt-2 mt-2 space-y-1.5">
                 {/* TOTAL HT = HT net après remise et co-production (base TVA).
                     Identique à totalHt si pas de remise ni coproduction. */}
                 <div className="flex justify-between font-semibold">
@@ -290,15 +290,15 @@ export default async function DevisDetailPage({
                   <span>{formatEuros(devis.totalApresRemise)}</span>
                 </div>
                 {showTva && (
-                  <div className="flex justify-between text-slate-500">
+                  <div className="flex justify-between text-brand-ink-muted">
                     <span>{formatTvaLabel(devis.tauxTva)}</span>
                     <span>{formatEuros(devis.tva)}</span>
                   </div>
                 )}
                 {showTtc && (
-                  <div className="flex justify-between font-bold text-base border-t border-slate-200 pt-2 mt-2">
+                  <div className="flex justify-between font-bold text-base border-t border-brand-rule pt-2 mt-2">
                     <span>TOTAL TTC</span>
-                    <span className="text-blue-600">{formatEuros(devis.totalTtc)}</span>
+                    <span className="text-brand-blue">{formatEuros(devis.totalTtc)}</span>
                   </div>
                 )}
               </div>
@@ -306,9 +306,9 @@ export default async function DevisDetailPage({
           </div>
 
           {devis.notes && (
-            <div className="bg-white rounded-xl border border-slate-100 p-5">
-              <h4 className="text-sm font-semibold text-slate-700 mb-2">Notes</h4>
-              <p className="text-sm text-slate-500 whitespace-pre-wrap">{devis.notes}</p>
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+              <h4 className="text-sm font-semibold text-brand-ink mb-2">Notes</h4>
+              <p className="text-sm text-brand-ink-muted whitespace-pre-wrap">{devis.notes}</p>
             </div>
           )}
         </div>

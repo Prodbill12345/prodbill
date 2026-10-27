@@ -1,12 +1,13 @@
 import { scopedPrisma } from "@/lib/scoped-prisma";
 import { getCurrentUser } from "@/lib/auth-context";
 import Link from "next/link";
-import { Plus, FileText } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DevisListClient } from "@/components/devis/DevisListClient";
 import {
   toFactureForFacturation,
   FACTURE_FACTURATION_SELECT,
 } from "@/lib/devis-facturation-state";
+import { Mascot } from "@/components/brand/Mascot";
 
 export default async function DevisPage() {
   const user = await getCurrentUser();
@@ -62,10 +63,8 @@ export default async function DevisPage() {
 
       {devis.length === 0 ? (
         <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-16 text-center">
-          <div className="w-16 h-16 bg-brand-surface rounded-[var(--radius-card)] flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-brand-ink-muted" />
-          </div>
-          <h3 className="text-lg font-semibold text-brand-ink mb-2">
+          <Mascot size={88} className="mx-auto mb-4" />
+          <h3 className="font-display text-lg font-semibold text-brand-ink mb-2">
             Aucun devis
           </h3>
           <p className="text-brand-ink-muted mb-6 text-sm">

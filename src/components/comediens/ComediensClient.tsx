@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/brand/StatusBadge";
 import { DEVIS_STATUT_TONE } from "@/design/status";
 import type { StatusTone } from "@/design/tokens";
 import type { DevisStatut } from "@prisma/client";
+import { Mascot } from "@/components/brand/Mascot";
 
 interface AgentRef {
   id: string;
@@ -234,7 +235,7 @@ export function ComediensClient({ comediens: initialComediens, agents }: Comedie
       <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
         {comediens.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3 text-brand-ink-muted">
-            <UserRound className="w-10 h-10 text-brand-ink-subtle" />
+            <Mascot size={80} />
             <p className="text-sm">Aucun comédien enregistré</p>
             <button
               onClick={openCreate}

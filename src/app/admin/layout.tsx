@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const { isImpersonating } = await getActor();
   return {
     title: {
-      template: isImpersonating ? "👑 IMPERSONATION — %s" : "%s · Admin · ProdBill",
-      default: isImpersonating ? "👑 IMPERSONATION — Admin · ProdBill" : "Admin · ProdBill",
+      template: isImpersonating ? "IMPERSONATION — %s" : "%s · Admin · ProdBill",
+      default: isImpersonating ? "IMPERSONATION — Admin · ProdBill" : "Admin · ProdBill",
     },
   };
 }
@@ -44,17 +44,17 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-brand-cream">
       {bannerProps && <ImpersonationBanner {...bannerProps} />}
-      <header className="bg-slate-950 text-white border-b border-slate-800">
+      <header className="bg-brand-ink text-brand-cream border-b border-brand-ink-muted">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
           <Link href="/admin/workspaces" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-red-600/90 flex items-center justify-center shadow-md shadow-red-900/40 group-hover:bg-red-500 transition-colors">
-              <Shield className="w-4 h-4 text-white" strokeWidth={2.5} />
+            <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-coral/90 flex items-center justify-center group-hover:bg-brand-coral transition-colors">
+              <Shield className="w-4 h-4 text-brand-cream" strokeWidth={2.5} />
             </div>
             <div>
-              <span className="text-white font-bold text-[15px] tracking-tight leading-none block">
+              <span className="text-brand-cream font-bold text-[15px] tracking-tight leading-none block">
                 ProdBill
               </span>
-              <span className="text-red-300 text-[10px] tracking-widest uppercase leading-none block mt-0.5">
+              <span className="text-brand-coral text-[10px] tracking-widest uppercase leading-none block mt-0.5">
                 Super-admin
               </span>
             </div>
@@ -62,7 +62,7 @@ export default async function AdminLayout({
           <nav className="ml-6 flex items-center gap-1">
             <Link
               href="/admin/workspaces"
-              className="px-3 py-1.5 rounded-md text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+              className="px-3 py-1.5 rounded-md text-sm text-brand-ink-subtle hover:text-brand-cream hover:bg-brand-ink-muted/40 transition-colors"
             >
               Workspaces
             </Link>
@@ -70,7 +70,7 @@ export default async function AdminLayout({
           <div className="flex-1" />
           <Link
             href="/"
-            className="text-xs text-slate-400 hover:text-white transition-colors"
+            className="text-xs text-brand-ink-subtle hover:text-brand-cream transition-colors"
           >
             ← Retour au dashboard
           </Link>

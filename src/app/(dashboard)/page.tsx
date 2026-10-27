@@ -31,10 +31,10 @@ export default async function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">
+          <h2 className="text-xl font-semibold text-brand-ink mb-2">
             Bienvenue sur ProdBill
           </h2>
-          <p className="text-slate-500">Configuration de votre espace en cours...</p>
+          <p className="text-brand-ink-muted">Configuration de votre espace en cours...</p>
         </div>
       </div>
     );

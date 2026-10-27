@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X, Loader2, UserRound } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Loader2 } from "lucide-react";
+import { Mascot } from "@/components/brand/Mascot";
 
 interface Agent {
   id: string;
@@ -123,7 +124,7 @@ export function AgentsClient({ agents: initialAgents }: AgentsClientProps) {
       <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-x-auto">
         {agents.length === 0 ? (
           <div className="py-16 flex flex-col items-center gap-3 text-brand-ink-muted">
-            <UserRound className="w-10 h-10 text-brand-ink-subtle" />
+            <Mascot size={80} />
             <p className="text-sm">Aucun agent enregistré</p>
             <button
               onClick={openCreate}

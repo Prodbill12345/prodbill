@@ -24,10 +24,10 @@ const RELANCE_LABELS: Record<string, string> = {
 };
 
 const RELANCE_COLORS: Record<string, string> = {
-  ENVOI: "bg-blue-100 text-blue-700",
-  RELANCE_1: "bg-yellow-100 text-yellow-700",
-  RELANCE_2: "bg-orange-100 text-orange-700",
-  MISE_EN_DEMEURE: "bg-red-100 text-red-700",
+  ENVOI: "bg-status-info-bg text-brand-blue",
+  RELANCE_1: "bg-status-partial-bg text-brand-ink",
+  RELANCE_2: "bg-status-partial-bg text-brand-ink",
+  MISE_EN_DEMEURE: "bg-status-danger-bg text-brand-coral-ink",
 };
 
 export default async function FactureDetailPage({
@@ -114,7 +114,7 @@ export default async function FactureDetailPage({
       <div>
         <Link
           href="/factures"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm text-brand-ink-muted hover:text-brand-ink mb-4"
         >
           <ChevronLeft className="w-4 h-4" />
           Factures
@@ -122,26 +122,26 @@ export default async function FactureDetailPage({
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">
                 {formatFactureNumero(facture)}
               </h1>
               <StatusBadge tone={FACTURE_STATUT_TONE[facture.statut]} label={FACTURE_STATUT_LABELS[facture.statut]} />
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-brand-surface text-brand-ink-muted">
                 {FACTURE_TYPE_LABELS[facture.type]}
               </span>
               {isRetard && (
-                <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-status-danger-bg text-brand-coral-ink">
                   <AlertTriangle className="w-3 h-3" />
                   En retard
                 </span>
               )}
             </div>
             {facture.devis && !isRecap && (
-              <p className="text-slate-500 mt-1">
+              <p className="text-brand-ink-muted mt-1">
                 Réf. devis :{" "}
                 <Link
                   href={`/devis/${facture.devis.id}`}
-                  className="text-blue-600 hover:text-blue-700"
+                  className="text-brand-blue hover:text-brand-blue"
                 >
                   {facture.devis.numero}
                 </Link>
@@ -152,14 +152,14 @@ export default async function FactureDetailPage({
               </p>
             )}
             {isRecap && (
-              <p className="text-slate-500 mt-1">
+              <p className="text-brand-ink-muted mt-1">
                 Facture récapitulative —{" "}
                 {recapDevis.map((d, i) => (
                   <span key={d.id}>
                     {i > 0 && ", "}
                     <Link
                       href={`/devis/${d.id}`}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-brand-blue hover:text-brand-blue"
                     >
                       {d.numero ? `D${d.numero}` : "(brouillon)"}
                     </Link>
@@ -169,10 +169,10 @@ export default async function FactureDetailPage({
             )}
             {/* FEAT-FACTURE-OBJET-DESCRIPTION — snapshot, rien si vide */}
             {facture.objet && (
-              <p className="text-slate-500 mt-1">{facture.objet}</p>
+              <p className="text-brand-ink-muted mt-1">{facture.objet}</p>
             )}
             {facture.descriptionProjet && (
-              <p className="text-sm text-slate-400 italic mt-1 whitespace-pre-line">
+              <p className="text-sm text-brand-ink-muted italic mt-1 whitespace-pre-line">
                 {facture.descriptionProjet}
               </p>
             )}
@@ -188,30 +188,30 @@ export default async function FactureDetailPage({
         {/* Contenu principal */}
         <div className="col-span-2 space-y-5">
           {/* Infos client */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5">
-            <h3 className="font-semibold text-slate-900 mb-3">Client</h3>
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+            <h3 className="font-semibold text-brand-ink mb-3">Client</h3>
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-medium text-slate-900">
+                <p className="font-medium text-brand-ink">
                   {facture.client.name}
                 </p>
-                <p className="text-sm text-slate-500 mt-0.5">
+                <p className="text-sm text-brand-ink-muted mt-0.5">
                   {facture.client.email}
                 </p>
                 {facture.client.siret && (
-                  <p className="text-xs text-slate-400 font-mono mt-1">
+                  <p className="text-xs text-brand-ink-muted font-mono mt-1">
                     SIRET {facture.client.siret}
                   </p>
                 )}
               </div>
-              <div className="text-right text-sm text-slate-500">
+              <div className="text-right text-sm text-brand-ink-muted">
                 {facture.dateEmission && (
                   <p>Émise le {formatDate(facture.dateEmission)}</p>
                 )}
                 {facture.dateEcheance && (
-                  <p className={isRetard ? "text-red-600 font-medium" : ""}>
+                  <p className={isRetard ? "text-brand-coral-ink font-medium" : ""}>
                     Échéance : {formatDate(facture.dateEcheance)}
-                    {isRetard && " ⚠"}
+                    {isRetard && <AlertTriangle className="inline w-3.5 h-3.5 ml-1 -mt-0.5" />}
                   </p>
                 )}
               </div>
@@ -225,17 +225,17 @@ export default async function FactureDetailPage({
                 Lecture seule ici : la modif passe par /devis/[id]/modifier.
                 Ticket #79. */}
             {facture.devis?.bdcClientUrl && (
-              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
-                <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] bg-brand-surface">
+                <FileText className="w-4 h-4 text-brand-ink-muted shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-400 leading-tight">BDC client (fichier)</p>
+                  <p className="text-xs text-brand-ink-muted leading-tight">BDC client (fichier)</p>
                   <p
-                    className="text-sm text-slate-700 truncate"
+                    className="text-sm text-brand-ink truncate"
                     title={facture.devis.bdcClientFilename ?? ""}
                   >
                     {facture.devis.bdcClientFilename}
                     {facture.devis.bdcClientUploadedAt && (
-                      <span className="ml-2 text-xs text-slate-400">
+                      <span className="ml-2 text-xs text-brand-ink-muted">
                         · uploadé le {formatDate(facture.devis.bdcClientUploadedAt)}
                       </span>
                     )}
@@ -245,7 +245,7 @@ export default async function FactureDetailPage({
                   href={facture.devis.bdcClientUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-brand-blue hover:bg-status-info-bg rounded transition-colors"
                   title="Ouvrir le BDC dans un nouvel onglet"
                 >
                   <ExternalLink className="w-3 h-3" />
@@ -267,11 +267,11 @@ export default async function FactureDetailPage({
                 datePaiement = timestamp système au moment du bascule
                 (à distinguer de dateReglement = saisie manuelle). */}
             {facture.statut === "PAYEE" && facture.datePaiement && (
-              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-green-200 rounded-lg bg-green-50">
-                <span className="text-xs font-semibold text-green-700">
+              <div className="mt-3 flex items-center gap-2 px-3 py-2 border border-status-success-bg rounded-[var(--radius-control)] bg-status-success-bg">
+                <span className="text-xs font-semibold text-brand-pistachio-ink">
                   ✓ Payée
                 </span>
-                <span className="text-sm text-green-800">
+                <span className="text-sm text-brand-pistachio-ink">
                   le {formatDate(facture.datePaiement)}
                 </span>
               </div>
@@ -280,11 +280,11 @@ export default async function FactureDetailPage({
                 l'émission. Lecture seule (immuabilité légale comme le
                 reste de la facture). Ticket #69. */}
             {formatPeriodeExploitation(facture) && (
-              <div className="mt-3 px-3 py-2 border border-slate-200 rounded-lg bg-slate-50">
-                <p className="text-xs text-slate-400 leading-tight">
+              <div className="mt-3 px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] bg-brand-surface">
+                <p className="text-xs text-brand-ink-muted leading-tight">
                   Période d&apos;exploitation
                 </p>
-                <p className="text-sm text-slate-700 mt-0.5">
+                <p className="text-sm text-brand-ink mt-0.5">
                   {formatPeriodeExploitation(facture)}
                 </p>
               </div>
@@ -295,39 +295,39 @@ export default async function FactureDetailPage({
               valeurs ramenées au prorata (ratio = facture.totalHt / devis.totalHt).
               Fallback single-line pour les factures sans devis (NONNA/SACEM). */}
           {isRecap ? (
-            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-                <h4 className="font-semibold text-slate-800">
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50">
+                <h4 className="font-semibold text-brand-ink">
                   Devis regroupés ({recapDevis.length})
                 </h4>
               </div>
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium w-28">
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium w-28">
                       Devis
                     </th>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Objet
                     </th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium w-32">
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium w-32">
                       Total HT
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-brand-rule">
                   {recapDevis.map((d) => (
                     <tr key={d.id}>
                       <td className="px-5 py-3 text-sm">
                         <Link
                           href={`/devis/${d.id}`}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
+                          className="text-brand-blue hover:text-brand-blue font-medium"
                         >
                           {d.numero ? `D${d.numero}` : "(brouillon)"}
                         </Link>
                       </td>
-                      <td className="px-5 py-3 text-sm text-slate-700">{d.objet}</td>
-                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-slate-900">
+                      <td className="px-5 py-3 text-sm text-brand-ink">{d.objet}</td>
+                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-brand-ink">
                         {formatEuros(d.montantHt)}
                       </td>
                     </tr>
@@ -343,37 +343,37 @@ export default async function FactureDetailPage({
                   : 1;
               return (
                 <>
-                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-                    <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                      <h4 className="font-semibold text-slate-800">
+                  <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50 flex items-center justify-between">
+                      <h4 className="font-semibold text-brand-ink">
                         {facture.type === "ACOMPTE"
                           ? `Acompte ${Math.round(ratio * 100)}% sur devis n° ${facture.devis!.numero}`
                           : `Solde sur devis n° ${facture.devis!.numero}`}
                       </h4>
                       {facture.devis!.objet && (
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm text-brand-ink-muted">
                           {facture.devis!.objet}
                         </span>
                       )}
                     </div>
                     {facture.devis!.sections.map((section) => (
-                      <div key={section.id} className="border-t border-slate-100">
-                        <div className="px-5 py-2.5 bg-slate-50/40 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <div key={section.id} className="border-t border-brand-rule">
+                        <div className="px-5 py-2.5 bg-brand-surface/40 text-xs font-semibold text-brand-ink-muted uppercase tracking-wider">
                           {section.titre}
                         </div>
                         <table className="w-full">
                           <thead>
                             <tr>
-                              <th className="text-left px-5 py-2 text-xs text-slate-400 font-medium">
+                              <th className="text-left px-5 py-2 text-xs text-brand-ink-muted font-medium">
                                 Libellé
                               </th>
-                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-20">
+                              <th className="text-right px-5 py-2 text-xs text-brand-ink-muted font-medium w-20">
                                 Qté
                               </th>
-                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-32">
+                              <th className="text-right px-5 py-2 text-xs text-brand-ink-muted font-medium w-32">
                                 P.U. HT
                               </th>
-                              <th className="text-right px-5 py-2 text-xs text-slate-400 font-medium w-32">
+                              <th className="text-right px-5 py-2 text-xs text-brand-ink-muted font-medium w-32">
                                 Total HT
                               </th>
                             </tr>
@@ -383,17 +383,17 @@ export default async function FactureDetailPage({
                               const pu = Math.round(ligne.prixUnit * ratio * 100) / 100;
                               const tot = Math.round(ligne.total * ratio * 100) / 100;
                               return (
-                                <tr key={ligne.id} className="border-t border-slate-50">
-                                  <td className="px-5 py-3 text-sm text-slate-700">
+                                <tr key={ligne.id} className="border-t border-brand-rule">
+                                  <td className="px-5 py-3 text-sm text-brand-ink">
                                     {ligne.libelle}
                                   </td>
-                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-brand-ink-muted">
                                     {formatQuantite(ligne.quantite)}
                                   </td>
-                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-slate-600">
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums text-brand-ink-muted">
                                     {formatEuros(pu)}
                                   </td>
-                                  <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-slate-900">
+                                  <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-brand-ink">
                                     {formatEuros(tot)}
                                   </td>
                                 </tr>
@@ -408,29 +408,29 @@ export default async function FactureDetailPage({
               );
             })()
           ) : (
-            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-                <h4 className="font-semibold text-slate-800">Détail</h4>
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50">
+                <h4 className="font-semibold text-brand-ink">Détail</h4>
               </div>
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Description
                     </th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium">
                       Montant HT
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-t border-slate-50">
-                    <td className="px-5 py-4 text-sm text-slate-700">
+                  <tr className="border-t border-brand-rule">
+                    <td className="px-5 py-4 text-sm text-brand-ink">
                       {isAvoir && facture.devis
                         ? `Avoir sur devis n° ${facture.devis.numero}`
                         : FACTURE_TYPE_LABELS[facture.type]}
                     </td>
-                    <td className="px-5 py-4 text-sm text-right tabular-nums font-medium text-slate-900">
+                    <td className="px-5 py-4 text-sm text-right tabular-nums font-medium text-brand-ink">
                       {isAvoir
                         ? `- ${formatEuros(Math.abs(totalHtNet))}`
                         : formatEuros(totalHtNet)}
@@ -443,26 +443,26 @@ export default async function FactureDetailPage({
 
           {/* Paiements */}
           {facture.paiements.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-                <h4 className="font-semibold text-slate-800">Paiements reçus</h4>
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50">
+                <h4 className="font-semibold text-brand-ink">Paiements reçus</h4>
               </div>
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">Date</th>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">Référence</th>
-                    <th className="text-left px-5 py-2.5 text-xs text-slate-400 font-medium">Mode</th>
-                    <th className="text-right px-5 py-2.5 text-xs text-slate-400 font-medium">Montant TTC</th>
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">Date</th>
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">Référence</th>
+                    <th className="text-left px-5 py-2.5 text-xs text-brand-ink-muted font-medium">Mode</th>
+                    <th className="text-right px-5 py-2.5 text-xs text-brand-ink-muted font-medium">Montant TTC</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-brand-rule">
                   {facture.paiements.map((p) => (
                     <tr key={p.id}>
-                      <td className="px-5 py-3 text-sm text-slate-600">{formatDate(p.date)}</td>
-                      <td className="px-5 py-3 text-sm text-slate-500 font-mono">{p.reference ?? "—"}</td>
-                      <td className="px-5 py-3 text-sm text-slate-500 capitalize">{p.mode ?? "—"}</td>
-                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-green-700">
+                      <td className="px-5 py-3 text-sm text-brand-ink-muted">{formatDate(p.date)}</td>
+                      <td className="px-5 py-3 text-sm text-brand-ink-muted font-mono">{p.reference ?? "—"}</td>
+                      <td className="px-5 py-3 text-sm text-brand-ink-muted capitalize">{p.mode ?? "—"}</td>
+                      <td className="px-5 py-3 text-sm text-right tabular-nums font-medium text-brand-pistachio-ink">
                         {formatEuros(p.montant)}
                       </td>
                     </tr>
@@ -474,30 +474,30 @@ export default async function FactureDetailPage({
 
           {/* Historique des relances */}
           {facture.relances.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-                <Mail className="w-4 h-4 text-slate-400" />
-                <h4 className="font-semibold text-slate-800">
+            <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+              <div className="flex items-center gap-2 px-5 py-3.5 border-b border-brand-rule bg-brand-surface/50">
+                <Mail className="w-4 h-4 text-brand-ink-muted" />
+                <h4 className="font-semibold text-brand-ink">
                   Historique des emails ({facture.relances.length})
                 </h4>
               </div>
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-brand-rule">
                 {facture.relances.map((r) => (
                   <div key={r.id} className="flex items-center gap-4 px-5 py-3.5">
                     <span
                       className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
-                        RELANCE_COLORS[r.type] ?? "bg-slate-100 text-slate-600"
+                        RELANCE_COLORS[r.type] ?? "bg-brand-surface text-brand-ink-muted"
                       }`}
                     >
                       {RELANCE_LABELS[r.type] ?? r.type}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-slate-700 truncate">{r.subject}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-sm text-brand-ink truncate">{r.subject}</p>
+                      <p className="text-xs text-brand-ink-muted mt-0.5">
                         Envoyé à <span className="font-medium">{r.sentTo}</span>
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs text-slate-400">
+                    <span className="shrink-0 text-xs text-brand-ink-muted">
                       {formatDate(r.sentAt)}
                     </span>
                   </div>
@@ -509,8 +509,8 @@ export default async function FactureDetailPage({
 
         {/* Panneau totaux */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5">
-            <h3 className="font-semibold text-slate-900 mb-4">Récapitulatif</h3>
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+            <h3 className="font-semibold text-brand-ink mb-4">Récapitulatif</h3>
             <div className="space-y-2 text-sm">
               {/* Sous-total + CS/FG/Marge : affichés seulement si on a un
                   breakdown valide. Lignes à 0 € masquées (cf. devis). */}
@@ -532,13 +532,13 @@ export default async function FactureDetailPage({
                     .filter((r) => r.alwaysShow || r.value !== 0)
                     .map((r) => (
                       <div key={r.label} className="flex justify-between">
-                        <span className="text-slate-500">{r.label}</span>
-                        <span className="tabular-nums text-slate-700">
+                        <span className="text-brand-ink-muted">{r.label}</span>
+                        <span className="tabular-nums text-brand-ink">
                           {formatEuros(r.value)}
                         </span>
                       </div>
                     ))}
-                  <div className="border-t border-slate-100 pt-2 mt-2" />
+                  <div className="border-t border-brand-rule pt-2 mt-2" />
                 </>
               )}
               <div className="flex justify-between font-semibold">
@@ -550,19 +550,19 @@ export default async function FactureDetailPage({
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">
+                <span className="text-brand-ink-muted">
                   TVA {(facture.tauxTva % 1 === 0 ? facture.tauxTva.toFixed(0) : String(facture.tauxTva).replace(".", ","))}%
                 </span>
-                <span className="tabular-nums text-slate-700">
+                <span className="tabular-nums text-brand-ink">
                   {isAvoir
                     ? `- ${formatEuros(Math.abs(facture.tva))}`
                     : formatEuros(facture.tva)}
                 </span>
               </div>
-              <div className="border-t border-slate-100 pt-2 mt-2">
+              <div className="border-t border-brand-rule pt-2 mt-2">
                 <div className="flex justify-between font-bold text-base">
                   <span>{isAvoir ? "Montant avoir TTC" : "Total TTC"}</span>
-                  <span className={isAvoir ? "text-red-600" : "text-blue-600"}>
+                  <span className={isAvoir ? "text-brand-coral-ink" : "text-brand-blue"}>
                     {isAvoir
                       ? `- ${formatEuros(Math.abs(facture.totalTtc))}`
                       : formatEuros(facture.totalTtc)}
@@ -571,16 +571,16 @@ export default async function FactureDetailPage({
               </div>
 
               {!isAvoir && totalPaye > 0 && (
-                <div className="border-t border-slate-100 pt-2 mt-1 space-y-1.5">
+                <div className="border-t border-brand-rule pt-2 mt-1 space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Déjà réglé</span>
-                    <span className="tabular-nums text-green-700 font-medium">
+                    <span className="text-brand-ink-muted">Déjà réglé</span>
+                    <span className="tabular-nums text-brand-pistachio-ink font-medium">
                       {formatEuros(totalPaye)}
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold">
                     <span>Reste à payer</span>
-                    <span className="tabular-nums text-slate-900">
+                    <span className="tabular-nums text-brand-ink">
                       {formatEuros(resteAPayer)}
                     </span>
                   </div>
@@ -590,12 +590,12 @@ export default async function FactureDetailPage({
           </div>
 
           {/* Coordonnées bancaires */}
-          <div className="bg-white rounded-xl border border-slate-100 p-5 text-xs text-slate-500 space-y-1">
-            <p className="font-semibold text-slate-600 mb-2">Coordonnées bancaires</p>
-            <p><span className="font-medium text-slate-700">IBAN</span> {facture.ibanEmetteur || "—"}</p>
-            <p><span className="font-medium text-slate-700">BIC</span> {facture.bicEmetteur || "—"}</p>
-            <p className="pt-1"><span className="font-medium text-slate-700">SIRET</span> {facture.siretEmetteur || "—"}</p>
-            <p><span className="font-medium text-slate-700">N° TVA</span> {facture.tvaIntraEmetteur || "—"}</p>
+          <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5 text-xs text-brand-ink-muted space-y-1">
+            <p className="font-semibold text-brand-ink-muted mb-2">Coordonnées bancaires</p>
+            <p><span className="font-medium text-brand-ink">IBAN</span> {facture.ibanEmetteur || "—"}</p>
+            <p><span className="font-medium text-brand-ink">BIC</span> {facture.bicEmetteur || "—"}</p>
+            <p className="pt-1"><span className="font-medium text-brand-ink">SIRET</span> {facture.siretEmetteur || "—"}</p>
+            <p><span className="font-medium text-brand-ink">N° TVA</span> {facture.tvaIntraEmetteur || "—"}</p>
           </div>
         </div>
       </div>

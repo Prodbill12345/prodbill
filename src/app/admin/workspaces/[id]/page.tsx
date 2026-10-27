@@ -109,39 +109,39 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
     <div className="space-y-6">
       <Link
         href="/admin/workspaces"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-brand-ink-muted hover:text-brand-ink transition-colors"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Retour à la liste
       </Link>
 
       {/* Header workspace */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex items-start gap-5">
+      <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-6 flex items-start gap-5">
         {company.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={company.logoUrl}
             alt={company.name}
-            className="w-16 h-16 rounded-xl object-contain bg-slate-50 border border-slate-100 shrink-0"
+            className="w-16 h-16 rounded-[var(--radius-card)] object-contain bg-brand-surface border border-brand-rule shrink-0"
           />
         ) : (
           <div
-            className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0"
+            className="w-16 h-16 rounded-[var(--radius-card)] flex items-center justify-center shrink-0"
             style={{ backgroundColor: company.primaryColor + "20" }}
           >
             <Building2 className="w-8 h-8" style={{ color: company.primaryColor }} />
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900">{company.name}</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
+          <h1 className="font-display text-2xl font-bold tracking-[-0.02em] text-brand-ink">{company.name}</h1>
+          <p className="text-brand-ink-muted text-sm mt-0.5">
             <span className="font-mono">{company.siret}</span>
-            <span className="mx-2 text-slate-300">·</span>
+            <span className="mx-2 text-brand-ink-subtle">·</span>
             {company.tvaIntra}
-            <span className="mx-2 text-slate-300">·</span>
+            <span className="mx-2 text-brand-ink-subtle">·</span>
             Créée le {dateTimeFmt.format(company.createdAt)}
           </p>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-brand-ink-muted text-sm mt-1">
             {company.address}, {company.postalCode} {company.city}
           </p>
         </div>
@@ -164,8 +164,8 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
       {/* Grid Infos + Users + Audit */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Infos Company */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="font-semibold text-slate-900 mb-4 text-sm uppercase tracking-wide">
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+          <h2 className="font-semibold text-brand-ink mb-4 text-sm uppercase tracking-wide">
             Configuration
           </h2>
           <dl className="space-y-2.5 text-sm">
@@ -175,12 +175,12 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
             <Row label="IBAN" value={company.iban} mono />
             <Row label="BIC" value={company.bic} mono />
             <Row label="Banque" value={company.nomBanque || "—"} />
-            <div className="border-t border-slate-100 my-2" />
+            <div className="border-t border-brand-rule my-2" />
             <Row label="CS Comédien" value={`${(company.defaultTauxCsComedien * 100).toFixed(0)} %`} />
             <Row label="CS Tech" value={`${(company.defaultTauxCsTech * 100).toFixed(0)} %`} />
             <Row label="FG" value={`${(company.defaultTauxFg * 100).toFixed(0)} %`} />
             <Row label="Marge" value={`${(company.defaultTauxMarge * 100).toFixed(0)} %`} />
-            <div className="border-t border-slate-100 my-2" />
+            <div className="border-t border-brand-rule my-2" />
             <Row label="Préfixe devis" value={company.prefixDevis || "—"} mono />
             <Row label="Préfixe facture" value={company.prefixFacture || "—"} mono />
             <Row label="Clients" value={String(clientsCount)} />
@@ -189,32 +189,32 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
         </div>
 
         {/* Users */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="font-semibold text-slate-900 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
-            <Users className="w-3.5 h-3.5 text-slate-400" />
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+          <h2 className="font-semibold text-brand-ink mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+            <Users className="w-3.5 h-3.5 text-brand-ink-muted" />
             Utilisateurs ({users.length})
           </h2>
           {users.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">Aucun utilisateur.</p>
+            <p className="text-sm text-brand-ink-muted italic">Aucun utilisateur.</p>
           ) : (
             <ul className="space-y-2.5">
               {users.map((u) => (
                 <li key={u.id} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                    <span className="text-slate-600 text-xs font-bold">
+                  <div className="w-8 h-8 rounded-[var(--radius-control)] bg-brand-surface flex items-center justify-center shrink-0">
+                    <span className="text-brand-ink-muted text-xs font-bold">
                       {(u.name || u.email).slice(0, 2).toUpperCase()}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-slate-900 text-sm truncate">
+                    <div className="font-medium text-brand-ink text-sm truncate">
                       {u.name || u.email.split("@")[0]}
                     </div>
-                    <div className="text-xs text-slate-400 truncate">{u.email}</div>
+                    <div className="text-xs text-brand-ink-muted truncate">{u.email}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-brand-surface text-brand-ink-muted">
                         {u.role}
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-brand-ink-muted">
                         depuis le {dateTimeFmt.format(u.createdAt)}
                       </span>
                     </div>
@@ -226,13 +226,13 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
         </div>
 
         {/* AuditLog */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h2 className="font-semibold text-slate-900 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
-            <Activity className="w-3.5 h-3.5 text-slate-400" />
+        <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-5">
+          <h2 className="font-semibold text-brand-ink mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 text-brand-ink-muted" />
             Activité récente
           </h2>
           {auditLogs.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">Aucune activité enregistrée.</p>
+            <p className="text-sm text-brand-ink-muted italic">Aucune activité enregistrée.</p>
           ) : (
             <ul className="space-y-3">
               {auditLogs.map((log) => (
@@ -241,18 +241,18 @@ export default async function AdminWorkspaceDetailPage({ params }: PageProps) {
                     <span
                       className={`font-mono font-semibold px-1.5 py-0.5 rounded ${
                         log.action.includes("IMPERSON")
-                          ? "bg-red-100 text-red-700"
-                          : "bg-slate-100 text-slate-700"
+                          ? "bg-status-danger-bg text-brand-coral-ink"
+                          : "bg-brand-surface text-brand-ink"
                       }`}
                     >
                       {log.action}
                     </span>
-                    <span className="text-slate-400">{log.entityType}</span>
+                    <span className="text-brand-ink-muted">{log.entityType}</span>
                   </div>
-                  <div className="text-slate-500 mt-1">
+                  <div className="text-brand-ink-muted mt-1">
                     {log.userName}{" "}
-                    <span className="text-slate-300">·</span>{" "}
-                    <span className="text-slate-400">{dateTimeFmt.format(log.createdAt)}</span>
+                    <span className="text-brand-ink-subtle">·</span>{" "}
+                    <span className="text-brand-ink-muted">{dateTimeFmt.format(log.createdAt)}</span>
                   </div>
                 </li>
               ))}
@@ -275,9 +275,9 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <dt className="text-slate-400 text-xs">{label}</dt>
+      <dt className="text-brand-ink-muted text-xs">{label}</dt>
       <dd
-        className={`text-slate-700 text-right truncate ${
+        className={`text-brand-ink text-right truncate ${
           mono ? "font-mono text-xs" : "text-sm"
         }`}
       >
@@ -299,20 +299,20 @@ function StatCard({
   accent: "violet" | "indigo" | "emerald" | "amber";
 }) {
   const accents = {
-    violet: { bg: "bg-violet-50", text: "text-violet-600" },
-    indigo: { bg: "bg-indigo-50", text: "text-indigo-600" },
-    emerald: { bg: "bg-emerald-50", text: "text-emerald-600" },
-    amber: { bg: "bg-amber-50", text: "text-amber-600" },
+    violet: { bg: "bg-status-info-bg", text: "text-brand-blue" },
+    indigo: { bg: "bg-status-info-bg", text: "text-brand-blue" },
+    emerald: { bg: "bg-status-success-bg", text: "text-brand-pistachio-ink" },
+    amber: { bg: "bg-status-partial-bg", text: "text-brand-ink" },
   } as const;
   const a = accents[accent];
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl ${a.bg} flex items-center justify-center shrink-0`}>
+    <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule p-4 flex items-center gap-3">
+      <div className={`w-10 h-10 rounded-[var(--radius-card)] ${a.bg} flex items-center justify-center shrink-0`}>
         <Icon className={`w-5 h-5 ${a.text}`} strokeWidth={2} />
       </div>
       <div className="min-w-0">
-        <div className="text-xs text-slate-400 uppercase tracking-wide">{label}</div>
-        <div className="text-lg font-bold text-slate-900 tabular-nums truncate">
+        <div className="text-xs text-brand-ink-muted uppercase tracking-wide">{label}</div>
+        <div className="text-lg font-bold text-brand-ink tabular-nums truncate">
           {value}
         </div>
       </div>

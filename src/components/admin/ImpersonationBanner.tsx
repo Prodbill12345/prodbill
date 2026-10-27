@@ -39,7 +39,7 @@ export function ImpersonationBanner({
   }
 
   return (
-    <div className="sticky top-0 z-50 bg-red-600 text-white shadow-lg">
+    <div className="sticky top-0 z-50 bg-brand-coral-ink text-brand-cream">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-4">
         <AlertTriangle className="w-5 h-5 shrink-0" strokeWidth={2.5} />
         <div className="flex-1 min-w-0 text-sm">
@@ -57,7 +57,7 @@ export function ImpersonationBanner({
             Connecté en tant que {realEmail}. Toutes vos actions sont loguées dans AuditLog.
           </span>
           {error && (
-            <span className="ml-3 inline-flex items-center gap-1 bg-red-800 px-2 py-0.5 rounded text-xs">
+            <span className="ml-3 inline-flex items-center gap-1 bg-brand-ink px-2 py-0.5 rounded text-xs">
               Erreur : {error}
             </span>
           )}
@@ -66,7 +66,7 @@ export function ImpersonationBanner({
           type="button"
           onClick={handleExit}
           disabled={isPending}
-          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-red-700 hover:bg-red-50 active:bg-red-100 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-[var(--radius-control)] text-sm font-semibold bg-brand-paper text-brand-coral-ink hover:bg-status-danger-bg active:bg-status-danger-bg disabled:opacity-60 disabled:cursor-not-allowed transition-all"
         >
           <LogOut className="w-4 h-4" strokeWidth={2.5} />
           {isPending ? "Sortie…" : "Quitter le mode"}

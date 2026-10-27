@@ -12,8 +12,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const { isImpersonating } = await getActor();
   return {
     title: {
-      template: isImpersonating ? "👑 IMPERSONATION — %s" : "%s · ProdBill",
-      default: isImpersonating ? "👑 IMPERSONATION — ProdBill" : "ProdBill",
+      template: isImpersonating ? "IMPERSONATION — %s" : "%s · ProdBill",
+      default: isImpersonating ? "IMPERSONATION — ProdBill" : "ProdBill",
     },
   };
 }
