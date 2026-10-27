@@ -84,17 +84,22 @@ export const motion = {
 
 /**
  * Tons des badges de statut : pastille (dot) + fond teinté léger + texte
- * lisible. Contrastes texte/fond ≥ 6.9 (AA). Mapping statut → ton : étape 4.
- *   neutral  → Brouillon
- *   info     → Envoyé / Émise
- *   success  → Accepté / Validé / Payée
- *   danger   → Refusé / Annulée / En retard
- *   muted    → Expiré
+ * lisible. Contrastes texte/fond ≥ 6.9 (AA). Mapping statut → ton :
+ * src/design/status.ts.
+ *   neutral   → Brouillon
+ *   info      → Envoyé / Émise
+ *   validated → Validé (en interne) — pistache en contour, distinct d'Accepté
+ *   success   → Accepté / Payée — pistache en aplat teinté
+ *   partial   → Paiement partiel — rose tendre
+ *   danger    → Refusé / Annulée / En retard
+ *   muted     → Expiré
  */
 export const statusTones = {
   neutral: { dot: colors.inkMuted, bg: colors.surface, text: colors.ink, border: colors.surface },
   info: { dot: colors.accent, bg: "#E4E3FC", text: colors.accent, border: "#E4E3FC" },
+  validated: { dot: "#8DB136", bg: "transparent", text: colors.ink, border: "#8DB136" },
   success: { dot: "#8DB136", bg: "#E6F0C6", text: colors.ink, border: "#E6F0C6" },
+  partial: { dot: "#F48FB4", bg: "#FFE4ED", text: colors.ink, border: "#FFE4ED" },
   danger: { dot: colors.coral, bg: "#FFE1D8", text: colors.ink, border: "#FFE1D8" },
   muted: { dot: colors.inkSubtle, bg: "transparent", text: colors.inkMuted, border: colors.rule },
 } as const;

@@ -61,3 +61,29 @@ describe("contrastes AA (texte normal ≥ 4.5)", () => {
     expect(contrast(colors.pistachio, colors.cream)).toBeLessThan(4.5);
   });
 });
+
+describe("statuts → tons de badge (src/design/status.ts)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { DEVIS_STATUT_TONE, FACTURE_STATUT_TONE } = require("../design/status");
+
+  test("chaque statut devis/facture a un ton existant", () => {
+    for (const tone of [...Object.values(DEVIS_STATUT_TONE), ...Object.values(FACTURE_STATUT_TONE)]) {
+      expect(statusTones).toHaveProperty(tone as string);
+    }
+    expect(Object.keys(DEVIS_STATUT_TONE).sort()).toEqual(
+      ["ACCEPTE", "BROUILLON", "ENVOYE", "EXPIRE", "REFUSE", "VALIDE"]
+    );
+    expect(Object.keys(FACTURE_STATUT_TONE).sort()).toEqual(
+      ["ANNULEE", "BROUILLON", "EMISE", "EN_RETARD", "PAYEE", "PAYEE_PARTIEL"]
+    );
+  });
+
+  test("Validé (interne) visuellement distinct d'Accepté (client) — #96", () => {
+    expect(DEVIS_STATUT_TONE.VALIDE).not.toBe(DEVIS_STATUT_TONE.ACCEPTE);
+  });
+
+  test("badge validated (fond transparent) : texte lisible sur crème et sur papier", () => {
+    expect(contrast(statusTones.validated.text, colors.cream)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(statusTones.validated.text, colors.paper)).toBeGreaterThanOrEqual(4.5);
+  });
+});

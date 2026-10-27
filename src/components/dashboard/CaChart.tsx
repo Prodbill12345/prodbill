@@ -1,6 +1,11 @@
 "use client";
 
 import { formatEuros } from "@/lib/calculations";
+import { colors } from "@/design/tokens";
+
+// DA ProdBill (étape 3) : barres pleines sans dégradé, mois courant en bleu
+// signature, mois passés en bleu teinté, piste crème grisée.
+const BAR_PAST = "#D3D0FB";
 
 export interface MonthData {
   label: string; // "Jan", "Fév", etc.
@@ -32,7 +37,7 @@ export function CaChart({ data }: { data: MonthData[] }) {
               y1={y}
               x2={totalWidth}
               y2={y}
-              stroke="#f1f5f9"
+              stroke={colors.rule}
               strokeWidth={1}
             />
           );
@@ -53,7 +58,7 @@ export function CaChart({ data }: { data: MonthData[] }) {
                 width={BAR_W}
                 height={CHART_H}
                 rx={6}
-                fill="#f8fafc"
+                fill={colors.surface}
               />
 
               {/* Barre valeur */}
@@ -63,7 +68,7 @@ export function CaChart({ data }: { data: MonthData[] }) {
                 width={BAR_W}
                 height={barH}
                 rx={6}
-                fill={isLast ? "url(#barGradientActive)" : "url(#barGradient)"}
+                fill={isLast ? colors.accent : BAR_PAST}
               />
 
               {/* Montant au-dessus */}
@@ -73,8 +78,9 @@ export function CaChart({ data }: { data: MonthData[] }) {
                   y={barY - 7}
                   textAnchor="middle"
                   fontSize={9.5}
-                  fill={isLast ? "#3b82f6" : "#94a3b8"}
+                  fill={isLast ? colors.accent : colors.inkMuted}
                   fontWeight={isLast ? "700" : "500"}
+                  fontFamily="var(--font-display)"
                 >
                   {d.ca >= 1000
                     ? `${(d.ca / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}k`
@@ -88,7 +94,7 @@ export function CaChart({ data }: { data: MonthData[] }) {
                 y={CHART_H + 18}
                 textAnchor="middle"
                 fontSize={11}
-                fill={isLast ? "#3b82f6" : "#94a3b8"}
+                fill={isLast ? colors.accent : colors.inkMuted}
                 fontWeight={isLast ? "700" : "400"}
               >
                 {d.label}
@@ -97,23 +103,12 @@ export function CaChart({ data }: { data: MonthData[] }) {
           );
         })}
 
-        {/* Gradients */}
-        <defs>
-          <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#bfdbfe" />
-            <stop offset="100%" stopColor="#dbeafe" />
-          </linearGradient>
-          <linearGradient id="barGradientActive" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#6366f1" />
-          </linearGradient>
-        </defs>
       </svg>
 
       {/* Total période */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-        <span className="text-xs text-slate-400">Total 6 mois · TTC encaissé</span>
-        <span className="text-sm font-bold text-slate-900">
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-brand-rule">
+        <span className="text-xs text-brand-ink-muted">Total 6 mois · TTC encaissé</span>
+        <span className="font-display text-sm font-bold text-brand-ink tabular-nums">
           {formatEuros(data.reduce((s, d) => s + d.ca, 0))}
         </span>
       </div>
