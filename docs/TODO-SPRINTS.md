@@ -350,3 +350,24 @@ des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
   et des brouillons
 
 ---
+
+## Après C-REDESIGN-PHASE2-APP — Listes mobiles en cartes
+
+Ouvert le 27/10/2026 (arbitrage Rose : ticket séparé, après l'étape 6 —
+c'est de la restructuration, pas de l'habillage).
+
+Sur téléphone, les listes (devis, factures, paiements, clients…) sont des
+tableaux en défilement horizontal depuis l'étape 4 du redesign : utilisable
+mais pas confortable pour Vanda. Cible : sous `md`, une carte par ligne
+(numéro + client + montant + badge de statut, actions en bas de carte),
+le tableau restant tel quel au-dessus de `md`.
+
+### Acceptance criteria
+
+- Devis, factures, paiements : lisibles et actionnables à 390 px sans
+  défilement horizontal
+- Mêmes données, filtres, tris et sélection (récap multi-devis) qu'en
+  tableau — aucune régression fonctionnelle
+- Le tableau desktop est inchangé
+
+---
