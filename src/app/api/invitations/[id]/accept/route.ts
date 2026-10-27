@@ -1,5 +1,5 @@
 /**
- * POST /api/invitations/[token]/accept
+ * POST /api/invitations/[token]/accept  (segment de route : [id], cf. params)
  *
  * Callback appelé une fois que l'utilisateur est authentifié via Clerk
  * (signup ou signin), pour finaliser l'acceptation d'une invitation :
@@ -29,10 +29,14 @@ import { checkInvitationAcceptable } from "@/lib/invitations";
 
 export async function POST(
   _req: Request,
-  { params }: { params: Promise<{ token: string }> }
+  // Le segment s'appelle [id] (et non [token]) : Next refuse deux noms de
+  // slug différents au même niveau (/api/invitations/[id] existe déjà pour
+  // la révocation). La valeur reçue ici reste le TOKEN de l'invitation,
+  // l'URL publique est inchangée : /api/invitations/<token>/accept.
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { token } = await params;
+    const { id: token } = await params;
     if (!token) {
       return Response.json({ error: "Token manquant" }, { status: 400 });
     }
