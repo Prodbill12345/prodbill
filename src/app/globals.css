@@ -12,6 +12,44 @@
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
+/* ── DA ProdBill (C-REDESIGN-PHASE2-APP) ────────────────────────────────
+   Valeurs synchronisées avec src/design/tokens.ts (cssVars) — vérifié par
+   src/__tests__/design-tokens.test.ts. Préfixe « brand » : pas de collision
+   avec la palette Tailwind. Étape 1 : déclarées, pas encore appliquées. */
+@theme {
+  --color-brand-cream: #F7F5EE;
+  --color-brand-paper: #FCFBF7;
+  --color-brand-ink: #25251F;
+  --color-brand-ink-muted: #66665A;
+  --color-brand-ink-subtle: #97978A;
+  --color-brand-blue: #2115ED;
+  --color-brand-coral: #FF6846;
+  --color-brand-pistachio: #B7D85D;
+  --color-brand-rose: #FFBBD3;
+  --color-brand-rule: #DEDED2;
+  --color-brand-surface: #EDEEE2;
+
+  --color-status-neutral-bg: #EDEEE2;
+  --color-status-neutral-dot: #66665A;
+  --color-status-info-bg: #E4E3FC;
+  --color-status-info-text: #2115ED;
+  --color-status-success-bg: #E6F0C6;
+  --color-status-success-dot: #8DB136;
+  --color-status-danger-bg: #FFE1D8;
+  --color-status-danger-dot: #FF6846;
+
+  --radius-card: 14px;
+  --radius-control: 10px;
+}
+
+/* Familles chargées par next/font (layout.tsx) : références de variables →
+   @theme inline. Serif éditoriale = Georgia système. */
+@theme inline {
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-text: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: Georgia, "Times New Roman", serif;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -29,4 +67,15 @@ body {
 /* Prevent transition on pseudo-elements that don't need it */
 ::before, ::after {
   transition: none;
+}
+
+/* Accessibilité : animations et transitions coupées si l'utilisateur le
+   demande (spec DA : respect de prefers-reduced-motion). */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
