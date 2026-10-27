@@ -12,6 +12,8 @@ import { formatFactureNumero } from "@/lib/facture-numero";
 import { facturxMention } from "@/lib/facturx-tax";
 import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 import { factureObjetDisplay } from "@/lib/facture-objet";
+import "@/lib/pdf/fonts";
+import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -61,6 +63,8 @@ const TAG_LABELS: Record<LigneTag, string> = {
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function euros(n: number): string {
+  // Ni Space Grotesk ni DM Sans ne contiennent U+202F (séparateur de milliers
+  // fr-FR) → normalisation en espace ASCII (cf. src/assets/fonts/README.md).
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "EUR",
@@ -70,7 +74,7 @@ function euros(n: number): string {
 }
 
 function qte(n: number): string {
-  // Même normalisation que euros() : Helvetica embarquée ne contient pas U+202F.
+  // Même normalisation que euros() : les polices embarquées n'ont pas U+202F.
   return new Intl.NumberFormat("fr-FR", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -88,186 +92,200 @@ function pct(r: number): string {
 
 // ─── styles ─────────────────────────────────────────────────────────────────
 
+// DA ProdBill, déclinaison documents (C-REDESIGN-PHASE1-PDF) — tokens dans
+// src/design/tokens.ts. Habillage uniquement : structure inchangée. Même
+// gabarit pour facture, avoir et conteneur Factur-X.
 const s = StyleSheet.create({
   page: {
-    fontFamily: "Helvetica",
-    fontSize: 9,
+    fontFamily: fonts.text,
+    fontSize: 8.5,
     paddingTop: 40,
     paddingBottom: 72,
     paddingHorizontal: 40,
-    color: "#1e293b",
+    color: colors.ink,
+    backgroundColor: colors.cream,
   },
 
   // Header
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 28 },
+  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 30 },
   logo: { width: 110, marginBottom: 6 },
-  companyName: { fontFamily: "Helvetica-Bold", fontSize: 15, color: "#1e293b", marginBottom: 4 },
-  companyMeta: { fontSize: 7.5, color: "#64748b", lineHeight: 1.55 },
+  companyName: { fontFamily: fonts.display, fontWeight: 700, fontSize: 15, color: colors.ink, marginBottom: 4 },
+  companyMeta: { fontSize: 7.5, color: colors.inkMuted, lineHeight: 1.55 },
   headerRight: { alignItems: "flex-end" },
-  docTitre: { fontFamily: "Helvetica-Bold", fontSize: 22, color: "#1e293b", marginBottom: 3 },
-  docNumero: { fontFamily: "Helvetica-Bold", fontSize: 13, color: "#3b82f6", marginBottom: 2 },
-  docAvoir: { fontFamily: "Helvetica-Bold", fontSize: 13, color: "#dc2626", marginBottom: 2 },
-  docDate: { fontSize: 8, color: "#64748b", marginTop: 4 },
+  docTitre: { fontFamily: fonts.display, fontWeight: 700, fontSize: 26, color: colors.ink, letterSpacing: -0.5, marginBottom: 2 },
+  docNumero: { fontFamily: fonts.display, fontWeight: 700, fontSize: 13, color: colors.accent, marginBottom: 2 },
+  docDate: { fontSize: 7.5, color: colors.inkMuted, marginTop: 4 },
 
   // Parties
-  partiesRow: { flexDirection: "row", marginBottom: 20 },
-  partyBox: { flex: 1, backgroundColor: "#f8fafc", borderRadius: 4, padding: 10 },
-  partyBoxLeft: { marginRight: 10 },
-  partyLabel: { fontFamily: "Helvetica-Bold", fontSize: 6.5, color: "#94a3b8", marginBottom: 5 },
-  partyName: { fontFamily: "Helvetica-Bold", fontSize: 9.5, color: "#1e293b", marginBottom: 2 },
-  partyDetail: { fontSize: 8, color: "#475569", lineHeight: 1.55 },
+  partiesRow: { flexDirection: "row", marginBottom: 22 },
+  partyBox: { flex: 1, borderTopWidth: rules.thin, borderTopColor: colors.rule, paddingTop: 8 },
+  partyBoxLeft: { marginRight: 20 },
+  partyLabel: { ...sectionLabel, color: colors.accent, marginBottom: 6 },
+  partyName: { fontWeight: 700, fontSize: 9.5, color: colors.ink, marginBottom: 2 },
+  partyDetail: { fontSize: 7.5, color: colors.inkMuted, lineHeight: 1.55 },
 
-  // Objet / référence devis
+  // Référence devis / bandeau récap
   refRow: {
     flexDirection: "row",
-    backgroundColor: "#eff6ff",
-    borderRadius: 4,
-    padding: 10,
-    marginBottom: 18,
+    borderTopWidth: rules.hairline,
+    borderTopColor: colors.rule,
+    borderBottomWidth: rules.hairline,
+    borderBottomColor: colors.rule,
+    paddingVertical: 7,
+    marginBottom: 16,
   },
-  refLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#3b82f6", marginRight: 6 },
-  refText: { fontSize: 8.5, color: "#1e293b", flex: 1 },
+  refLabel: { fontWeight: 500, fontSize: 8, color: colors.inkMuted, marginRight: 6 },
+  refText: { fontWeight: 500, fontSize: 8.5, color: colors.ink, flex: 1 },
 
   // Objet + description du projet (FEAT-FACTURE-OBJET-DESCRIPTION) —
   // mêmes styles que DevisPdf.
   objetRow: { flexDirection: "row", marginBottom: 10 },
-  objetLabel: { fontFamily: "Helvetica-Bold", fontSize: 8, color: "#64748b", marginRight: 6 },
-  objetText: { fontSize: 9, color: "#1e293b", flex: 1 },
+  objetLabel: { fontWeight: 500, fontSize: 8, color: colors.inkMuted, marginRight: 6 },
+  objetText: { fontWeight: 500, fontSize: 9, color: colors.ink, flex: 1 },
   descriptionBlock: { marginBottom: 16 },
-  descriptionText: { fontSize: 8.5, color: "#64748b", lineHeight: 1.6, fontStyle: "italic" },
+  descriptionText: { fontSize: 8.5, color: colors.inkMuted, lineHeight: 1.6 },
 
-  // Tableau montants
+  // N° BDC
+  bdcBlock: { marginBottom: 14 },
+  bdcBox: { borderTopWidth: rules.hairline, borderTopColor: colors.rule, paddingTop: 6, alignSelf: "flex-start", minWidth: 160 },
+  bdcLabel: { ...sectionLabel, fontSize: 6, color: colors.inkMuted, marginBottom: 3 },
+  bdcValue: { fontSize: 8.5, color: colors.ink },
+
+  // Période d'exploitation
+  periodeBlock: { marginBottom: 14 },
+  periodeText: { fontSize: 8.5, color: colors.inkMuted, lineHeight: 1.6 },
+  periodeLabel: { fontWeight: 700, color: colors.ink },
+
+  // Tableau montants (récap / ligne unique) — filets horizontaux, pas d'aplats
   amountsBlock: { marginBottom: 20 },
-  amountsTable: { borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 4, overflow: "hidden" },
+  amountsTable: {},
   amountsHead: {
     flexDirection: "row",
-    backgroundColor: "#f1f5f9",
+    borderTopWidth: rules.thin,
+    borderTopColor: colors.ink,
+    borderBottomWidth: rules.hairline,
+    borderBottomColor: colors.rule,
     paddingVertical: 5,
-    paddingHorizontal: 10,
   },
   amountsRow: {
     flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderBottomWidth: rules.hairline,
+    borderBottomColor: colors.rule,
     paddingVertical: 6,
-    paddingHorizontal: 10,
   },
-  thText: { fontFamily: "Helvetica-Bold", fontSize: 7, color: "#64748b" },
-  tdText: { fontSize: 8.5, color: "#334155" },
-  tdRight: { fontSize: 8.5, color: "#334155", textAlign: "right" },
-  colDesc: { flex: 4 },
-  colLib: { flex: 3.2 },
+  thText: { fontWeight: 500, fontSize: 6, letterSpacing: 1.5, textTransform: "uppercase", color: colors.inkMuted },
+  tdText: { fontSize: 8.5, color: colors.ink },
+  tdRight: { fontFamily: fonts.display, fontWeight: 500, fontSize: 8.5, color: colors.ink, textAlign: "right" },
+  colDesc: { flex: 4, paddingRight: 8 },
+  colLib: { flex: 3.2, paddingRight: 8 },
   colTag: { flex: 1.1 },
   colQte: { flex: 0.6, textAlign: "right" },
   colPu: { flex: 1.2, textAlign: "right" },
   colTot: { flex: 1.2, textAlign: "right" },
 
   // Sections (pattern repris du DevisPdf)
-  sectionBlock: { marginBottom: 12 },
+  sectionBlock: { marginBottom: 14 },
   sectionTitle: {
-    fontFamily: "Helvetica-Bold",
+    fontWeight: 700,
     fontSize: 9,
-    color: "#1e293b",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    backgroundColor: "#eff6ff",
-    borderTopLeftRadius: 4,
-    borderTopRightRadius: 4,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.5,
+    color: colors.ink,
+    paddingBottom: 5,
   },
   tableHead: {
     flexDirection: "row",
-    backgroundColor: "#f1f5f9",
+    borderTopWidth: rules.thin,
+    borderTopColor: colors.ink,
+    borderBottomWidth: rules.hairline,
+    borderBottomColor: colors.rule,
     paddingVertical: 5,
-    paddingHorizontal: 10,
   },
   tableRow: {
     flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
+    borderBottomWidth: rules.hairline,
+    borderBottomColor: colors.rule,
     paddingVertical: 5,
-    paddingHorizontal: 10,
   },
-  tableRowAlt: { backgroundColor: "#fafbfc" },
   sectionSubtotalRow: {
     flexDirection: "row",
-    backgroundColor: "#f8fafc",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    paddingVertical: 6,
   },
   sectionSubtotalLabel: {
     flex: 4.3,
-    fontFamily: "Helvetica-Bold",
-    fontSize: 8,
-    color: "#475569",
+    fontWeight: 700,
+    fontSize: 6.5,
+    letterSpacing: 1,
+    color: colors.ink,
     textAlign: "right",
   },
   sectionSubtotalValue: {
     flex: 1.2,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: fonts.display,
+    fontWeight: 700,
     fontSize: 8.5,
-    color: "#1e293b",
+    color: colors.ink,
     textAlign: "right",
   },
 
-  // Totaux
-  totauxSection: { flexDirection: "row", justifyContent: "flex-end", marginTop: 8 },
-  totauxBox: { width: 228 },
+  // Badges hors marge / hors CS — pastille discrète
+  badge: {
+    alignSelf: "flex-start",
+    borderWidth: rules.hairline,
+    borderColor: colors.inkSubtle,
+    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 0.5,
+    marginTop: 2,
+  },
+  badgeText: { fontSize: 6, color: colors.inkMuted, letterSpacing: 0.3 },
+
+  // Totaux — bloc récapitulatif sur fond secondaire, total final en accent
+  totauxSection: { flexDirection: "row", justifyContent: "flex-end", marginTop: 10 },
+  totauxBox: { width: 240, backgroundColor: colors.surface, paddingVertical: 12, paddingHorizontal: 12 },
   totRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 2.5 },
-  totLabel: { fontSize: 8, color: "#64748b" },
-  totValue: { fontSize: 8, color: "#334155" },
-  totDivider: { borderTopWidth: 1, borderTopColor: "#cbd5e1", marginVertical: 5 },
-  totHtLabel: { fontFamily: "Helvetica-Bold", fontSize: 9, color: "#1e293b" },
-  totHtValue: { fontFamily: "Helvetica-Bold", fontSize: 9, color: "#1e293b" },
-  totTtcRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#1e293b",
-    borderRadius: 4,
-    paddingVertical: 7,
-    paddingHorizontal: 9,
-    marginTop: 6,
+  totLabel: { fontSize: 7.5, color: colors.inkMuted },
+  totValue: { fontFamily: fonts.display, fontWeight: 500, fontSize: 8, color: colors.ink },
+  totPct: { fontFamily: fonts.display, fontWeight: 500, fontSize: 7.5, color: colors.inkMuted },
+  totDivider: { borderTopWidth: rules.thin, borderTopColor: colors.rule, marginVertical: 6 },
+  totHtLabel: { fontWeight: 700, fontSize: 8.5, color: colors.ink },
+  totHtValue: { fontFamily: fonts.display, fontWeight: 700, fontSize: 9, color: colors.ink },
+  // Libellé au-dessus, montant aligné à droite dessous : tient quelle que
+  // soit la longueur du libellé (« MONTANT DE L'AVOIR TTC »).
+  totFinalRow: {
+    flexDirection: "column",
+    borderTopWidth: rules.thin,
+    borderTopColor: colors.ink,
+    paddingTop: 8,
+    marginTop: 8,
   },
-  totTtcRowAvoir: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#dc2626",
-    borderRadius: 4,
-    paddingVertical: 7,
-    paddingHorizontal: 9,
-    marginTop: 6,
-  },
-  totTtcLabel: { fontFamily: "Helvetica-Bold", fontSize: 10.5, color: "#ffffff" },
-  totTtcValue: { fontFamily: "Helvetica-Bold", fontSize: 10.5, color: "#ffffff" },
+  totFinalLabel: { ...sectionLabel, fontSize: 7, color: colors.accent, marginBottom: 2 },
+  totFinalValue: { fontFamily: fonts.display, fontWeight: 700, fontSize: 17, color: colors.accent, textAlign: "right" },
+  tvaMention: { fontSize: 7.5, color: colors.inkMuted },
 
   // Mentions légales L441-9
   mentionsBlock: {
-    marginTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    marginTop: 26,
+    borderTopWidth: rules.thin,
+    borderTopColor: colors.rule,
     paddingTop: 12,
   },
-  mentionsTitle: { fontFamily: "Helvetica-Bold", fontSize: 7, color: "#94a3b8", marginBottom: 7 },
+  mentionsTitle: { ...sectionLabel, fontSize: 6, color: colors.inkMuted, marginBottom: 8 },
   mentionsRow: { flexDirection: "row" },
   mentionsCol: { flex: 1 },
   mentionsColLeft: { marginRight: 20 },
   mentionItem: { marginBottom: 4 },
-  mentionLabel: { fontFamily: "Helvetica-Bold", fontSize: 7.5, color: "#475569" },
-  mentionText: { fontSize: 7.5, color: "#64748b", lineHeight: 1.55 },
+  mentionLabel: { fontWeight: 700, fontSize: 7, color: colors.ink },
+  mentionText: { fontSize: 7, color: colors.inkMuted, lineHeight: 1.55 },
   ibanBox: {
     marginTop: 10,
-    backgroundColor: "#f8fafc",
-    borderRadius: 4,
-    padding: 8,
+    borderTopWidth: rules.hairline,
+    borderTopColor: colors.rule,
+    paddingTop: 8,
     flexDirection: "row",
   },
   ibanCol: { flex: 1 },
   ibanColLeft: { marginRight: 20 },
-  ibanLabel: { fontFamily: "Helvetica-Bold", fontSize: 7, color: "#94a3b8", marginBottom: 3 },
-  ibanText: { fontSize: 8, color: "#334155" },
+  ibanLabel: { ...sectionLabel, fontSize: 6, color: colors.inkMuted, marginBottom: 3 },
+  ibanText: { fontWeight: 500, fontSize: 8, color: colors.ink },
 
   // Footer
   footer: {
@@ -275,14 +293,14 @@ const s = StyleSheet.create({
     bottom: 24,
     left: 40,
     right: 40,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopWidth: rules.hairline,
+    borderTopColor: colors.rule,
     paddingTop: 7,
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  footerText: { fontSize: 6.5, color: "#94a3b8" },
-  pageNum: { fontSize: 6.5, color: "#94a3b8" },
+  footerText: { fontSize: 6.5, color: colors.inkSubtle },
+  pageNum: { fontFamily: fonts.display, fontWeight: 500, fontSize: 6.5, color: colors.inkSubtle },
 });
 
 // ─── composant ──────────────────────────────────────────────────────────────
@@ -295,6 +313,9 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
   const isRecap = !!facture.devisList && facture.devisList.length > 0;
 
   const docTitreLabel = isAvoir ? "AVOIR" : "FACTURE";
+  // Titre affiché en casse éditoriale (« Facture », « Avoir ») ; les
+  // métadonnées du PDF gardent docTitreLabel.
+  const docTitreAffiche = isAvoir ? "Avoir" : "Facture";
   // #98 : numéro nul en brouillon → "(Brouillon)". Sinon préfixe F/AV via helper.
   const numeroAffiche = facture.numero ? formatFactureNumero(facture) : null;
   const titreDoc = numeroAffiche
@@ -364,8 +385,8 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
             <Text style={s.companyMeta}>{facture.adresseEmetteur}</Text>
           </View>
           <View style={s.headerRight}>
-            <Text style={s.docTitre}>{docTitreLabel}</Text>
-            <Text style={isAvoir ? s.docAvoir : s.docNumero}>
+            <Text style={s.docTitre}>{docTitreAffiche}</Text>
+            <Text style={s.docNumero}>
               {numeroAffiche ? `N° ${numeroAffiche}` : "(Brouillon)"}
             </Text>
             {facture.dateEmission && (
@@ -445,19 +466,19 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
 
         {/* ── N° BDC ────────────────────────────────────────────── */}
         {facture.numeroBdc && (
-          <View style={{ marginBottom: 14 }}>
-            <View style={{ backgroundColor: "#f8fafc", borderRadius: 4, padding: 8, alignSelf: "flex-start", minWidth: 160 }}>
-              <Text style={s.partyLabel}>N° BDC</Text>
-              <Text style={{ fontSize: 8.5, color: "#1e293b" }}>{facture.numeroBdc}</Text>
+          <View style={s.bdcBlock}>
+            <View style={s.bdcBox}>
+              <Text style={s.bdcLabel}>N° BDC</Text>
+              <Text style={s.bdcValue}>{facture.numeroBdc}</Text>
             </View>
           </View>
         )}
 
         {/* ── Période d'exploitation (snapshot du devis, ticket #69) ── */}
         {periodeTexte && (
-          <View style={{ marginBottom: 14 }}>
-            <Text style={{ fontSize: 8.5, color: "#64748b", lineHeight: 1.6 }}>
-              <Text style={{ fontFamily: "Helvetica-Bold", color: "#475569" }}>
+          <View style={s.periodeBlock}>
+            <Text style={s.periodeText}>
+              <Text style={s.periodeLabel}>
                 Période d&apos;exploitation :{" "}
               </Text>
               {periodeTexte}
@@ -483,11 +504,8 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     <Text style={[s.thText, s.colDesc]}>Objet</Text>
                     <Text style={[s.thText, s.colTot]}>Total HT</Text>
                   </View>
-                  {devisList.map((d, i) => (
-                    <View
-                      key={d.id}
-                      style={[s.amountsRow, i % 2 === 1 ? s.tableRowAlt : {}]}
-                    >
+                  {devisList.map((d) => (
+                    <View key={d.id} style={s.amountsRow}>
                       <Text style={[s.tdText, s.colTag]}>D{d.numero}</Text>
                       <Text style={[s.tdText, s.colDesc]}>{d.objet}</Text>
                       <Text style={[s.tdRight, s.colTot]}>{euros(d.montantHt)}</Text>
@@ -553,11 +571,8 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                       <Text style={[s.thText, s.colPu]}>P.U. HT</Text>
                       <Text style={[s.thText, s.colTot]}>Total HT</Text>
                     </View>
-                    {sectionLignesAdj.map((l, i) => (
-                      <View
-                        key={l.id}
-                        style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]}
-                      >
+                    {sectionLignesAdj.map((l) => (
+                      <View key={l.id} style={s.tableRow}>
                         <View style={[s.colLib, { flexDirection: "column" }]}>
                           <Text style={s.tdText}>{l.libelle}</Text>
                           {/* Fallback robuste : horsMarge optionnel — si le
@@ -566,14 +581,14 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                               Le montant snapshoté de la facture reste
                               correct quoi qu'il arrive. */}
                           {l.horsMarge === true && (
-                            <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
-                              hors marge &amp; FG
-                            </Text>
+                            <View style={s.badge}>
+                              <Text style={s.badgeText}>hors marge &amp; FG</Text>
+                            </View>
                           )}
                           {l.horsCS === true && (
-                            <Text style={{ fontSize: 7, fontStyle: "italic", color: "#94a3b8", marginTop: 1 }}>
-                              hors charges sociales
-                            </Text>
+                            <View style={s.badge}>
+                              <Text style={s.badgeText}>hors charges sociales</Text>
+                            </View>
                           )}
                         </View>
                         <Text style={[s.tdText, s.colTag]}>
@@ -626,7 +641,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     {detailRows.map((r) => (
                       <View key={r.label} style={s.totRow}>
                         <Text style={[s.totLabel, { flex: 1 }]}>{r.label}</Text>
-                        <Text style={[s.totLabel, { width: 40, textAlign: "right" }]}>
+                        <Text style={[s.totPct, { width: 40, textAlign: "right" }]}>
                           {pct(r.taux)}
                         </Text>
                         <Text style={[s.totValue, { width: 65, textAlign: "right" }]}>
@@ -668,18 +683,18 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
                     </Text>
                   </View>
                 )}
-                <View style={isAvoir ? s.totTtcRowAvoir : s.totTtcRow}>
-                  <Text style={s.totTtcLabel}>
+                <View style={s.totFinalRow}>
+                  <Text style={s.totFinalLabel}>
                     {isAvoir ? "MONTANT DE L'AVOIR TTC" : "TOTAL TTC"}
                   </Text>
-                  <Text style={s.totTtcValue}>
+                  <Text style={s.totFinalValue}>
                     {isAvoir ? `- ${euros(absTtc)}` : euros(absTtc)}
                   </Text>
                 </View>
                 {/* Mention légale TVA — visible uniquement si TVA=0 */}
                 {facture.tauxTva === 0 && (
                   <View style={[s.totRow, { marginTop: 4 }]}>
-                    <Text style={[s.totLabel, { fontStyle: "italic", fontSize: 8 }]}>
+                    <Text style={s.tvaMention}>
                       {facture.tvaMention || "Art. 293 B du CGI"}
                     </Text>
                   </View>
@@ -691,7 +706,7 @@ export function FacturePdf({ facture }: { facture: FactureForPdf }) {
 
         {/* ── Mentions légales art. L441-9 C. com. ─────────────── */}
         {!isAvoir && (
-          <View style={s.mentionsBlock}>
+          <View style={s.mentionsBlock} wrap={false}>
             <Text style={s.mentionsTitle}>
               MENTIONS LÉGALES — art. L441-9 Code de commerce
             </Text>
