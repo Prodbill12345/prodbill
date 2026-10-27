@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8F9FC;
-  --foreground: #0f172a;
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* DA ProdBill (étape 2) : crème + encre, DM Sans pour tout le texte. */
+  --background: #F7F5EE;
+  --foreground: #25251F;
+  --font-sans: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
 }
 
 /* ── DA ProdBill (C-REDESIGN-PHASE2-APP) ────────────────────────────────
@@ -67,6 +68,13 @@ body {
 /* Prevent transition on pseudo-elements that don't need it */
 ::before, ::after {
   transition: none;
+}
+
+/* Focus clavier visible partout (spec DA : navigation clavier). Les champs
+   qui gèrent leur propre anneau (focus:outline-none + ring) le gardent. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 2px;
 }
 
 /* Accessibilité : animations et transitions coupées si l'utilisateur le

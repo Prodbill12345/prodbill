@@ -45,11 +45,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-[#F8F9FC]">
+    // DA ProdBill (étape 2) : fond crème. Sous lg, la sidebar devient un
+    // tiroir et un header fixe (h-14) prend sa place → pt-14 sur le contenu.
+    <div className="flex h-dvh bg-brand-cream">
       <Sidebar isAdmin={isAdmin} />
-      <main className="flex-1 ml-60 overflow-y-auto">
+      <main className="flex-1 lg:ml-60 pt-14 lg:pt-0 overflow-y-auto">
         {bannerProps && <ImpersonationBanner {...bannerProps} />}
-        <div className="max-w-7xl mx-auto px-8 py-8">{children}</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">{children}</div>
       </main>
     </div>
   );
