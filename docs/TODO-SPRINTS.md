@@ -309,6 +309,14 @@ des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
    construire sur des lignes figées à l'émission, pas relues depuis le
    devis source (cf. TODO schéma `Facture` + art. 289 CGI). À faire en
    premier.
+   *Verrous à lever ensuite :* tant que les lignes ne sont pas figées, le
+   réordonnancement des sections d'un devis est **bloqué dès qu'une facture
+   (mono ou récap) y est liée** (C-DEVIS-SECTIONS-REORDER, 29/10/2026 —
+   `isDevisFactureLocked` dans `src/lib/devis-sections.ts`, refus 400 dans
+   `PUT /api/devis/[id]`, poignée désactivée dans le DevisBuilder), sinon le
+   PDF d'une facture déjà émise changerait d'ordre. Une fois les sections et
+   lignes snapshotées à l'émission, ce blocage pourra être levé (le devis
+   pourra être réordonné sans toucher aux pièces émises).
 2. **XML EN 16931 complet** : profil `urn:cen.eu:en16931:2017`, lignes de
    facture (BG-25), ventilation TVA par taux/catégorie (BG-23), conditions
    et date d'échéance réelles, validation XSD + schematron officiels.

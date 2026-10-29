@@ -19,6 +19,28 @@ import {
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { BdcClientUploadField } from "./BdcClientUploadField";
 import { sortByLabelFr } from "@/lib/sort-by-name";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type Announcements,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  SECTIONS_REORDER_BLOCKED_MESSAGE,
+  buildSectionsPayload,
+  moveIndexSet,
+} from "@/lib/devis-sections";
 
 // Convention : la DB stocke les taux en DÉCIMAL (0..1). Le form state
 // les manipule en POURCENTAGE (0..100). Conversions :
@@ -42,6 +64,10 @@ const LigneSchema = z.object({
 });
 
 const SectionSchema = z.object({
+  // Id de la DevisSection en base (mode édition) : sert à la route PUT pour
+  // détecter un réordonnancement (C-DEVIS-SECTIONS-REORDER). Absent pour une
+  // section nouvelle.
+  sourceId: z.string().optional(),
   titre: z.string().default(""),
   lignes: z.array(LigneSchema),
 });
@@ -124,6 +150,7 @@ interface DevisInitialData {
   bdcClientFilename?: string | null;
   bdcClientUploadedAt?: string | null;
   sections: {
+    sourceId?: string;
     titre: string;
     lignes: {
       libelle: string;
@@ -171,6 +198,12 @@ interface DevisBuilderProps {
    * l'affichage du banner orange en haut du formulaire.
    */
   historicalImportWarning?: boolean;
+  /**
+   * True si une facture (mono ou récap) est liée au devis : les sections ne
+   * peuvent plus être réordonnées (même règle que le changement de client,
+   * cf. src/lib/devis-sections.ts).
+   */
+  sectionsReorderLocked?: boolean;
 }
 
 export function DevisBuilder({
@@ -181,6 +214,7 @@ export function DevisBuilder({
   devisId,
   initialData,
   historicalImportWarning = false,
+  sectionsReorderLocked = false,
 }: DevisBuilderProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -274,7 +308,38 @@ export function DevisBuilder({
     fields: sectionFields,
     append: appendSection,
     remove: removeSection,
+    move: moveSection,
   } = useFieldArray({ control, name: "sections" });
+
+  // Réordonnancement des sections (C-DEVIS-SECTIONS-REORDER) : poignée seule
+  // (souris / tactile après 4 px, pour ne pas gêner le clic) et clavier
+  // (Espace pour saisir, flèches, Espace pour poser). L'ordre affiché devient
+  // `ordre` au submit (buildSectionsPayload).
+  const sectionSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleSectionDragEnd({ active, over }: DragEndEvent) {
+    if (!over || active.id === over.id) return;
+    const from = sectionFields.findIndex((f) => f.id === active.id);
+    const to = sectionFields.findIndex((f) => f.id === over.id);
+    if (from < 0 || to < 0) return;
+    moveSection(from, to);
+    setExpandedSections((prev) => moveIndexSet(prev, sectionFields.length, from, to));
+  }
+
+  const sectionPosition = (id: string | number) =>
+    sectionFields.findIndex((f) => f.id === id) + 1;
+  const sectionAnnouncements: Announcements = {
+    onDragStart: ({ active }) =>
+      `Section ${sectionPosition(active.id)} saisie. Flèches pour déplacer, Espace pour poser, Échap pour annuler.`,
+    onDragOver: ({ over }) =>
+      over ? `Position ${sectionPosition(over.id)} sur ${sectionFields.length}.` : undefined,
+    onDragEnd: ({ over }) =>
+      over ? `Section posée en position ${sectionPosition(over.id)}.` : "Section reposée.",
+    onDragCancel: () => "Déplacement annulé.",
+  };
 
   const watchedValues = watch();
 
@@ -369,24 +434,8 @@ export function DevisBuilder({
   async function onSubmit(data: DevisFormData) {
     setSubmitting(true);
     try {
-      const sections = data.sections.map((s, si) => ({
-        ...s,
-        ordre: si,
-        lignes: s.lignes.map((l, li) => ({
-          ...l,
-          // `<select>` HTML envoie "" pour l'option par défaut. On convertit
-          // toute valeur falsy ("", null, undefined) en `undefined` pour que
-          // optionalFkId côté API la transforme proprement en undefined puis
-          // en null Prisma au mapping `?? null`. Envoyer `null` direct est
-          // rejeté par le schema Zod (z.string().optional() n'accepte que
-          // string|undefined). Voir BUG #3 + régression devis existants.
-          comedienId: l.comedienId || undefined,
-          agentId: l.agentId || undefined,
-          quantite: Number(l.quantite),
-          prixUnit: Number(l.prixUnit),
-          ordre: li,
-        })),
-      }));
+      // ordre = position affichée (sections réordonnables par glisser-déposer).
+      const sections = buildSectionsPayload(data.sections);
 
       // Conversion UI (%) → API (décimal) avant POST/PUT
       const payload = {
@@ -759,9 +808,30 @@ export function DevisBuilder({
 
         {/* Sections */}
         <div className="space-y-3">
+          <DndContext
+            id="devis-sections-dnd"
+            sensors={sectionSensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleSectionDragEnd}
+            accessibility={{
+              announcements: sectionAnnouncements,
+              screenReaderInstructions: {
+                draggable:
+                  "Pour déplacer la section, appuyez sur Espace, utilisez les flèches haut et bas, puis Espace pour poser ou Échap pour annuler.",
+              },
+            }}
+          >
+          <SortableContext
+            items={sectionFields.map((f) => f.id)}
+            strategy={verticalListSortingStrategy}
+            disabled={sectionsReorderLocked}
+          >
           {sectionFields.map((sField, si) => (
             <SectionBlock
               key={sField.id}
+              sortableId={sField.id}
+              reorderLocked={sectionsReorderLocked}
+              canReorder={sectionFields.length > 1}
               sectionIndex={si}
               control={control}
               register={register}
@@ -776,6 +846,8 @@ export function DevisBuilder({
               comediens={sortedComediens}
             />
           ))}
+          </SortableContext>
+          </DndContext>
 
           <button
             type="button"
@@ -964,6 +1036,12 @@ export function DevisBuilder({
 // ─────────────────────────────────────────────
 
 interface SectionBlockProps {
+  /** Clé useFieldArray de la section : identifiant pour le tri dnd-kit. */
+  sortableId: string;
+  /** Facture liée : poignée désactivée (SECTIONS_REORDER_BLOCKED_MESSAGE). */
+  reorderLocked: boolean;
+  /** Une seule section : rien à réordonner. */
+  canReorder: boolean;
   sectionIndex: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any;
@@ -983,6 +1061,9 @@ interface SectionBlockProps {
 }
 
 function SectionBlock({
+  sortableId,
+  reorderLocked,
+  canReorder,
   sectionIndex,
   control,
   register,
@@ -996,6 +1077,20 @@ function SectionBlock({
   agents,
   comediens,
 }: SectionBlockProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sortableId, disabled: reorderLocked || !canReorder });
+  const sortableStyle = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: `sections.${sectionIndex}.lignes`,
@@ -1104,10 +1199,29 @@ function SectionBlock({
     new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
 
   return (
-    <div className="bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden">
+    <div
+      ref={setSortableRef}
+      style={sortableStyle}
+      className={`bg-brand-paper rounded-[var(--radius-card)] border border-brand-rule overflow-hidden ${
+        isDragging ? "relative z-10 shadow-[0_8px_24px_rgba(37,37,31,0.12)]" : ""
+      }`}
+    >
       {/* En-tête section */}
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-brand-rule">
-        <GripVertical className="w-4 h-4 text-brand-ink-subtle cursor-grab" />
+        {/* Poignée de déplacement : seule zone qui démarre le glisser-déposer
+            (titre et montants restent éditables). */}
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...(reorderLocked || !canReorder ? {} : attributes)}
+          {...(reorderLocked || !canReorder ? {} : listeners)}
+          disabled={reorderLocked || !canReorder}
+          aria-label={reorderLocked ? SECTIONS_REORDER_BLOCKED_MESSAGE : "Déplacer la section"}
+          title={reorderLocked ? SECTIONS_REORDER_BLOCKED_MESSAGE : "Déplacer la section"}
+          className="-ml-1 p-1 rounded-[6px] text-brand-ink-subtle touch-none enabled:cursor-grab enabled:hover:text-brand-ink enabled:hover:bg-brand-surface enabled:active:cursor-grabbing disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-brand-blue"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
         <input
           {...register(`sections.${sectionIndex}.titre`)}
           className="flex-1 font-semibold text-brand-ink bg-transparent focus:outline-none focus:ring-0 placeholder:text-brand-ink-muted text-sm"

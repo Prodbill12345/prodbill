@@ -8,6 +8,7 @@ import {
 } from "@/lib/zod-helpers";
 import { del } from "@vercel/blob";
 import { evaluateClientChange } from "@/lib/devis-client-change";
+import { evaluateSectionReorder, SECTIONS_REORDER_BLOCKED_MESSAGE } from "@/lib/devis-sections";
 import { refreshBrouillonFacturesForDevis } from "@/lib/facture-recompute";
 import { z } from "zod";
 
@@ -28,6 +29,9 @@ const LigneSchema = z.object({
 
 const SectionSchema = z.object({
   id: z.string().optional(),
+  // Id de la DevisSection d'origine (builder en édition) : détection d'un
+  // réordonnancement (C-DEVIS-SECTIONS-REORDER).
+  sourceId: z.string().optional(),
   titre: z.string().min(1),
   ordre: z.number().int(),
   lignes: z.array(LigneSchema),
@@ -104,7 +108,10 @@ export async function PUT(
       where: { id, companyId: user.companyId },
       // #99 : on compte aussi les liens FactureDevis (factures récap multi-devis
       // où devisId n'est pas renseigné) en plus des factures mono.
-      include: { _count: { select: { factures: true, factureLinks: true } } },
+      include: {
+        _count: { select: { factures: true, factureLinks: true } },
+        sections: { select: { id: true }, orderBy: { ordre: "asc" } },
+      },
     });
 
     if (!existing) {
@@ -145,6 +152,20 @@ export async function PUT(
     }
 
     const clientChange = clientDecision === "allowed";
+
+    // Réordonnancement des sections (C-DEVIS-SECTIONS-REORDER) : même verrou
+    // que le client — une facture lit les sections du devis en direct.
+    if (input.sections) {
+      const reorderDecision = evaluateSectionReorder({
+        existingSectionIds: existing.sections.map((s) => s.id),
+        incomingSourceIds: input.sections.map((s) => s.sourceId),
+        facturesCount: existing._count.factures,
+        factureLinksCount: existing._count.factureLinks,
+      });
+      if (reorderDecision === "blocked-factures") {
+        return Response.json({ error: SECTIONS_REORDER_BLOCKED_MESSAGE }, { status: 400 });
+      }
+    }
 
     // Recalculer si les sections sont mises à jour
     let totaux = {};

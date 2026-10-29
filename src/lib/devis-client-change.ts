@@ -1,4 +1,5 @@
 import type { DevisStatut } from "@prisma/client";
+import { isDevisFactureLocked } from "./devis-sections";
 
 /**
  * Décision d'autorisation d'un changement de client sur un devis en édition
@@ -48,7 +49,7 @@ export function evaluateClientChange(params: {
   if (newClientId === undefined || newClientId === currentClientId) {
     return "no-change";
   }
-  if (facturesCount > 0 || factureLinksCount > 0) {
+  if (isDevisFactureLocked({ facturesCount, factureLinksCount })) {
     return "blocked-factures";
   }
   return "allowed";

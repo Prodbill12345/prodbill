@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { DevisBuilder } from "@/components/devis/DevisBuilder";
 import { toValidPeriodeDate } from "@/lib/periode-exploitation";
+import { isDevisFactureLocked } from "@/lib/devis-sections";
 
 export default async function ModifierDevisPage({
   params,
@@ -29,6 +30,9 @@ export default async function ModifierDevisPage({
         include: { lignes: { orderBy: { ordre: "asc" } } },
         orderBy: { ordre: "asc" },
       },
+      // C-DEVIS-SECTIONS-REORDER : facture mono OU récap (#99) → sections
+      // non réordonnables (même règle que le changement de client).
+      _count: { select: { factures: true, factureLinks: true } },
     },
   });
 
@@ -90,6 +94,7 @@ export default async function ModifierDevisPage({
       ? devis.bdcClientUploadedAt.toISOString()
       : null,
     sections: devis.sections.map((s) => ({
+      sourceId: s.id,
       titre: s.titre,
       lignes: s.lignes.map((l) => ({
         libelle: l.libelle,
@@ -127,6 +132,10 @@ export default async function ModifierDevisPage({
         defaultTaux={defaultTaux}
         devisId={id}
         initialData={initialData}
+        sectionsReorderLocked={isDevisFactureLocked({
+          facturesCount: devis._count.factures,
+          factureLinksCount: devis._count.factureLinks,
+        })}
         historicalImportWarning={isHistoricalImport(
           { createdAt: devis.createdAt, updatedAt: devis.updatedAt },
           { name: company.name }
