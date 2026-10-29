@@ -1,4 +1,5 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
+import { resolveDevisPdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { DevisPdf } from "@/components/devis/DevisPdf";
@@ -58,7 +59,11 @@ export async function GET(
     // renderToBuffer attend un ReactElement<DocumentProps> — le cast est sûr
     // car DevisPdf retourne bien un <Document> au runtime
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mainBuffer = await renderToBuffer(React.createElement(DevisPdf, { devis }) as any);
+    const mainBuffer = await renderToBuffer(React.createElement(DevisPdf, {
+        devis,
+        // C-PDF-ACCENT-PAR-COMPANY : un devis suit toujours le réglage actuel.
+        accent: resolveDevisPdfAccent(devis.company.pdfAccent),
+      }) as any);
 
     const filename = devisPdfFilename({
       id: devis.id,

@@ -34,6 +34,11 @@ tranché en même temps : PDF figé ou non).
 - Lignes / sections : relues EN DIRECT sur le devis source → une modif du
   devis après émission change le détail et le PDF d'une pièce émise.
 - Client destinataire : relu en direct (pas de snapshot).
+- Accent PDF : déjà figé à l'émission (C-PDF-ACCENT-PAR-COMPANY, 29/10/2026 —
+  `Facture.pdfAccent`, posé par `emettre` et à la création d'un avoir ; NULL
+  = pièce émise avant la fonctionnalité, rendue en Majorelle). Le chantier
+  doit le traiter comme les lignes et le client : un snapshot d'émission
+  parmi les autres, à garder cohérent (reprise des pièces, verrou, AuditLog).
 - Aucun AuditLog sur les modifications de devis / facture.
 
 ### Périmètre
@@ -426,6 +431,14 @@ le tableau restant tel quel au-dessus de `md`.
 ## Après C-REDESIGN-PHASE2-APP — C-PDF-ACCENT-PAR-COMPANY
 
 Ouvert le 27/10/2026 (demande Vanda, arbitrage Rose : après l'étape 6).
+
+**Livré le 29/10/2026.** Palette finale (Rose) : Majorelle (défaut),
+Bordeaux #962A3A, Olive #5C6B1F, Pétrole #0E6A7A, Encre — wine et olive
+éclaircis par rapport aux teintes testées (#5E1A1A / #3A3D2B, lues noires) ;
+Vanda tranche sur les 5 PDF et on swappe si elle préfère les originales.
+`Company.pdfAccent` (clé, NULL = Majorelle), `Facture.pdfAccent` figé à
+l'émission, réglage « Couleur des documents PDF » dans les Paramètres ;
+l'app garde le Majorelle. Le texte ci-dessous est l'énoncé d'origine.
 
 Permettre à chaque société de choisir la couleur d'accent de ses
 documents clients (PDF devis / facture / avoir / conteneur Factur-X), au

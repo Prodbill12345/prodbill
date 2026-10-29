@@ -18,6 +18,8 @@ import { formatPeriodeExploitation } from "@/lib/periode-exploitation";
 import "@/lib/pdf/fonts";
 import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
+import type { PdfAccentKey } from "@/design/tokens";
+import { pdfAccentColors } from "@/lib/pdf-accent";
 
 export type DevisForPdf = Devis & {
   client: Client;
@@ -242,7 +244,18 @@ const s = StyleSheet.create({
 
 // ─── composant ──────────────────────────────────────────────────────────────
 
-export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
+/**
+ * `accent` : clé de la palette PDF de la société (C-PDF-ACCENT-PAR-COMPANY),
+ * déjà résolue par la route (src/lib/pdf-accent.ts). Absent = Majorelle.
+ */
+export function DevisPdf({
+  devis: devisBrut,
+  accent,
+}: {
+  devis: DevisForPdf;
+  accent?: PdfAccentKey;
+}) {
+  const ac = pdfAccentColors(accent);
   // Textes en NFC : accents décomposés recomposés (affichage uniquement).
   const devis = normalizeNfcDeep(devisBrut);
   const { company, client } = devis;
@@ -290,7 +303,7 @@ export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
           <View style={s.headerRight}>
             <Text style={s.docTitre}>Devis</Text>
             {devis.numero
-              ? <Text style={s.docNumero}>N° {devis.numero}</Text>
+              ? <Text style={[s.docNumero, { color: ac.accent }]}>N° {devis.numero}</Text>
               : <Text style={s.docBrouillon}>Brouillon</Text>
             }
             <Text style={s.docDate}>
@@ -308,14 +321,14 @@ export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
         {/* ── Emetteur / Destinataire ────────────────────────────── */}
         <View style={s.partiesRow}>
           <View style={[s.partyBox, s.partyBoxLeft]}>
-            <Text style={s.partyLabel}>ÉMETTEUR</Text>
+            <Text style={[s.partyLabel, { color: ac.accentInk }]}>ÉMETTEUR</Text>
             <Text style={s.partyName}>{company.name}</Text>
             <Text style={s.partyDetail}>{adresseCompany}</Text>
             <Text style={s.partyDetail}>SIRET : {company.siret}</Text>
             <Text style={s.partyDetail}>TVA : {company.tvaIntra}</Text>
           </View>
           <View style={s.partyBox}>
-            <Text style={s.partyLabel}>DESTINATAIRE</Text>
+            <Text style={[s.partyLabel, { color: ac.accentInk }]}>DESTINATAIRE</Text>
             <Text style={s.partyName}>{client.name}</Text>
             <Text style={s.partyDetail}>{adresseClient}</Text>
             {client.siret && <Text style={s.partyDetail}>SIRET : {client.siret}</Text>}
@@ -531,8 +544,8 @@ export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
                 {/* Sans TTC (NONNA), le TOTAL HT est le total final du
                     document : il prend la mise en valeur du TTC. */}
                 <View style={showTtc ? s.totRow : s.totFinalRow}>
-                  <Text style={showTtc ? s.totHtLabel : s.totFinalLabel}>TOTAL HT</Text>
-                  <Text style={showTtc ? s.totHtValue : s.totFinalValue}>{euros(devis.totalApresRemise)}</Text>
+                  <Text style={showTtc ? s.totHtLabel : [s.totFinalLabel, { color: ac.accentInk }]}>TOTAL HT</Text>
+                  <Text style={showTtc ? s.totHtValue : [s.totFinalValue, { color: ac.accent }]}>{euros(devis.totalApresRemise)}</Text>
                 </View>
                 {showTva && (devis.tauxTva === 0 ? (
                   <View style={s.totRow}>
@@ -548,8 +561,8 @@ export function DevisPdf({ devis: devisBrut }: { devis: DevisForPdf }) {
 
                 {showTtc && (
                   <View style={s.totFinalRow}>
-                    <Text style={s.totFinalLabel}>TOTAL TTC</Text>
-                    <Text style={s.totFinalValue}>{euros(devis.totalTtc)}</Text>
+                    <Text style={[s.totFinalLabel, { color: ac.accentInk }]}>TOTAL TTC</Text>
+                    <Text style={[s.totFinalValue, { color: ac.accent }]}>{euros(devis.totalTtc)}</Text>
                   </View>
                 )}
 

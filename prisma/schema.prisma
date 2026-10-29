@@ -111,6 +111,11 @@ model Company {
   // Aucun calcul serveur impacté — pur affichage. Cas NONNA (#hide-tva).
   hideTvaTtcOnDevis Boolean @default(false)
 
+  // Accent des documents PDF (C-PDF-ACCENT-PAR-COMPANY) : clé de la palette
+  // `pdfAccents` (src/design/tokens.ts). NULL = Majorelle, l'accent de l'app :
+  // aucune société ne change d'apparence tant qu'elle ne choisit rien.
+  pdfAccent String?
+
   // Sections custom proposées en plus des 5 par défaut (Voix-Off, Studio,
   // Musique, Droits, Autres) lors de la création d'un devis.
   // Format : [{ nom: string, categorie: "ARTISTE"|"TECHNICIEN_HCS"|"STUDIO"|"MUSIQUE"|"AUTRE" }]
@@ -542,6 +547,11 @@ model Facture {
   // l'émission comme le reste.
   objet             String?
   descriptionProjet String?
+
+  // Accent PDF figé à l'émission (C-PDF-ACCENT-PAR-COMPANY) : copie de
+  // Company.pdfAccent. NULL sur un brouillon (suit le réglage) et sur les
+  // pièces émises avant la fonctionnalité (rendu Majorelle).
+  pdfAccent String?
 
   // Période d'exploitation — snapshot recopié depuis le devis source
   // au moment de l'émission (re-snapshot à chaque facture acompte/solde).

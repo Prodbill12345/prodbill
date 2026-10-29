@@ -1,6 +1,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { PDF_ACCENT_KEYS } from "@/design/tokens";
 
 const UpdateCompanySchema = z.object({
   name: z.string().min(1).optional(),
@@ -16,6 +17,8 @@ const UpdateCompanySchema = z.object({
   nomBanque: z.string().optional(),
   logoUrl: z.string().url().nullable().optional(),
   primaryColor: z.string().optional(),
+  // C-PDF-ACCENT-PAR-COMPANY : uniquement une clé de la palette curée.
+  pdfAccent: z.enum(PDF_ACCENT_KEYS).optional(),
   conditionsPaiement: z.string().optional(),
   defaultTauxFg: z.number().min(0).max(1).optional(),
   defaultTauxMarge: z.number().min(0).max(1).optional(),

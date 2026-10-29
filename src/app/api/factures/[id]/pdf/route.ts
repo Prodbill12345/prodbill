@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { requireAuth, handleAuthError } from "@/lib/auth";
+import { resolveFacturePdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
@@ -63,7 +64,7 @@ export async function GET(
       }),
       prisma.company.findUnique({
         where: { id: user.companyId },
-        select: { logoUrl: true },
+        select: { logoUrl: true, pdfAccent: true },
       }),
     ]);
 
@@ -88,7 +89,11 @@ export async function GET(
     };
 
     const mainBuffer = await renderToBuffer(
-      React.createElement(FacturePdf, { facture: factureWithLogo }) as never
+      React.createElement(FacturePdf, {
+        facture: factureWithLogo,
+        // C-PDF-ACCENT-PAR-COMPANY : accent figé à l'émission, sinon réglage société.
+        accent: resolveFacturePdfAccent(facture, company?.pdfAccent),
+      }) as never
     );
 
     const filename = facturePdfFilename({

@@ -15,6 +15,8 @@ import { factureObjetDisplay } from "@/lib/facture-objet";
 import "@/lib/pdf/fonts";
 import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
+import type { PdfAccentKey } from "@/design/tokens";
+import { pdfAccentColors } from "@/lib/pdf-accent";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -306,7 +308,18 @@ const s = StyleSheet.create({
 
 // ─── composant ──────────────────────────────────────────────────────────────
 
-export function FacturePdf({ facture: factureBrute }: { facture: FactureForPdf }) {
+/**
+ * `accent` : clé de la palette PDF de la société (C-PDF-ACCENT-PAR-COMPANY),
+ * déjà résolue par la route (src/lib/pdf-accent.ts). Absent = Majorelle.
+ */
+export function FacturePdf({
+  facture: factureBrute,
+  accent,
+}: {
+  facture: FactureForPdf;
+  accent?: PdfAccentKey;
+}) {
+  const ac = pdfAccentColors(accent);
   // Textes en NFC : accents décomposés recomposés (affichage uniquement).
   const facture = normalizeNfcDeep(factureBrute);
   const { client, logoUrl } = facture;
@@ -389,7 +402,7 @@ export function FacturePdf({ facture: factureBrute }: { facture: FactureForPdf }
           </View>
           <View style={s.headerRight}>
             <Text style={s.docTitre}>{docTitreAffiche}</Text>
-            <Text style={s.docNumero}>
+            <Text style={[s.docNumero, { color: ac.accent }]}>
               {numeroAffiche ? `N° ${numeroAffiche}` : "(Brouillon)"}
             </Text>
             {facture.dateEmission && (
@@ -413,14 +426,14 @@ export function FacturePdf({ facture: factureBrute }: { facture: FactureForPdf }
         {/* ── Emetteur / Destinataire ────────────────────────────── */}
         <View style={s.partiesRow}>
           <View style={[s.partyBox, s.partyBoxLeft]}>
-            <Text style={s.partyLabel}>ÉMETTEUR</Text>
+            <Text style={[s.partyLabel, { color: ac.accentInk }]}>ÉMETTEUR</Text>
             <Text style={s.partyName}>{facture.nomEmetteur}</Text>
             <Text style={s.partyDetail}>{facture.adresseEmetteur}</Text>
             <Text style={s.partyDetail}>SIRET : {facture.siretEmetteur}</Text>
             <Text style={s.partyDetail}>TVA : {facture.tvaIntraEmetteur}</Text>
           </View>
           <View style={s.partyBox}>
-            <Text style={s.partyLabel}>DESTINATAIRE</Text>
+            <Text style={[s.partyLabel, { color: ac.accentInk }]}>DESTINATAIRE</Text>
             <Text style={s.partyName}>{client.name}</Text>
             <Text style={s.partyDetail}>{adresseClient}</Text>
             {client.siret && (
@@ -687,10 +700,10 @@ export function FacturePdf({ facture: factureBrute }: { facture: FactureForPdf }
                   </View>
                 )}
                 <View style={s.totFinalRow}>
-                  <Text style={s.totFinalLabel}>
+                  <Text style={[s.totFinalLabel, { color: ac.accentInk }]}>
                     {isAvoir ? "MONTANT DE L'AVOIR TTC" : "TOTAL TTC"}
                   </Text>
-                  <Text style={s.totFinalValue}>
+                  <Text style={[s.totFinalValue, { color: ac.accent }]}>
                     {isAvoir ? `- ${euros(absTtc)}` : euros(absTtc)}
                   </Text>
                 </View>

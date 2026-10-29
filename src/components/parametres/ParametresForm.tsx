@@ -9,6 +9,8 @@ import Image from "next/image";
 import type { Company, Role } from "@/types";
 import { InputPct } from "@/components/forms/InputPct";
 import { parsePctInput, decimalToPct, pctToDecimal } from "@/lib/parse-pct";
+import { pdfAccents, PDF_ACCENT_KEYS } from "@/design/tokens";
+import { toPdfAccentKey } from "@/lib/pdf-accent";
 
 // Les taux sont saisis et validés en POURCENTAGE (0..100) côté UI.
 // Conversion en décimal (0..1) au moment de l'envoi à l'API (onSubmit).
@@ -25,6 +27,7 @@ const ParametresSchema = z.object({
   iban: z.string().min(1, "IBAN requis"),
   bic: z.string().min(1, "BIC requis"),
   primaryColor: z.string().default("#3B82F6"),
+  pdfAccent: z.enum(PDF_ACCENT_KEYS).default("majorelle"),
   conditionsPaiement: z.string().min(1, "Conditions de paiement requises"),
   defaultTauxFg: z.coerce.number().min(0).max(100),
   defaultTauxMarge: z.coerce.number().min(0).max(100),
@@ -69,6 +72,8 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
       iban: company.iban,
       bic: company.bic,
       primaryColor: company.primaryColor,
+      // NULL en base = Majorelle (aucun changement d'apparence par défaut).
+      pdfAccent: toPdfAccentKey(company.pdfAccent),
       conditionsPaiement: company.conditionsPaiement,
       defaultTauxFg: decimalToPct(company.defaultTauxFg),
       defaultTauxMarge: decimalToPct(company.defaultTauxMarge),
@@ -78,6 +83,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
   });
 
   const primaryColor = watch("primaryColor");
+  const pdfAccent = watch("pdfAccent");
 
   async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -422,7 +428,7 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
         <div className="flex items-center gap-4">
           <div>
             <label className="block text-sm font-medium text-brand-ink mb-1">
-              Couleur principale
+              Couleur des emails
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -435,8 +441,65 @@ export function ParametresForm({ company, userRole }: ParametresFormProps) {
                 {primaryColor}
               </span>
             </div>
+            <p className="text-xs text-brand-ink-muted mt-1">
+              En-tête des emails envoyés aux clients.
+            </p>
           </div>
         </div>
+
+        {/* C-PDF-ACCENT-PAR-COMPANY : accent des devis et factures PDF.
+            L'app garde son bleu ; une facture émise garde l'accent qu'elle
+            avait à l'émission. */}
+        <fieldset disabled={!canEdit} className="pt-2">
+          <legend className="block text-sm font-medium text-brand-ink mb-1">
+            Couleur des documents PDF
+          </legend>
+          <p className="text-xs text-brand-ink-muted mb-3">
+            Numéro, libellés et total des devis et factures. Les factures déjà
+            émises gardent leur couleur.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            {PDF_ACCENT_KEYS.map((key) => {
+              const a = pdfAccents[key];
+              const selected = pdfAccent === key;
+              return (
+                <label
+                  key={key}
+                  className={`relative flex flex-col gap-2 rounded-[var(--radius-control)] border p-3 cursor-pointer transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-blue ${
+                    selected
+                      ? "border-brand-ink ring-1 ring-brand-ink bg-brand-paper"
+                      : "border-brand-rule bg-brand-paper hover:border-brand-ink-subtle"
+                  } ${!canEdit ? "cursor-not-allowed opacity-70" : ""}`}
+                >
+                  <input type="radio" value={key} {...register("pdfAccent")} className="sr-only" />
+                  <span className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-brand-ink">{a.label}</span>
+                    <span
+                      aria-hidden
+                      className="w-4 h-4 rounded-full border border-black/10"
+                      style={{ background: a.accent }}
+                    />
+                  </span>
+                  {/* Aperçu : mêmes couleurs que sur le PDF */}
+                  <span aria-hidden className="rounded-md bg-brand-cream px-2 py-1.5">
+                    <span className="block font-display text-[13px] font-bold" style={{ color: a.accent }}>
+                      N° F26122
+                    </span>
+                    <span
+                      className="block text-[8px] font-medium uppercase tracking-[0.2em] mt-0.5"
+                      style={{ color: a.accentInk }}
+                    >
+                      Total TTC
+                    </span>
+                  </span>
+                  {key === "majorelle" && (
+                    <span className="text-[10px] text-brand-ink-muted">Par défaut</span>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
       </div>
 
       {canEdit && (

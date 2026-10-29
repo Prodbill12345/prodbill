@@ -121,6 +121,34 @@ export const statusTones = {
 
 export type StatusTone = keyof typeof statusTones;
 
+/**
+ * Accents des documents PDF, au choix de chaque société
+ * (C-PDF-ACCENT-PAR-COMPANY, 29/10/2026). L'app garde toujours `colors.accent`.
+ * Le choix s'applique aux 4 usages de l'accent dans DevisPdf / FacturePdf :
+ * numéro et TOTAL TTC en `accent`, libellés ÉMETTEUR / DESTINATAIRE et
+ * « TOTAL TTC » (6–7 pt) en `accentInk`.
+ *
+ * Contrastes (WCAG) — accent sur crème / sur bloc totaux (surface) ;
+ * accentInk sur crème ; écart avec le texte (ink) :
+ *   majorelle 5.23 / 4.87 ; 6.69 ; 2.70
+ *   wine      7.16 / 6.67 ; 9.17 ; 1.97   (#5E1A1A testé : 1.20, lu noir)
+ *   olive     5.38 / 5.01 ; 7.22 ; 2.62   (#3A3D2B testé : 1.38, lu noir)
+ *   petrole   5.73 / 5.33 ; 7.72 ; 2.47
+ *   ink       14.1 / 13.1 ; 14.1 ; —      (PDF sobre, sans couleur, voulu)
+ */
+export const pdfAccents = {
+  majorelle: { label: "Majorelle", accent: colors.accent, accentInk: colors.accentInk },
+  wine: { label: "Bordeaux", accent: "#962A3A", accentInk: "#7A2230" },
+  olive: { label: "Olive", accent: "#5C6B1F", accentInk: "#4A5718" },
+  petrole: { label: "Pétrole", accent: "#0E6A7A", accentInk: "#0B5563" },
+  ink: { label: "Encre", accent: colors.ink, accentInk: colors.ink },
+} as const;
+
+export type PdfAccentKey = keyof typeof pdfAccents;
+export const PDF_ACCENT_KEYS = Object.keys(pdfAccents) as [PdfAccentKey, ...PdfAccentKey[]];
+/** Accent d'une société qui n'a rien choisi (Company.pdfAccent NULL). */
+export const DEFAULT_PDF_ACCENT: PdfAccentKey = "majorelle";
+
 /** Libellés de section en capitales espacées (« ÉMETTEUR », « TOTAL TTC »). */
 export const sectionLabel = {
   fontFamily: fonts.text,

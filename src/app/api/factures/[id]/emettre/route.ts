@@ -2,6 +2,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
 import { getNextFactureNumero } from "@/lib/numbering";
+import { toPdfAccentKey } from "@/lib/pdf-accent";
 import { sendFactureEmail } from "@/lib/email/resend";
 import { loadFactureTotals } from "@/lib/facture-recompute";
 import { isRecapFacture } from "@/lib/facture-recap-view";
@@ -103,6 +104,13 @@ export async function POST(
     // (évite le legacy emiseAt=null, cf. fix 3bfcbc0).
     const numero = await getNextFactureNumero(user.companyId);
 
+    // C-PDF-ACCENT-PAR-COMPANY : accent PDF de la société figé à l'émission
+    // (un changement de réglage ultérieur ne recolore pas la pièce émise).
+    const companyAccent = await prisma.company.findUnique({
+      where: { id: user.companyId },
+      select: { pdfAccent: true },
+    });
+
     // Flip BROUILLON→EMISE conditionnel : garde-fou double-clic. Seule la
     // 1ère requête (statut encore BROUILLON) gagne. La contrainte unique
     // (companyId, numero) est le backstop ultime contre tout doublon.
@@ -114,6 +122,7 @@ export async function POST(
         dateEmission: now,
         dateEcheance,
         emiseAt: now, // Marque l'immuabilité
+        pdfAccent: toPdfAccentKey(companyAccent?.pdfAccent),
         // #99 : fige les totaux recalculés à l'instant (no-op si déjà à jour ;
         // omis pour une facture sans devis lié → on garde ses totaux stockés).
         ...(totals ?? {}),

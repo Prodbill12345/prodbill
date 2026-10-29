@@ -1,6 +1,7 @@
 import { requireAuth, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
+import { toPdfAccentKey } from "@/lib/pdf-accent";
 
 /**
  * POST /api/factures/[id]/avoir
@@ -66,6 +67,13 @@ export async function POST(
     const tva = -Math.abs(facture.tva);
     const totalTtc = -Math.abs(facture.totalTtc);
 
+    const companyAccent = facture.pdfAccent
+      ? null
+      : await prisma.company.findUnique({
+          where: { id: user.companyId },
+          select: { pdfAccent: true },
+        });
+
     const avoir = await prisma.facture.create({
       data: {
         companyId: user.companyId,
@@ -91,6 +99,9 @@ export async function POST(
         nomEmetteur: facture.nomEmetteur,
         adresseEmetteur: facture.adresseEmetteur,
         emiseAt: new Date(),
+        // C-PDF-ACCENT-PAR-COMPANY : l'avoir reprend l'accent de la facture
+        // qu'il annule (pièces appariées) ; à défaut, le réglage actuel.
+        pdfAccent: toPdfAccentKey(facture.pdfAccent ?? companyAccent?.pdfAccent),
         createdById: user.id,
       },
       include: { client: true, devis: true },

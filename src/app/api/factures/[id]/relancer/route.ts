@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { requireAuth, handleAuthError } from "@/lib/auth";
+import { resolveFacturePdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
@@ -63,7 +64,7 @@ export async function POST(
       }),
       prisma.company.findUnique({
         where: { id: user.companyId },
-        select: { logoUrl: true, primaryColor: true, iban: true, bic: true },
+        select: { logoUrl: true, primaryColor: true, iban: true, bic: true, pdfAccent: true },
       }),
     ]);
 
@@ -120,7 +121,10 @@ export async function POST(
       : null;
     const factureForPdf = { ...facture, devis: devisNormalized, logoUrl: company?.logoUrl ?? null };
     const pdfBuffer = Buffer.from(
-      await renderToBuffer(React.createElement(FacturePdf, { facture: factureForPdf }) as never)
+      await renderToBuffer(React.createElement(FacturePdf, {
+        facture: factureForPdf,
+        accent: resolveFacturePdfAccent(facture, company?.pdfAccent),
+      }) as never)
     );
 
     const { subject, skipped } = await sendRelanceEmail(type, {
