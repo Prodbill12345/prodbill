@@ -5,7 +5,115 @@ priorité estimée. Mettre à jour le sprint d'affectation quand on tranche.
 
 ---
 
-## Sprint 2 — AuditLog DEVIS_UPDATED + FACTURE_UPDATED
+## Ordre retenu (29/10/2026, Rose)
+
+1. Auto-sélection de l'agent depuis le comédien (DevisBuilder) — plan
+   court avant code.
+2. C-PDF-ACCENT-PAR-COMPANY.
+3. Chantier IMMUABILITE-FACTURE, en une session dédiée.
+4. Le reste de CONFORMITE-2027.
+
+---
+
+## Chantier IMMUABILITE-FACTURE — facture émise immuable (art. 289 CGI)
+
+Ouvert le 29/10/2026 (arbitrage Rose) : **session dédiée**, les quatre
+tickets ci-dessous sont fusionnés car ils décident ensemble « ce qu'on fige,
+où, et qui peut encore modifier quoi ». Prérequis de CONFORMITE-2027 et de
+l'activation des mails clients (cf. chantier mails #91, qui gagne à être
+tranché en même temps : PDF figé ou non).
+
+### État au 29/10/2026
+
+- Totaux de facture figés à l'émission (#99, `8fd3eab`), rafraîchis tant que
+  la facture est BROUILLON.
+- Verrous partiels déjà en place, même règle (`isDevisFactureLocked`,
+  `src/lib/devis-sections.ts` : facture mono OU récap liée au devis) :
+  changement de client (FIX-CLIENT-CHANGE-ENVOYE) et réordonnancement des
+  sections (C-DEVIS-SECTIONS-REORDER, refus 400 + poignée désactivée).
+- Lignes / sections : relues EN DIRECT sur le devis source → une modif du
+  devis après émission change le détail et le PDF d'une pièce émise.
+- Client destinataire : relu en direct (pas de snapshot).
+- Aucun AuditLog sur les modifications de devis / facture.
+
+### Périmètre
+
+#### A. SNAPSHOT-FACTURE-LIGNES — figer sections et lignes à l'émission
+
+Ticket validé par Vanda le 07/09/2026. Tables `FactureSection` /
+`FactureLigne` (ou équivalent) remplies à l'émission ; détail facture,
+PDF et Factur-X lus depuis ce snapshot, plus depuis `devis.sections`.
+Reprise des factures déjà émises : snapshot rétroactif depuis l'état actuel
+du devis (à valider : un devis modifié depuis l'émission ne peut pas être
+reconstitué — à signaler, pas à deviner).
+
+**Verrous à lever ensuite :** une fois les lignes figées, le blocage du
+réordonnancement des sections d'un devis facturé (C-DEVIS-SECTIONS-REORDER,
+29/10/2026) pourra être levé — le devis pourra être réordonné sans toucher
+aux pièces émises. Même question pour le reste du verrou (point C).
+
+#### B. Snapshot du client sur la facture
+
+Le modèle `Facture` snapshot les coordonnées de la **Company émettrice**
+(`siretEmetteur`, `tvaIntraEmetteur`, `ibanEmetteur`, `adresseEmetteur`,
+etc.) mais **PAS** celles du **Client destinataire**. La facture pointe
+juste vers `clientId` via FK.
+
+Conséquence : si Vanda modifie un client (via FIX 5 ajouté en Sprint 2)
+et qu'on re-génère une facture émise pour ce client, le PDF re-rendu
+afficherait les nouvelles coordonnées au lieu des coordonnées
+historiques. Or l'art. 289 CGI exige l'immutabilité des mentions
+légales post-émission.
+
+Mitigations Phase 2 :
+
+- Soit ajouter sur `Facture` les champs `clientNameSnapshot`,
+  `clientSiretSnapshot`, `clientTvaSnapshot`, `clientAddressSnapshot`,
+  remplis au moment de l'émission, et faire que `FacturePdf` utilise
+  ces snapshots si présents (sinon fallback sur la relation `client`).
+- Soit verrouiller l'édition client si une facture EMISE existe
+  (refus côté PUT avec 409) — plus strict mais simple.
+- Soit accepter le risque et documenter pour l'utilisateur que les
+  modifications client n'impactent que les futurs documents — pour
+  les anciens, le PDF déposé sur Vercel Blob est l'unique source de
+  vérité (déjà immutable comme fichier).
+
+À discuter avec Vanda et un expert-comptable avant de trancher.
+
+#### C. Verrou métier complet du devis facturé
+
+Aujourd'hui, `PUT /api/devis/[id]` accepte une modification sur tout devis,
+quel que soit son statut (`BROUILLON`, `ENVOYE`, `ACCEPTE`, `REFUSE`,
+`EXPIRE`) et qu'une facture ait été émise ou non depuis ce devis. Le
+commentaire ligne 82 du fichier route dit "est éditable" mais ne vérifie
+rien.
+
+Cas réel discuté : Vanda doit pouvoir corriger un devis `ACCEPTE` qui
+n'a pas encore été facturé (typo, ajustement client). C'est pourquoi on
+ne lock pas sur le statut seul.
+
+À étudier en Sprint 2 :
+
+- Verrou si `devis.factures.some(f => f.statut !== "BROUILLON")` → renvoyer
+  409 Conflict avec message clair côté UI
+- Permettre uniquement la modification des champs "safe" (objet, notes,
+  refDevis, nomProjet, annee) si une facture est émise ; bloquer les
+  changements de lignes/taux/remise qui altèreraient la cohérence
+  facture ↔ devis (cf. TODO immuabilité art. 289 CGI déjà tagué dans
+  `prisma/schema.prisma`)
+- Alternative plus stricte : dupliquer les lignes en `FactureSection` /
+  `FactureLigne` au moment de l'émission, comme indiqué dans le TODO
+  schema, pour découpler définitivement
+
+##### Acceptance criteria (C)
+
+- Devis sans facture : éditable comme aujourd'hui (zéro régression)
+- Devis avec ≥ 1 facture émise : champs critiques (sections, taux,
+  remise) refusés en PUT → 409 + UI affiche un bandeau "Ce devis a
+  généré une facture, modifications limitées"
+- Tests intégration couvrant les 2 cas
+
+#### D. AuditLog DEVIS_UPDATED / FACTURE_UPDATED
 
 Aujourd'hui les modifs de Devis et Facture ne sont **pas** tracées dans
 `AuditLog`. Conséquence : impossible de répondre à « quelles valeurs avait
@@ -26,7 +134,7 @@ ni infirmer côté data.
 - Symétrique sur Facture (`FACTURE_EMISE`, `FACTURE_UPDATED`)
 - Permet aussi le rollback automatisé si bug d'écrasement futur
 
-### Acceptance criteria
+##### Acceptance criteria (D)
 
 - Tout PUT sur Devis crée 1 ligne AuditLog avec before/after sur les
   champs critiques (taux, totaux, sectionsCount)
@@ -34,6 +142,12 @@ ni infirmer côté data.
   rapidement les vraies modifs
 - Pas de double-log pour les opérations admin déjà loguées (impersonation,
   scripts de repair)
+
+### Ordre suggéré dans la session
+
+A (snapshot lignes) et B (snapshot client) d'abord — ils rendent la facture
+autonome ; puis C (le verrou peut alors s'assouplir là où le snapshot
+protège déjà la pièce) ; D en continu, dès la première route touchée.
 
 ---
 
@@ -76,35 +190,6 @@ Acceptance criteria :
 
 ---
 
-## Sprint 3 — Snapshot client sur Facture (immutabilité légale)
-
-Le modèle `Facture` snapshot les coordonnées de la **Company émettrice**
-(`siretEmetteur`, `tvaIntraEmetteur`, `ibanEmetteur`, `adresseEmetteur`,
-etc.) mais **PAS** celles du **Client destinataire**. La facture pointe
-juste vers `clientId` via FK.
-
-Conséquence : si Vanda modifie un client (via FIX 5 ajouté en Sprint 2)
-et qu'on re-génère une facture émise pour ce client, le PDF re-rendu
-afficherait les nouvelles coordonnées au lieu des coordonnées
-historiques. Or l'art. 289 CGI exige l'immutabilité des mentions
-légales post-émission.
-
-Mitigations Phase 2 :
-
-- Soit ajouter sur `Facture` les champs `clientNameSnapshot`,
-  `clientSiretSnapshot`, `clientTvaSnapshot`, `clientAddressSnapshot`,
-  remplis au moment de l'émission, et faire que `FacturePdf` utilise
-  ces snapshots si présents (sinon fallback sur la relation `client`).
-- Soit verrouiller l'édition client si une facture EMISE existe
-  (refus côté PUT avec 409) — plus strict mais simple.
-- Soit accepter le risque et documenter pour l'utilisateur que les
-  modifications client n'impactent que les futurs documents — pour
-  les anciens, le PDF déposé sur Vercel Blob est l'unique source de
-  vérité (déjà immutable comme fichier).
-
-À discuter avec Vanda et un expert-comptable avant de trancher.
-
----
 
 ## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
 
@@ -126,40 +211,6 @@ l'agent correspondant, gated par un état `agentManuallySet`.
 
 ---
 
-## Sprint 2 — Verrou métier devis (facture émise)
-
-Aujourd'hui, `PUT /api/devis/[id]` accepte une modification sur tout devis,
-quel que soit son statut (`BROUILLON`, `ENVOYE`, `ACCEPTE`, `REFUSE`,
-`EXPIRE`) et qu'une facture ait été émise ou non depuis ce devis. Le
-commentaire ligne 82 du fichier route dit "est éditable" mais ne vérifie
-rien.
-
-Cas réel discuté : Vanda doit pouvoir corriger un devis `ACCEPTE` qui
-n'a pas encore été facturé (typo, ajustement client). C'est pourquoi on
-ne lock pas sur le statut seul.
-
-À étudier en Sprint 2 :
-
-- Verrou si `devis.factures.some(f => f.statut !== "BROUILLON")` → renvoyer
-  409 Conflict avec message clair côté UI
-- Permettre uniquement la modification des champs "safe" (objet, notes,
-  refDevis, nomProjet, annee) si une facture est émise ; bloquer les
-  changements de lignes/taux/remise qui altèreraient la cohérence
-  facture ↔ devis (cf. TODO immuabilité art. 289 CGI déjà tagué dans
-  `prisma/schema.prisma`)
-- Alternative plus stricte : dupliquer les lignes en `FactureSection` /
-  `FactureLigne` au moment de l'émission, comme indiqué dans le TODO
-  schema, pour découpler définitivement
-
-### Acceptance criteria
-
-- Devis sans facture : éditable comme aujourd'hui (zéro régression)
-- Devis avec ≥ 1 facture émise : champs critiques (sections, taux,
-  remise) refusés en PUT → 409 + UI affiche un bandeau "Ce devis a
-  généré une facture, modifications limitées"
-- Tests intégration couvrant les 2 cas
-
----
 
 ## Sprint 3 ou 4 — Hardening des envois email (Resend)
 
@@ -305,18 +356,10 @@ des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
 
 ### Périmètre (chantier unique, les briques dépendent les unes des autres)
 
-1. **SNAPSHOT-FACTURE-LIGNES — prérequis.** Le XML EN 16931 doit se
-   construire sur des lignes figées à l'émission, pas relues depuis le
-   devis source (cf. TODO schéma `Facture` + art. 289 CGI). À faire en
-   premier.
-   *Verrous à lever ensuite :* tant que les lignes ne sont pas figées, le
-   réordonnancement des sections d'un devis est **bloqué dès qu'une facture
-   (mono ou récap) y est liée** (C-DEVIS-SECTIONS-REORDER, 29/10/2026 —
-   `isDevisFactureLocked` dans `src/lib/devis-sections.ts`, refus 400 dans
-   `PUT /api/devis/[id]`, poignée désactivée dans le DevisBuilder), sinon le
-   PDF d'une facture déjà émise changerait d'ordre. Une fois les sections et
-   lignes snapshotées à l'émission, ce blocage pourra être levé (le devis
-   pourra être réordonné sans toucher aux pièces émises).
+1. **SNAPSHOT-FACTURE-LIGNES — prérequis**, traité dans le chantier
+   **IMMUABILITE-FACTURE** (voir plus haut), qui doit être livré avant ce
+   chantier : le XML EN 16931 se construit sur des lignes figées à
+   l'émission, pas relues depuis le devis source.
 2. **XML EN 16931 complet** : profil `urn:cen.eu:en16931:2017`, lignes de
    facture (BG-25), ventilation TVA par taux/catégorie (BG-23), conditions
    et date d'échéance réelles, validation XSD + schematron officiels.
