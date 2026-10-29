@@ -156,26 +156,14 @@ protège déjà la pièce) ; D en continu, dès la première route touchée.
 
 ---
 
-## Sprint 3 — Filtres /devis : filtre "Type" + persistance localStorage
+## Sprint 3 — Filtres /devis : persistance localStorage
 
-Issus du SPRINT 2 (filtres /devis) — items reportés :
+Issu du SPRINT 2 (filtres /devis) — item reporté.
 
-### Filtre par "Type" (à clarifier avec Vanda)
-
-Vanda a demandé un filtre "Type" mais le `LigneTag`
-(`ARTISTE / TECHNICIEN_HCS / STUDIO / MUSIQUE / AGENT`) est un attribut
-des **lignes**, pas du devis. Avant d'implémenter, clarifier avec elle
-ce qu'elle entend par "Type" :
-
-- Peut-être : "devis qui contient au moins une voix-off" → filtre sur
-  `devis.lignes.some(tag === "ARTISTE")`
-- Peut-être : "devis avec studio uniquement" → filtre sur composition
-  des lignes
-- Peut-être : un champ métier complètement autre (catégorie projet ?)
-
-Si l'implémentation est validée, deux options techniques :
-- Option A : ajouter `include: { sections: { include: { lignes: { select: { tag: true } } } } }` côté server SSR → payload ~3-5× plus gros
-- Option B : pré-calculer côté serveur un champ dérivé `devis._hasTags: LigneTag[]` envoyé minimaliste au client
+*Filtre « Type » : fermé le 29/10/2026.* Le ticket ne précisait pas sur quoi
+filtrer (trois hypothèses à clarifier : présence d'une ligne voix-off,
+composition des lignes, champ métier inconnu) et Vanda ne se souvient pas
+de la demande. À rouvrir seulement sur une demande précise.
 
 ### Persistance localStorage des filtres
 
@@ -197,6 +185,12 @@ Acceptance criteria :
 
 
 ## Sprint 2 — UX : auto-pré-sélection agent depuis comédien (DevisBuilder)
+
+**Livré le 29/10/2026 (`953d632`)** : `src/lib/agent-preselect.ts`. Règle
+retenue : un agent choisi à la main n'est jamais écrasé ; passer à un
+comédien à son compte vide un agent rempli automatiquement. Limite : un seul
+agent par comédien (voir « Sujet à cadrer — plusieurs agents par comédien »).
+Énoncé d'origine ci-dessous.
 
 Quand l'utilisateur sélectionne un comédien dans le dropdown d'une ligne
 ARTISTE, et que ce comédien a un agent associé (`comedien.agentId !== null`),
@@ -407,26 +401,6 @@ des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
 
 ---
 
-## Après C-REDESIGN-PHASE2-APP — Listes mobiles en cartes
-
-Ouvert le 27/10/2026 (arbitrage Rose : ticket séparé, après l'étape 6 —
-c'est de la restructuration, pas de l'habillage).
-
-Sur téléphone, les listes (devis, factures, paiements, clients…) sont des
-tableaux en défilement horizontal depuis l'étape 4 du redesign : utilisable
-mais pas confortable pour Vanda. Cible : sous `md`, une carte par ligne
-(numéro + client + montant + badge de statut, actions en bas de carte),
-le tableau restant tel quel au-dessus de `md`.
-
-### Acceptance criteria
-
-- Devis, factures, paiements : lisibles et actionnables à 390 px sans
-  défilement horizontal
-- Mêmes données, filtres, tris et sélection (récap multi-devis) qu'en
-  tableau — aucune régression fonctionnelle
-- Le tableau desktop est inchangé
-
----
 
 ## Après C-REDESIGN-PHASE2-APP — C-PDF-ACCENT-PAR-COMPANY
 
@@ -483,3 +457,47 @@ statut mais le même principe s'applique au repli des tons.
 - Caleson et NONNA : rendu vérifié à l'œil (devis, facture, avoir)
 
 ---
+
+## Sujet à cadrer — plusieurs agents par comédien
+
+Noté le 29/10/2026 (info Vanda, **ne rien coder avant ses précisions**).
+Un comédien peut avoir **2 agents**. Aujourd'hui le modèle n'en porte qu'un
+(`Comedien.agentId`) et l'auto-pré-sélection du DevisBuilder (`953d632`)
+s'appuie dessus.
+
+À cadrer avec Vanda :
+- plusieurs agents par comédien (modèle : relation n-n ou agent principal +
+  secondaire) ;
+- quel agent pré-sélectionner selon le contexte : quel critère décide
+  (client, type de prestation, média, territoire… à préciser par Vanda) ;
+- comportement si le contexte ne tranche pas (pré-sélection vide ?
+  liste restreinte aux agents du comédien ?) ;
+- effet sur le suivi budgétaire par agent et sur la ligne « Agent Voix
+  Off (10 %) ».
+
+---
+
+## Hors planning (parqué)
+
+Tickets gardés pour mémoire, sans date ni ordre.
+
+### Listes mobiles en cartes
+
+*Parqué le 29/10/2026 : Vanda ne travaille jamais sur téléphone.*
+
+Ouvert le 27/10/2026 (arbitrage Rose : ticket séparé, après l'étape 6 —
+c'est de la restructuration, pas de l'habillage).
+
+Sur téléphone, les listes (devis, factures, paiements, clients…) sont des
+tableaux en défilement horizontal depuis l'étape 4 du redesign : utilisable
+mais pas confortable pour Vanda. Cible : sous `md`, une carte par ligne
+(numéro + client + montant + badge de statut, actions en bas de carte),
+le tableau restant tel quel au-dessus de `md`.
+
+#### Acceptance criteria
+
+- Devis, factures, paiements : lisibles et actionnables à 390 px sans
+  défilement horizontal
+- Mêmes données, filtres, tris et sélection (récap multi-devis) qu'en
+  tableau — aucune régression fonctionnelle
+- Le tableau desktop est inchangé
