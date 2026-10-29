@@ -17,6 +17,8 @@ priorité estimée. Mettre à jour le sprint d'affectation quand on tranche.
 
 ## Chantier IMMUABILITE-FACTURE — facture émise immuable (art. 289 CGI)
 
+**Plan détaillé (29/10/2026, à relire) : `docs/PLAN-IMMUABILITE-FACTURE.md`.**
+
 Ouvert le 29/10/2026 (arbitrage Rose) : **session dédiée**, les quatre
 tickets ci-dessous sont fusionnés car ils décident ensemble « ce qu'on fige,
 où, et qui peut encore modifier quoi ». Prérequis de CONFORMITE-2027 et de
