@@ -1249,11 +1249,11 @@ function SectionBlock({
       </div>
 
       {isExpanded && (
-        <div className="p-4 space-y-2">
+        <div className="@container p-4 space-y-2">
           {/* En-tête colonnes */}
           {fields.length > 0 && (
-            <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 px-2 mb-1">
-              <span className="text-xs text-brand-ink-muted font-medium">
+            <div className="grid grid-cols-[minmax(6.5rem,1.3fr)_minmax(3.5rem,0.7fr)_minmax(4.5rem,1fr)_minmax(4.5rem,1fr)_28px] @2xl:grid-cols-[minmax(0,1fr)_120px_80px_80px_80px_32px] gap-x-2 gap-y-0.5 px-2 mb-1">
+              <span className="col-span-full @2xl:col-span-1 text-xs text-brand-ink-muted font-medium">
                 Libellé
                 {agentEnabled && sourceFields.length > 0 && (
                   <span className="ml-2 text-brand-coral font-normal">✓ sélection agent</span>
@@ -1282,14 +1282,14 @@ function SectionBlock({
               return (
                 <div
                   key={field.id}
-                  className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center rounded-[var(--radius-control)] border border-status-partial-bg bg-status-partial-bg px-2 py-2"
+                  className="grid grid-cols-[minmax(6.5rem,1.3fr)_minmax(3.5rem,0.7fr)_minmax(4.5rem,1fr)_minmax(4.5rem,1fr)_28px] @2xl:grid-cols-[minmax(0,1fr)_120px_80px_80px_80px_32px] gap-2 items-center rounded-[var(--radius-control)] border border-status-partial-bg bg-status-partial-bg px-2 py-2"
                 >
                   {/* hidden inputs pour que react-hook-form conserve les valeurs */}
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.tag`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.quantite`)} />
                   <input type="hidden" {...register(`sections.${sectionIndex}.lignes.${li}.prixUnit`)} />
-                  <span className="text-sm text-brand-ink font-medium truncate px-0.5">
+                  <span className="col-span-full @2xl:col-span-1 text-sm text-brand-ink font-medium truncate px-0.5">
                     {ligne.libelle || "Agent Voix Off (10%)"}
                   </span>
                   <span className="inline-flex items-center justify-center bg-status-partial-bg text-brand-ink text-xs font-medium px-2 py-0.5 rounded-full">
@@ -1326,11 +1326,11 @@ function SectionBlock({
             return (
               <Fragment key={field.id}>
               <div
-                className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center"
+                className="grid grid-cols-[minmax(6.5rem,1.3fr)_minmax(3.5rem,0.7fr)_minmax(4.5rem,1fr)_minmax(4.5rem,1fr)_28px] @2xl:grid-cols-[minmax(0,1fr)_120px_80px_80px_80px_32px] gap-x-2 gap-y-1.5 items-center @max-2xl:pb-2.5 @max-2xl:border-b @max-2xl:border-brand-rule/70"
               >
                 {/* Libellé — avec checkbox agent si applicable */}
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
+                <div className="col-span-full @2xl:col-span-1 flex flex-col gap-0.5 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 min-w-0">
                     {isSourceLine ? (
                       <input
                         type="checkbox"
@@ -1352,59 +1352,63 @@ function SectionBlock({
                     <input
                       {...register(`sections.${sectionIndex}.lignes.${li}.libelle`)}
                       placeholder="Description de la prestation"
-                      className="flex-1 min-w-0 px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                      className="grow shrink basis-48 min-w-0 px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                     />
-                    {/* Toggle horsMarge — exclut la ligne du calcul Marge/FG.
-                        Discret par défaut, orange quand activé. Tickets #66-68. */}
-                    <label
-                      className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
-                      title="Exclure cette ligne du calcul Marge / Frais Généraux (la ligne reste facturée dans le HT). Utile pour les prestations Musique que vous ne souhaitez pas surfacturer."
-                    >
-                      <input
-                        type="checkbox"
-                        {...register(`sections.${sectionIndex}.lignes.${li}.horsMarge`)}
-                        className="w-3 h-3 cursor-pointer accent-brand-coral shrink-0"
-                      />
-                      <span
-                        className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
-                          ligne.horsMarge
-                            ? "text-brand-coral-ink"
-                            : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
-                        }`}
-                      >
-                        hors marge
-                      </span>
-                    </label>
-                    {/* Toggle horsCS — exclut la ligne de la base des charges
-                        sociales. Affiché uniquement sur les tags qui PORTENT
-                        une base CS (ARTISTE, TECHNICIEN_HCS) : sur STUDIO /
-                        MUSIQUE / AGENT la case n'aurait aucun effet et ferait
-                        croire le contraire. FEAT-LIGNE-HORS-CS (Vanda). */}
-                    {(tagValue === "ARTISTE" || tagValue === "TECHNICIEN_HCS") && (
+                    {/* Hors marge + Hors CS groupés : ils passent à la ligne
+                        ensemble, jamais l'un sans l'autre (C-DEVIS-LIBELLE-LARGEUR). */}
+                    <span className="flex items-center gap-1.5 shrink-0">
+                      {/* Toggle horsMarge — exclut la ligne du calcul Marge/FG.
+                          Discret par défaut, orange quand activé. Tickets #66-68. */}
                       <label
                         className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
-                        title={
-                          tagValue === "ARTISTE"
-                            ? "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS comédien. Utile quand l'artiste facture lui-même (société, auto-entrepreneur)."
-                            : "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS technicien. Attention : la part de CS disparaissant de la base, les FG et la Marge baissent aussi."
-                        }
+                        title="Exclure cette ligne du calcul Marge / Frais Généraux (la ligne reste facturée dans le HT). Utile pour les prestations Musique que vous ne souhaitez pas surfacturer."
                       >
                         <input
                           type="checkbox"
-                          {...register(`sections.${sectionIndex}.lignes.${li}.horsCS`)}
-                          className="w-3 h-3 cursor-pointer accent-brand-ink shrink-0"
+                          {...register(`sections.${sectionIndex}.lignes.${li}.horsMarge`)}
+                          className="w-3 h-3 cursor-pointer accent-brand-coral shrink-0"
                         />
                         <span
                           className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
-                            ligne.horsCS
+                            ligne.horsMarge
                               ? "text-brand-coral-ink"
                               : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
                           }`}
                         >
-                          hors cs
+                          hors marge
                         </span>
                       </label>
-                    )}
+                      {/* Toggle horsCS — exclut la ligne de la base des charges
+                          sociales. Affiché uniquement sur les tags qui PORTENT
+                          une base CS (ARTISTE, TECHNICIEN_HCS) : sur STUDIO /
+                          MUSIQUE / AGENT la case n'aurait aucun effet et ferait
+                          croire le contraire. FEAT-LIGNE-HORS-CS (Vanda). */}
+                      {(tagValue === "ARTISTE" || tagValue === "TECHNICIEN_HCS") && (
+                        <label
+                          className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
+                          title={
+                            tagValue === "ARTISTE"
+                              ? "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS comédien. Utile quand l'artiste facture lui-même (société, auto-entrepreneur)."
+                              : "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS technicien. Attention : la part de CS disparaissant de la base, les FG et la Marge baissent aussi."
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            {...register(`sections.${sectionIndex}.lignes.${li}.horsCS`)}
+                            className="w-3 h-3 cursor-pointer accent-brand-ink shrink-0"
+                          />
+                          <span
+                            className={`text-[10px] uppercase font-medium tracking-wide whitespace-nowrap ${
+                              ligne.horsCS
+                                ? "text-brand-coral-ink"
+                                : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
+                            }`}
+                          >
+                            hors cs
+                          </span>
+                        </label>
+                      )}
+                    </span>
                   </div>
                   {tagValue === "ARTISTE" && comediens.length > 0 && (
                     <select
@@ -1507,8 +1511,8 @@ function SectionBlock({
               {/* ── Indexation annuelle (ARTISTE / MUSIQUE seulement) ── */}
               {isIndexable && (
                 indexedLineIds.has(field.id) ? (
-                  <div className="grid grid-cols-[1fr_120px_80px_80px_80px_32px] gap-2 items-center ml-1 pl-3 border-l-2 border-brand-rule -mt-0.5 pb-0.5">
-                    <span className="text-xs text-brand-ink-muted font-medium">
+                  <div className="grid grid-cols-[minmax(6.5rem,1.3fr)_minmax(3.5rem,0.7fr)_minmax(4.5rem,1fr)_minmax(4.5rem,1fr)_28px] @2xl:grid-cols-[minmax(0,1fr)_120px_80px_80px_80px_32px] gap-x-2 gap-y-1 items-center ml-1 pl-3 border-l-2 border-brand-rule -mt-0.5 pb-0.5">
+                    <span className="col-span-full @2xl:col-span-1 text-xs text-brand-ink-muted font-medium">
                       {tagValue === "ARTISTE" ? "Indexation annuelle artiste" : "Indexation annuelle musique"}
                     </span>
                     <div className="flex items-center gap-1">
