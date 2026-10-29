@@ -35,7 +35,7 @@ type DevisTemplate = {
 };
 
 interface AgentRef { id: string; nom: string; prenom?: string | null; agence?: string | null; }
-interface ComedienRef { id: string; prenom: string; nom: string; }
+interface ComedienRef { id: string; prenom: string; nom: string; agentId?: string | null; }
 
 interface NouveauDevisClientProps {
   clients: Client[];

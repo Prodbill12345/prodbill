@@ -29,7 +29,8 @@ export default async function NouveauDevisPage() {
       orderBy: [{ agence: "asc" }, { nom: "asc" }],
     }),
     db.comedien.findMany({
-      select: { id: true, prenom: true, nom: true },
+      // agentId : auto-sélection de l'agent depuis le comédien (DevisBuilder).
+      select: { id: true, prenom: true, nom: true, agentId: true },
       orderBy: [{ nom: "asc" }, { prenom: "asc" }],
     }),
   ]);

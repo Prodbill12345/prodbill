@@ -19,6 +19,7 @@ import {
 import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { BdcClientUploadField } from "./BdcClientUploadField";
 import { sortByLabelFr } from "@/lib/sort-by-name";
+import { decideAgentForComedien } from "@/lib/agent-preselect";
 import {
   DndContext,
   KeyboardSensor,
@@ -177,6 +178,8 @@ interface ComedienRef {
   id: string;
   prenom: string;
   nom: string;
+  /** Agent habituel du comédien : pré-sélectionné quand on choisit le comédien. */
+  agentId?: string | null;
 }
 
 interface DevisBuilderProps {
@@ -1179,9 +1182,43 @@ function SectionBlock({
     append({ libelle: "Agent Voix Off (10%)", tag: "AGENT", quantite: 1, prixUnit: prix });
   }
 
+  // ── Auto-sélection de l'agent depuis le comédien ─────────────────────────────
+  // Par field.id (stable) : agent posé automatiquement / agent choisi à la
+  // main. Non persistés : à l'ouverture d'un devis, les agents enregistrés
+  // comptent comme manuels (decideAgentForComedien ne les écrase jamais).
+  const [autoAgentLineIds, setAutoAgentLineIds] = useState<Set<string>>(new Set());
+  const [manualAgentLineIds, setManualAgentLineIds] = useState<Set<string>>(new Set());
+  const knownAgentIds = useMemo(() => new Set(agents.map((a) => a.id)), [agents]);
+
+  function handleComedienChange(fieldId: string, li: number, comedienId: string) {
+    const decision = decideAgentForComedien({
+      comedienId,
+      comediens,
+      knownAgentIds,
+      currentAgentId: watchedLignes[li]?.agentId,
+      agentIsAuto: autoAgentLineIds.has(fieldId),
+      agentManuallySet: manualAgentLineIds.has(fieldId),
+    });
+    if (!decision.change) return;
+    setValue(`sections.${sectionIndex}.lignes.${li}.agentId`, decision.agentId, { shouldDirty: true });
+    setAutoAgentLineIds((prev) => {
+      const n = new Set(prev);
+      if (decision.auto) n.add(fieldId);
+      else n.delete(fieldId);
+      return n;
+    });
+  }
+
+  function handleAgentManualChange(fieldId: string) {
+    setManualAgentLineIds((prev) => new Set(prev).add(fieldId));
+    setAutoAgentLineIds((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
+  }
+
   function removeLigne(i: number) {
     const fieldId = fields[i]?.id;
     if (fieldId) {
+      setAutoAgentLineIds((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
+      setManualAgentLineIds((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
       if (selectedForAgent.has(fieldId)) {
         setSelectedForAgent((prev) => { const n = new Set(prev); n.delete(fieldId); return n; });
       }
@@ -1323,6 +1360,8 @@ function SectionBlock({
             // ── Ligne normale ──────────────────────────────────────────────────
             const isIndexable = tagValue === "ARTISTE" || tagValue === "MUSIQUE";
             const indexationMontant = Math.round(total * (Number(ligne.tauxIndexation) || 0) / 100 * 100) / 100;
+            const comedienField = register(`sections.${sectionIndex}.lignes.${li}.comedienId`);
+            const agentField = register(`sections.${sectionIndex}.lignes.${li}.agentId`);
             return (
               <Fragment key={field.id}>
               <div
@@ -1412,7 +1451,11 @@ function SectionBlock({
                   </div>
                   {tagValue === "ARTISTE" && comediens.length > 0 && (
                     <select
-                      {...register(`sections.${sectionIndex}.lignes.${li}.comedienId`)}
+                      {...comedienField}
+                      onChange={(e) => {
+                        comedienField.onChange(e);
+                        handleComedienChange(field.id, li, e.target.value);
+                      }}
                       className="ml-5 px-2 py-0.5 border border-brand-rule rounded-md text-xs text-brand-ink-muted focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-surface"
                     >
                       <option value="">Comédien (optionnel)</option>
@@ -1425,7 +1468,11 @@ function SectionBlock({
                   )}
                   {tagValue === "ARTISTE" && agents.length > 0 && (
                     <select
-                      {...register(`sections.${sectionIndex}.lignes.${li}.agentId`)}
+                      {...agentField}
+                      onChange={(e) => {
+                        agentField.onChange(e);
+                        handleAgentManualChange(field.id);
+                      }}
                       className="ml-5 px-2 py-0.5 border border-brand-rule rounded-md text-xs text-brand-ink-muted focus:outline-none focus:ring-1 focus:ring-brand-blue bg-brand-surface"
                     >
                       <option value="">Associer un agent (optionnel)</option>

@@ -100,13 +100,11 @@ interface LigneInput {
  * (section et ligne), `sourceId` conservé pour la détection de
  * réordonnancement côté route.
  */
-export function buildSectionsPayload<L extends LigneInput, S extends SectionInput<L>>(
-  sections: S[]
-) {
+export function buildSectionsPayload<S extends SectionInput<LigneInput>>(sections: S[]) {
   return sections.map((s, si) => ({
     ...s,
     ordre: si,
-    lignes: s.lignes.map((l, li) => ({
+    lignes: s.lignes.map((l: S["lignes"][number], li) => ({
       ...l,
       // `<select>` HTML envoie "" pour l'option par défaut. On convertit
       // toute valeur falsy ("", null, undefined) en `undefined` pour que
