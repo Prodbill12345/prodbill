@@ -190,14 +190,14 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Chiffre principal : grande carte bleue, texte crème */}
         <div className="col-span-2 rounded-[var(--radius-card)] bg-brand-blue text-brand-cream p-6 flex flex-col justify-between min-h-[168px]">
-          <p className="text-[10px] font-medium tracking-[0.2em] uppercase text-brand-cream/80">
+          <p className="text-[10px] font-medium tracking-[0.2em] uppercase text-brand-cream">
             Encaissé ce mois · TTC
           </p>
           <div>
             <p className="font-display text-[40px] sm:text-[48px] font-bold leading-none tracking-[-0.03em] tabular-nums">
               {formatEuros(encaisseMonth)}
             </p>
-            <p className="mt-2 text-sm text-brand-cream/80 tabular-nums">
+            <p className="mt-2 text-sm text-brand-cream tabular-nums">
               {formatEuros(total6Mois)} sur 6 mois
             </p>
           </div>

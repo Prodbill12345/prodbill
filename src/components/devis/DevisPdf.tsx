@@ -94,7 +94,7 @@ const s = StyleSheet.create({
   partiesRow: { flexDirection: "row", marginBottom: 22 },
   partyBox: { flex: 1, borderTopWidth: rules.thin, borderTopColor: colors.rule, paddingTop: 8 },
   partyBoxLeft: { marginRight: 20 },
-  partyLabel: { ...sectionLabel, color: colors.accent, marginBottom: 6 },
+  partyLabel: { ...sectionLabel, color: colors.accentInk, marginBottom: 6 },
   partyName: { fontWeight: 700, fontSize: 9.5, color: colors.ink, marginBottom: 2 },
   partyDetail: { fontSize: 7.5, color: colors.inkMuted, lineHeight: 1.55 },
 
@@ -194,7 +194,7 @@ const s = StyleSheet.create({
     paddingTop: 8,
     marginTop: 8,
   },
-  totFinalLabel: { ...sectionLabel, fontSize: 7, color: colors.accent, marginBottom: 2 },
+  totFinalLabel: { ...sectionLabel, fontSize: 7, color: colors.accentInk, marginBottom: 2 },
   totFinalValue: { fontFamily: fonts.display, fontWeight: 700, fontSize: 17, color: colors.accent, textAlign: "right" },
   tvaMention: { fontSize: 7.5, color: colors.inkMuted },
 

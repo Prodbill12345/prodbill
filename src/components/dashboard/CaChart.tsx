@@ -5,7 +5,7 @@ import { colors } from "@/design/tokens";
 
 // DA ProdBill (étape 3) : barres pleines sans dégradé, mois courant en bleu
 // signature, mois passés en bleu teinté, piste crème grisée.
-const BAR_PAST = "#D3D0FB";
+const BAR_PAST = colors.accentBar;
 
 export interface MonthData {
   label: string; // "Jan", "Fév", etc.

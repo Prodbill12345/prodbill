@@ -23,7 +23,8 @@
   --color-brand-ink: #25251F;
   --color-brand-ink-muted: #66665A;
   --color-brand-ink-subtle: #97978A;
-  --color-brand-blue: #2115ED;
+  --color-brand-blue: #6050DC;
+  --color-brand-blue-ink: #4F3FC8;
   --color-brand-coral: #FF6846;
   --color-brand-pistachio: #B7D85D;
   --color-brand-rose: #FFBBD3;
@@ -34,8 +35,8 @@
 
   --color-status-neutral-bg: #EDEEE2;
   --color-status-neutral-dot: #66665A;
-  --color-status-info-bg: #E4E3FC;
-  --color-status-info-text: #2115ED;
+  --color-status-info-bg: #E9E6F4;
+  --color-status-info-text: #4F3FC8;
   --color-status-success-bg: #E6F0C6;
   --color-status-success-dot: #8DB136;
   --color-status-danger-bg: #FFE1D8;

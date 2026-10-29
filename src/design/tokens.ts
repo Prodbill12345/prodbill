@@ -13,7 +13,9 @@
  * grosses ombres, accumulation de capsules, emojis comme icônes.
  *
  * Contrastes (WCAG, calculés le 27/10/2026) : ink/cream 14.1 ; inkMuted/cream
- * 5.3 et /surface 5.0 ; accent/cream 8.0 ; cream/accent 8.0. Rouge orangé et
+ * 5.3 et /surface 5.0. Accent Bleu Majorelle (C-ACCENT-MAJORELLE, 29/10/2026) :
+ * accent/cream 5.2, /paper 5.5, /surface 4.9 ; cream/accent 5.2 ; petits
+ * textes en accentInk (cream 6.7, badge Envoyé 5.9). Rouge orangé et
  * pistache ne passent PAS en texte sur crème (2.6 et 1.5) : jamais de texte
  * dans ces couleurs, seulement des fonds, pastilles et détails graphiques.
  */
@@ -29,8 +31,16 @@ export const colors = {
   inkMuted: "#66665A",
   /** NON-TEXTE uniquement (2.7 sur crème) : icônes décoratives, états désactivés. */
   inkSubtle: "#97978A",
-  /** Bleu électrique ultramarine — couleur signature. */
-  accent: "#2115ED",
+  /** Bleu Majorelle — couleur signature (app ET PDF, token partagé). Grands
+   *  aplats, boutons, montants, mots éditoriaux. Remplace le Klein #2115ED. */
+  accent: "#6050DC",
+  /** Majorelle assombri pour les PETITS textes (badges, libellés PDF 6–7 pt) :
+   *  la base passe AA mais sans marge sur fonds teintés. */
+  accentInk: "#4F3FC8",
+  /** Teinte claire du Majorelle (fond du badge Envoyé / Émise, sélections). */
+  accentTint: "#E9E6F4",
+  /** Majorelle à 25 % sur papier : barres passées du graphique (non-texte). */
+  accentBar: "#D5D0F0",
   /** Rouge orangé — sticker, alertes, pastille « refusé ». Jamais en texte sur crème. */
   coral: "#FF6846",
   /** Vert pistache — mascotte, pastille « payé / accepté ». Jamais en texte. */
@@ -101,7 +111,7 @@ export const motion = {
  */
 export const statusTones = {
   neutral: { dot: colors.inkMuted, bg: colors.surface, text: colors.ink, border: colors.surface },
-  info: { dot: colors.accent, bg: "#E4E3FC", text: colors.accent, border: "#E4E3FC" },
+  info: { dot: colors.accent, bg: colors.accentTint, text: colors.accentInk, border: colors.accentTint },
   validated: { dot: "#8DB136", bg: "transparent", text: colors.ink, border: "#8DB136" },
   success: { dot: "#8DB136", bg: "#E6F0C6", text: colors.ink, border: "#E6F0C6" },
   partial: { dot: "#F48FB4", bg: "#FFE4ED", text: colors.ink, border: "#FFE4ED" },
@@ -132,6 +142,7 @@ export const cssVars: Record<string, string> = {
   "--color-brand-ink-muted": colors.inkMuted,
   "--color-brand-ink-subtle": colors.inkSubtle,
   "--color-brand-blue": colors.accent,
+  "--color-brand-blue-ink": colors.accentInk,
   "--color-brand-coral": colors.coral,
   "--color-brand-pistachio": colors.pistachio,
   "--color-brand-rose": colors.rose,
