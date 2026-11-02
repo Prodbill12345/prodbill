@@ -77,6 +77,8 @@ export interface RelanceEmailParams {
   iban: string;
   bic: string;
   pdfBuffer: Buffer; // PDF joint en pièce attachée
+  /** Nom de la pièce jointe (C-NOM-FICHIERS-PDF), sinon « facture-<numéro>.pdf ». */
+  pdfFilename?: string;
   accentColor?: string;
   premierRelanceDate?: Date; // pour RELANCE_2 : date de la 1ère relance
 }
@@ -222,7 +224,8 @@ export async function sendRelanceEmail(type: RelanceType, params: RelanceEmailPa
     : type === "RELANCE_2"     ? templateRelance2(params)
     :                            templateMiseEnDemeure(params);
 
-  const filename = `facture-${params.factureNumero.replace(/\//g, "-")}.pdf`;
+  const filename =
+    params.pdfFilename ?? `facture-${params.factureNumero.replace(/\//g, "-")}.pdf`;
 
   const result = await sendEmailSafe({
     type: `RELANCE_${type}`,

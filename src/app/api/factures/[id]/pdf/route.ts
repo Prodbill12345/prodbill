@@ -5,7 +5,7 @@ import { resolveFacturePdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { FacturePdf } from "@/components/factures/FacturePdf";
-import { facturePdfFilename } from "@/lib/pdf-filename";
+import { facturePdfFilename, contentDisposition } from "@/lib/pdf-filename";
 import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
 import React from "react";
 
@@ -96,8 +96,11 @@ export async function GET(
       }) as never
     );
 
+    // C-NOM-FICHIERS-PDF : « F26122 - Client - Titre.pdf » (avec ou sans BDC fusionné).
     const filename = facturePdfFilename({
       numero: facture.numero,
+      objet: facture.objet,
+      client: facture.client,
       devis: facture.devis ? { objet: facture.devis.objet } : null,
     });
 
@@ -105,7 +108,7 @@ export async function GET(
       return new Response(new Uint8Array(mainBuffer), {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Disposition": contentDisposition(filename),
           "X-Filename": encodeURIComponent(filename),
           "Cache-Control": "no-store",
         },
@@ -140,7 +143,7 @@ export async function GET(
     return new Response(mergedBuf, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": contentDisposition(filename),
         "X-Filename": encodeURIComponent(filename),
         "Cache-Control": "no-store",
       },

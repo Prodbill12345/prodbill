@@ -46,16 +46,19 @@ describe("factureNumeroForFilename", () => {
 });
 
 describe("facturePdfFilename — null-safe (brouillon générable)", () => {
-  test("brouillon sans devis → FACTURE_BROUILLON.pdf", () => {
-    expect(facturePdfFilename({ numero: null })).toBe("FACTURE_BROUILLON.pdf");
+  // C-NOM-FICHIERS-PDF (02/11/2026) : format « numéro - client - titre ».
+  test("brouillon sans devis ni client → Brouillon.pdf", () => {
+    expect(facturePdfFilename({ numero: null })).toBe("Brouillon.pdf");
   });
-  test("brouillon avec devis → slug objet", () => {
+  test("brouillon avec devis → objet en titre", () => {
     expect(
       facturePdfFilename({ numero: null, devis: { objet: "Spot TV" } })
-    ).toBe("FACTURE_BROUILLON_Spot_TV.pdf");
+    ).toBe("Brouillon - Spot TV.pdf");
   });
   test("facture numérotée", () => {
-    expect(facturePdfFilename({ numero: "26005" })).toBe("FACTURE_26005.pdf");
+    expect(
+      facturePdfFilename({ numero: "26005", devis: { objet: "Spot TV" } })
+    ).toBe("F26005 - Spot TV.pdf");
   });
 });
 

@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { requireAuth, handleAuthError } from "@/lib/auth";
+import { facturePdfFilename, contentDisposition } from "@/lib/pdf-filename";
 import { resolveFacturePdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -258,12 +259,21 @@ export async function GET(
 
     const outputBytes = await pdfDoc.save();
 
-    const filename = `facturx-${factureNumero.replace(/\//g, "-")}.pdf`;
+    // C-NOM-FICHIERS-PDF : même nom que le PDF, suffixé pour ne pas l'écraser.
+    const filename = facturePdfFilename(
+      {
+        numero: facture.numero,
+        objet: facture.objet,
+        client: facture.client,
+        devis: facture.devis ? { objet: facture.devis.objet } : null,
+      },
+      { suffix: "Factur-X" }
+    );
 
     return new Response(Buffer.from(outputBytes), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": contentDisposition(filename),
         "X-Filename": encodeURIComponent(filename),
         "Cache-Control": "no-store",
       },

@@ -1,108 +1,141 @@
+/**
+ * C-NOM-FICHIERS-PDF : « {numéro} - {client} - {titre}.pdf ».
+ * (Remplace les tests de l'ancien format DEVIS_<numéro>_<objet>.pdf.)
+ */
+
 import {
-  slugify,
+  cleanFilenamePart,
+  stripDevisRefPrefix,
+  buildPdfBaseName,
   devisPdfFilename,
   facturePdfFilename,
+  contentDisposition,
 } from "../lib/pdf-filename";
 
-describe("slugify", () => {
-  test("simple ASCII", () => {
-    expect(slugify("K-LINE")).toBe("K-LINE");
+describe("cleanFilenamePart", () => {
+  test("guillemets droits → typographiques, ouvrant puis fermant", () => {
+    expect(cleanFilenamePart('Netflix "L\'appartement" - Vignetting')).toBe("Netflix “L'appartement” - Vignetting");
+    expect(cleanFilenamePart('"Pokemon" et "Splendor"')).toBe("“Pokemon” et “Splendor”");
   });
 
-  test("espaces → underscores", () => {
-    expect(slugify("Spot TV 2026")).toBe("Spot_TV_2026");
+  test("accents en NFC (forme décomposée recomposée)", () => {
+    const decompose = "Fêtes des pères"; // ê et è décomposés
+    expect(cleanFilenamePart(decompose)).toBe("Fêtes des pères");
+    expect(cleanFilenamePart(decompose)).toHaveLength("Fêtes des pères".length);
   });
 
-  test("accents français retirés", () => {
-    expect(slugify("Spot TV été 2026")).toBe("Spot_TV_ete_2026");
-    expect(slugify("Cinéma à Paris")).toBe("Cinema_a_Paris");
-    expect(slugify("Réalisation")).toBe("Realisation");
+  test("caractères interdits retirés : / \\ : * ? < > |", () => {
+    expect(cleanFilenamePart("Mix/SD \\ v2: final* ? <ok> | fin")).toBe("MixSD v2 final ok fin");
   });
 
-  test("caractères interdits FS retirés", () => {
-    expect(slugify("a/b\\c?d*e:f\"g<h>i|j")).toBe("abcdefghij");
+  test("espaces multiples, retours à la ligne, bords et points finaux", () => {
+    expect(cleanFilenamePart("  Spot   radio\n30s  ")).toBe("Spot radio 30s");
+    expect(cleanFilenamePart("Rec + Mix...")).toBe("Rec + Mix");
   });
 
-  test("multiples underscores collapsés", () => {
-    expect(slugify("a   b")).toBe("a_b");
-    expect(slugify("a___b")).toBe("a_b");
-  });
-
-  test("trim underscores aux bords", () => {
-    expect(slugify("  a b  ")).toBe("a_b");
-    expect(slugify("_a_b_")).toBe("a_b");
-  });
-
-  test("vide → 'untitled'", () => {
-    expect(slugify("")).toBe("untitled");
-    expect(slugify("   ")).toBe("untitled");
-    expect(slugify(null)).toBe("untitled");
-    expect(slugify(undefined)).toBe("untitled");
-  });
-
-  test("tronqué à 80 chars", () => {
-    const long = "a".repeat(200);
-    expect(slugify(long).length).toBeLessThanOrEqual(80);
+  test("vide / null", () => {
+    expect(cleanFilenamePart(null)).toBe("");
+    expect(cleanFilenamePart("   ")).toBe("");
   });
 });
 
-describe("devisPdfFilename (préfixe DEVIS_)", () => {
-  test("devis avec numéro et objet K-LINE", () => {
-    expect(
-      devisPdfFilename({ id: "abc", numero: "DEV-2026-26089", objet: "K-LINE" })
-    ).toBe("DEVIS_DEV-2026-26089_K-LINE.pdf");
-  });
-
-  test("devis avec numéro court (26261) et objet CANDIA +", () => {
-    expect(
-      devisPdfFilename({ id: "abc", numero: "26261", objet: "CANDIA +" })
-    ).toBe("DEVIS_26261_CANDIA_+.pdf");
-  });
-
-  test("devis avec objet accentué", () => {
-    expect(
-      devisPdfFilename({ id: "abc", numero: "26089", objet: "Spot TV été 2026" })
-    ).toBe("DEVIS_26089_Spot_TV_ete_2026.pdf");
-  });
-
-  test("devis brouillon (sans numéro) — format lisible", () => {
-    expect(
-      devisPdfFilename({ id: "cmp1abcdef12345", numero: null, objet: "Test" })
-    ).toBe("DEVIS_BROUILLON_Test.pdf");
-  });
-
-  test("devis avec objet vide → 'untitled'", () => {
-    expect(
-      devisPdfFilename({ id: "abc", numero: "26000", objet: "" })
-    ).toBe("DEVIS_26000_untitled.pdf");
+describe("stripDevisRefPrefix", () => {
+  test.each([
+    ["D26366 - LA MAISON NOIRE - Helena Rubinstein", "LA MAISON NOIRE - Helena Rubinstein"],
+    ["D26365 ✘ - LA MAISON NOIRE - REC", "LA MAISON NOIRE - REC"],
+    ["D25722 (2026) - ARTEFACT - TotalEnergies", "ARTEFACT - TotalEnergies"],
+    ["MNSTR - Netflix", "MNSTR - Netflix"],
+    ["DIOR - 1 Film", "DIOR - 1 Film"],
+  ])("%s", (input, expected) => {
+    expect(stripDevisRefPrefix(input)).toBe(expected);
   });
 });
 
-describe("facturePdfFilename (préfixe FACTURE_)", () => {
-  test("facture avec devis lié et objet", () => {
+describe("devisPdfFilename — objet tel que Vanda l'écrit", () => {
+  test("exemple de Vanda : D26032", () => {
     expect(
-      facturePdfFilename({
-        numero: "FAC-2026-26051",
-        devis: { objet: "K-LINE" },
-      })
-    ).toBe("FACTURE_FAC-2026-26051_K-LINE.pdf");
+      devisPdfFilename({ numero: "26032", objet: 'MNSTR - Netflix "L\'appartement" - Vignetting', client: { name: "MENUXL" } })
+    ).toBe("D26032 - MNSTR - Netflix “L'appartement” - Vignetting.pdf");
   });
 
-  test("facture numéro court", () => {
+  test("objet commençant par son numéro : pas de doublon", () => {
     expect(
-      facturePdfFilename({ numero: "26051", devis: { objet: "K-LINE" } })
-    ).toBe("FACTURE_26051_K-LINE.pdf");
+      devisPdfFilename({ numero: "26366", objet: "D26366 - LA MAISON NOIRE - Helena Rubinstein", client: { name: "LA MAISON NOIRE" } })
+    ).toBe("D26366 - LA MAISON NOIRE - Helena Rubinstein.pdf");
   });
 
-  test("facture sans devis lié (avoir manuel)", () => {
-    expect(
-      facturePdfFilename({ numero: "AV-2026-0001", devis: null })
-    ).toBe("FACTURE_AV-2026-0001.pdf");
+  test("numéro de l'objet faux (coquille) : le vrai numéro l'emporte", () => {
+    expect(devisPdfFilename({ numero: "26286", objet: "D26285 - MATTER OF FACT - Piaget", client: null })).toBe(
+      "D26286 - MATTER OF FACT - Piaget.pdf"
+    );
   });
 
-  test("facture avec / dans le numéro (legacy) — sanitize", () => {
+  test("titre vide → numéro - client", () => {
+    expect(devisPdfFilename({ numero: "26032", objet: "", client: { name: "MNSTR" } })).toBe("D26032 - MNSTR.pdf");
+    expect(devisPdfFilename({ numero: "26032", objet: "D26032 - ", client: { name: "MNSTR" } })).toBe("D26032 - MNSTR.pdf");
+  });
+});
+
+describe("longueur", () => {
+  const long = "Range Rover - Additif Cutdowns 25s, 20s, 15s, 9s et 6s - Mixage + Sound design + Conformation + Livraisons multiples TV et digital";
+
+  test("titre très long tronqué sur un mot avec « … », numéro intact, ≤ 120 + .pdf", () => {
+    const name = devisPdfFilename({ numero: "26361", objet: `WPP PRODUCTION - ${long}`, client: null });
+    expect(name.startsWith("D26361 - WPP PRODUCTION - Range Rover")).toBe(true);
+    expect(name.endsWith("….pdf")).toBe(true);
+    expect(name.length).toBeLessThanOrEqual(124);
+  });
+
+  test("objet vide et client démesuré : client tronqué, jamais le numéro", () => {
+    const base = buildPdfBaseName({ numero: "F26026", client: "HONDA MOTOR EUROPE LTD ".repeat(8), titre: "" });
+    expect(base.startsWith("F26026 - HONDA MOTOR EUROPE")).toBe(true);
+    expect(base.length).toBeLessThanOrEqual(120);
+  });
+
+  test("objet renseigné : la fiche client n'est pas ajoutée (client final déjà dans l'objet)", () => {
+    expect(buildPdfBaseName({ numero: "D26029", client: "MATTER OF FACT", titre: "PIAGET SERIE CRAFT - LOCATION SALLE" })).toBe(
+      "D26029 - PIAGET SERIE CRAFT - LOCATION SALLE"
+    );
+  });
+});
+
+describe("facturePdfFilename", () => {
+  test("objet figé de la facture prioritaire", () => {
     expect(
-      facturePdfFilename({ numero: "25/0042-A1", devis: null })
-    ).toBe("FACTURE_25-0042-A1.pdf");
+      facturePdfFilename({ numero: "26122", objet: "D26307 - ARTEFACT - TotalEnergies - 1 Spot radio", client: { name: "ARTEFACT" }, devis: { objet: "autre" } })
+    ).toBe("F26122 - ARTEFACT - TotalEnergies - 1 Spot radio.pdf");
+  });
+
+  test("récap (pas d'objet, pas de devis) → numéro - client", () => {
+    expect(facturePdfFilename({ numero: "26120", objet: null, client: { name: "ARTEFACT" }, devis: null })).toBe("F26120 - ARTEFACT.pdf");
+  });
+
+  test("avoir et brouillon", () => {
+    expect(facturePdfFilename({ numero: "AV-26122", client: { name: "ARTEFACT" }, devis: { objet: "D26307 - ARTEFACT - Spot" } })).toBe(
+      "AV-26122 - ARTEFACT - Spot.pdf"
+    );
+    expect(facturePdfFilename({ numero: null, client: { name: "ARTEFACT" }, devis: null })).toBe("Brouillon - ARTEFACT.pdf");
+  });
+
+  test("Factur-X suffixé pour ne pas écraser le PDF simple", () => {
+    expect(facturePdfFilename({ numero: "26122", objet: "ARTEFACT - Spot", client: null }, { suffix: "Factur-X" })).toBe(
+      "F26122 - ARTEFACT - Spot - Factur-X.pdf"
+    );
+  });
+});
+
+describe("contentDisposition", () => {
+  test("filename* en UTF-8 + repli ASCII sans guillemet ni accent", () => {
+    const h = contentDisposition("D26032 - MNSTR - Netflix “L'appartement” - Fêtes.pdf");
+    expect(h).toBe(
+      "attachment; filename=\"D26032 - MNSTR - Netflix 'L'appartement' - Fetes.pdf\"; " +
+        "filename*=UTF-8''D26032%20-%20MNSTR%20-%20Netflix%20%E2%80%9CL%27appartement%E2%80%9D%20-%20F%C3%AAtes.pdf"
+    );
+  });
+
+  test("valeur d'en-tête HTTP valide (aucun caractère hors Latin-1)", () => {
+    const h = contentDisposition("F26122 - Réalisation “Été” ✘ ….pdf");
+    expect(() => new Headers({ "Content-Disposition": h })).not.toThrow();
+    expect(decodeURIComponent(h.split("filename*=UTF-8''")[1])).toBe("F26122 - Réalisation “Été” ✘ ….pdf");
   });
 });

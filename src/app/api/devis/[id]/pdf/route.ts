@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { DevisPdf } from "@/components/devis/DevisPdf";
 import { getNextDevisNumero } from "@/lib/numbering";
-import { devisPdfFilename } from "@/lib/pdf-filename";
+import { devisPdfFilename, contentDisposition } from "@/lib/pdf-filename";
 import React from "react";
 
 // @react-pdf/renderer requires Node.js runtime (not Edge)
@@ -65,17 +65,18 @@ export async function GET(
         accent: resolveDevisPdfAccent(devis.company.pdfAccent),
       }) as any);
 
+    // C-NOM-FICHIERS-PDF : « D26032 - Client - Titre.pdf » (avec ou sans BDC fusionné).
     const filename = devisPdfFilename({
-      id: devis.id,
       numero: devis.numero,
       objet: devis.objet,
+      client: devis.client,
     });
 
     if (docIds.length === 0) {
       return new Response(new Uint8Array(mainBuffer), {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Disposition": contentDisposition(filename),
           "X-Filename": encodeURIComponent(filename),
           "Cache-Control": "no-store",
         },
@@ -110,7 +111,7 @@ export async function GET(
     return new Response(mergedBuf, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": contentDisposition(filename),
         "X-Filename": encodeURIComponent(filename),
         "Cache-Control": "no-store",
       },

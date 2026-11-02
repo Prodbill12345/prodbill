@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { requireAuth, handleAuthError } from "@/lib/auth";
+import { facturePdfFilename } from "@/lib/pdf-filename";
 import { resolveFacturePdfAccent } from "@/lib/pdf-accent";
 import { prisma } from "@/lib/prisma";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -108,6 +109,12 @@ export async function POST(
       clientName: facture.client.name,
       companyName: facture.nomEmetteur,
       factureNumero,
+      pdfFilename: facturePdfFilename({
+        numero: facture.numero,
+        objet: facture.objet,
+        client: facture.client,
+        devis: facture.devis ? { objet: facture.devis.objet } : null,
+      }),
       totalTtc: facture.totalTtc,
       dateEcheance: facture.dateEcheance ?? new Date(),
       joursRetard,
