@@ -53,6 +53,8 @@ PDF et Factur-X lus depuis ce snapshot, plus depuis `devis.sections`.
 Reprise des factures déjà émises : snapshot rétroactif depuis l'état actuel
 du devis (à valider : un devis modifié depuis l'émission ne peut pas être
 reconstitué — à signaler, pas à deviner).
+Inclut le marqueur **« Offert »** des lignes (C-LIGNE-OFFERTE, 02/11/2026) :
+`offert` + valeur offerte figés avec la ligne.
 
 **Verrous à lever ensuite :** une fois les lignes figées, le blocage du
 réordonnancement des sections d'un devis facturé (C-DEVIS-SECTIONS-REORDER,
@@ -381,6 +383,11 @@ des pièces émises. **Pas de logo fx.n** tant que ce chantier n'est pas livré.
 
 ### Écarts repérés dans le XML actuel (à reprendre dans le point 2)
 
+- **Description du projet en gras (C-DESCRIPTION-GRAS, 02/11/2026)** : stockée
+  au format `**gras**`. Le XML actuel ne la reprend pas ; si le XML EN 16931
+  l'intègre (note BT-22 par exemple), la passer par `stripBold`
+  (`src/lib/text-bold.ts`) : le XML reçoit du texte brut, jamais les marqueurs.
+
 - `TypeCode` toujours 380 : un avoir devrait être 381
 - Date d'échéance = date d'émission (ignore `dateEcheance`)
 - SIRET émis en `SpecifiedTaxRegistration schemeID="FC"` : à remplacer par
@@ -457,6 +464,76 @@ statut mais le même principe s'applique au repli des tons.
 - Facture émise : l'accent est figé (changer l'accent de la société ne
   change pas le PDF d'une pièce déjà émise)
 - Caleson et NONNA : rendu vérifié à l'œil (devis, facture, avoir)
+
+---
+
+## C-LIGNE-OFFERTE — marquer une ligne de devis « Offert » (plan, en attente de Vanda)
+
+Ouvert le 02/11/2026 (demande Vanda). **Plan seulement : on attend le choix
+d'affichage de Vanda avant de coder.**
+
+Besoin : une ligne marquée « Offert » garde son prix unitaire affiché mais
+contribue **0** au HT, à la TVA, au TTC, à la marge / FG et aux charges
+sociales. Mention « Offert » sur le PDF, éventuellement « Valeur offerte » en
+bas. Remplace la pratique actuelle « P.U. à 0 » (lignes existantes inchangées,
+pas de reprise).
+
+### Modèle
+
+- `DevisLigne.offert Boolean @default(false)` — migration additive, poussée
+  seule. Copié par la duplication de devis et stocké dans les modèles (JSON
+  `sections` des templates).
+- **`DevisLigne.total` = 0 pour une ligne offerte** (montant facturé), la
+  valeur offerte (`quantite × prixUnit`, + indexation) étant calculée à
+  l'affichage. Raison : le suivi budgétaire et tout ce qui somme `total`
+  excluent alors la ligne d'office, sans risque d'oubli. (Alternative écartée :
+  garder `total` = valeur et filtrer `offert` partout.)
+
+### Calcul (`src/lib/calculations.ts` — règle métier critique)
+
+- Les lignes offertes sont retirées **à l'entrée** de `calculerDevis` :
+  absentes de SOUS_TOTAL_HT, des bases CS (artiste et technicien), de
+  BASE_MARGE et des indexations. Un seul point de filtrage.
+- Nouvelle sortie `valeurOfferte` (Σ des lignes offertes, indexation
+  comprise) pour la mention « Valeur offerte ».
+- Cas de référence ajouté aux tests : l'exemple de CLAUDE.md + une ligne
+  offerte doit redonner **exactement 4 603,20 € HT**.
+- CLAUDE.md (formule) mis à jour avec le flag `offert`, après validation.
+- Autres endroits qui calculent `quantite × prixUnit` à auditer : sous-total
+  de section (builder, PDF devis, PDF facture), base de la ligne « Agent Voix
+  Off (10 %) », prorata des factures acompte / solde.
+
+### Interactions
+
+| Avec | Règle proposée |
+|---|---|
+| Hors marge / Hors CS | Sans effet sur une ligne offerte (elle ne contribue à rien) : cases grisées quand « Offert » est coché, valeurs conservées (elles reprennent effet si on décoche). |
+| Indexation annuelle | Offerte avec la ligne (0 aux totaux, comptée dans la valeur offerte). |
+| **Agent Voix Off (10 %)** | **Question pour Vanda** : une ligne artiste offerte entre-t-elle dans la base des 10 % ? Proposition : non (aucun cachet facturé). |
+| Facture acompte / solde | Ligne affichée avec la mention « Offert », comme sur le devis ; le prorata ne s'applique qu'aux lignes facturées. |
+| Facture récap multi-devis | Montant net par devis : déjà hors lignes offertes. Pas de « valeur offerte » par devis (proposition). |
+| Exports FEC / CSV / Excel | Bâtis sur les totaux des pièces : inchangés. |
+| Suivi budgétaire | La ligne compte 0 (via `total` = 0). Pas de colonne « valeur offerte » (proposition). |
+| Factur-X actuel (MINIMUM) | Pas de lignes dans le XML : rien à faire. |
+| Factur-X EN 16931 (CONFORMITE-2027) | Ligne avec prix brut = P.U. (BT-148), remise de ligne à 100 % (BG-27, montant = valeur, motif « Offert »), montant net 0 (BT-131). |
+| SNAPSHOT-FACTURE-LIGNES | `FactureLigne.offert` + valeur offerte figés à l'émission (ajouté au plan IMMUABILITE-FACTURE). |
+
+### Affichage — choix de Vanda attendu
+
+- Builder : case « Offert » sur la ligne, comme « Hors marge » ; total de
+  ligne et sous-total de section en conséquence.
+- PDF (devis et facture), options :
+  - **A** — P.U. affiché, colonne Total « Offert » ;
+  - **B** — P.U. affiché, total barré + « Offert » ;
+  - **C** — P.U. et « 0,00 € » avec une mention « Offert » sous le libellé.
+- En option : ligne « Valeur offerte : X € HT » dans le bloc des totaux
+  (au-dessus du TOTAL HT, sans effet sur le calcul).
+
+### Tests prévus
+
+Calcul (cas de référence + ligne offerte, offert + hors marge / hors CS,
+indexation), base agent selon la décision, payload et duplication, rendu PDF
+des 3 options sur un devis réel avant push.
 
 ---
 

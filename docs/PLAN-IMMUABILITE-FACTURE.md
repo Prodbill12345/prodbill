@@ -45,8 +45,9 @@ Deux tables nouvelles, remplies à l'émission :
 - `FactureSection` : `factureId`, `companyId`, `ordre`, `titre`.
 - `FactureLigne` : `factureSectionId`, `companyId`, `ordre`, `libelle`, `tag`,
   `quantite`, `prixUnit`, `total`, `tauxIndexation`, `montantIndexation`,
-  `horsMarge`, `horsCS`, plus pour une récap `sourceDevisId`,
-  `sourceDevisNumero`, `sourceDevisObjet`.
+  `horsMarge`, `horsCS`, **`offert` + valeur offerte** (C-LIGNE-OFFERTE,
+  02/11/2026 — si livré avant le chantier), plus pour une récap
+  `sourceDevisId`, `sourceDevisNumero`, `sourceDevisObjet`.
 
 Règle : on fige **les valeurs telles qu'affichées** (prix unitaire et total
 déjà ramenés au prorata et arrondis comme aujourd'hui), pas les valeurs du
