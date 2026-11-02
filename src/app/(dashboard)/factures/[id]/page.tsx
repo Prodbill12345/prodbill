@@ -10,6 +10,7 @@ import { FACTURE_STATUT_LABELS, FACTURE_TYPE_LABELS } from "@/types";
 import { StatusBadge } from "@/components/brand/StatusBadge";
 import { FACTURE_STATUT_TONE } from "@/design/status";
 import { formatFactureNumero } from "@/lib/facture-numero";
+import { BoldText } from "@/components/shared/BoldText";
 import { isRecapFacture, buildRecapDevisList } from "@/lib/facture-recap-view";
 import { FactureActions } from "@/components/factures/FactureActions";
 import { FactureBdcField } from "@/components/factures/FactureBdcField";
@@ -173,7 +174,7 @@ export default async function FactureDetailPage({
             )}
             {facture.descriptionProjet && (
               <p className="text-sm text-brand-ink-muted italic mt-1 whitespace-pre-line">
-                {facture.descriptionProjet}
+                <BoldText text={facture.descriptionProjet} boldClassName="font-semibold not-italic text-brand-ink" />
               </p>
             )}
           </div>

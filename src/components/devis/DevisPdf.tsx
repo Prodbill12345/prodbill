@@ -20,6 +20,7 @@ import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
 import type { PdfAccentKey } from "@/design/tokens";
 import { pdfAccentColors } from "@/lib/pdf-accent";
+import { parseBold } from "@/lib/text-bold";
 
 export type DevisForPdf = Devis & {
   client: Client;
@@ -375,7 +376,12 @@ export function DevisPdf({
         {/* ── Description ───────────────────────────────────────── */}
         {devis.description && (
           <View style={s.descriptionBlock}>
-            <Text style={s.descriptionText}>{devis.description}</Text>
+            <Text style={s.descriptionText}>
+              {/* C-DESCRIPTION-GRAS : **mot** → gras (DM Sans Bold) */}
+              {parseBold(devis.description).map((seg, i) =>
+                seg.bold ? <Text key={i} style={{ fontWeight: 700 }}>{seg.text}</Text> : seg.text
+              )}
+            </Text>
           </View>
         )}
 

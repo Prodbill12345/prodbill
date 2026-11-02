@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { FileDown, Send, RotateCcw, Loader2, Bell, Pencil, X, Check, CircleCheckBig, Undo2, Trash2, AlertTriangle } from "lucide-react";
 import type { Facture } from "@/types";
 import { PdfModal } from "@/components/shared/PdfModal";
+import { BoldTextarea } from "@/components/forms/BoldTextarea";
 import { canEditFactureObjet } from "@/lib/facture-objet";
 
 const ANNEES = [2023, 2024, 2025, 2026, 2027];
@@ -217,7 +218,8 @@ export function FactureActions({ facture, hasRelances = false }: FactureActionsP
               </div>
               <div>
                 <label className="block text-xs text-brand-ink-muted mb-1">Description du projet</label>
-                <textarea
+                {/* C-DESCRIPTION-GRAS : bouton B / Ctrl+B, format **gras** */}
+                <BoldTextarea
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   rows={3}

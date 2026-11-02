@@ -17,6 +17,7 @@ import { normalizeNfcDeep } from "@/lib/pdf/nfc";
 import { colors, fonts, rules, sectionLabel } from "@/design/tokens";
 import type { PdfAccentKey } from "@/design/tokens";
 import { pdfAccentColors } from "@/lib/pdf-accent";
+import { parseBold } from "@/lib/text-bold";
 
 export type FactureForPdf = Facture & {
   client: Client;
@@ -466,7 +467,12 @@ export function FacturePdf({
         )}
         {descriptionFacture && (
           <View style={s.descriptionBlock}>
-            <Text style={s.descriptionText}>{descriptionFacture}</Text>
+            <Text style={s.descriptionText}>
+              {/* C-DESCRIPTION-GRAS : **mot** → gras (DM Sans Bold) */}
+              {parseBold(descriptionFacture).map((seg, i) =>
+                seg.bold ? <Text key={i} style={{ fontWeight: 700 }}>{seg.text}</Text> : seg.text
+              )}
+            </Text>
           </View>
         )}
 

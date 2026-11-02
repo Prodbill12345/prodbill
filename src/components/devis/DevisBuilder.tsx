@@ -20,6 +20,9 @@ import { ClientFormModal } from "@/components/clients/ClientFormModal";
 import { BdcClientUploadField } from "./BdcClientUploadField";
 import { sortByLabelFr } from "@/lib/sort-by-name";
 import { decideAgentForComedien } from "@/lib/agent-preselect";
+import { BoldTextarea } from "@/components/forms/BoldTextarea";
+import { BoldText } from "@/components/shared/BoldText";
+import { hasBold } from "@/lib/text-bold";
 import {
   DndContext,
   KeyboardSensor,
@@ -685,12 +688,20 @@ export function DevisBuilder({
               <label className="block text-sm font-medium text-brand-ink mb-1">
                 Description du projet
               </label>
-              <textarea
+              {/* C-DESCRIPTION-GRAS : bouton B / Ctrl+B, stocké en **gras** */}
+              <BoldTextarea
                 {...register("description")}
                 rows={3}
                 placeholder="Décrivez le projet, le contexte, les détails importants..."
                 className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue resize-none"
               />
+              {/* Aperçu du rendu PDF dès qu'un passage est en gras */}
+              {hasBold(watchedValues.description ?? "") && (
+                <p className="mt-1.5 px-3 py-2 rounded-[var(--radius-control)] bg-brand-surface text-sm text-brand-ink-muted whitespace-pre-line">
+                  <span className="block text-[10px] font-medium uppercase tracking-[0.15em] mb-1">Aperçu PDF</span>
+                  <BoldText text={watchedValues.description ?? ""} boldClassName="font-bold text-brand-ink" />
+                </p>
+              )}
             </div>
 
             {/* Champs d'identification */}
