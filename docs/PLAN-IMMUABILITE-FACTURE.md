@@ -214,19 +214,27 @@ Résultat (10 pièces, lecture seule) :
   « Objet », et libellait « Agent comédien » ce que ProdBill appelle « Agent
   Voix Off (10 %) ».
 
-**Questions ouvertes nées de la comparaison** (à trancher avant le backfill) :
-1. Pièces émises dans l'ancien outil (Caleson F26001 → F26133 au moins) :
-   « figer l'original » veut-il dire reproduire ses champs dans le rendu
-   ProdBill (sans SIRET client, sans objet, libellés d'origine), ou bien
-   **archiver le PDF original comme pièce officielle** (Vercel Blob) et
-   marquer le rendu ProdBill comme copie ? Proposition : la seconde — plus
-   simple, et seule fidèle à 100 %.
-2. **D6 — date d'émission** : 36 factures ont une date de règlement
-   antérieure à leur date d'émission, parce que leur `dateEmission` est celle
-   de la ré-émission dans ProdBill, pas celle de l'original (F26002 :
-   05/01/2026 sur l'original, 11/08/2026 en base). Impact : FEC (date
-   comptable), échéance, pénalités de retard. À intégrer au backfill (date de
-   l'original) après décision.
+**Décisions (Rose, 12/11/2026) — principe : le document que le client a
+reçu fait foi.**
+1. **Pièces de l'ancien outil** : le PDF original archivé est le **document
+   officiel**. La pièce est marquée **« importée »**, l'original est
+   consultable depuis la page détail, et **aucun PDF n'est jamais regénéré**
+   pour elle (téléchargement, envoi, relance, Factur-X servent l'original).
+   Conséquence pour le modèle : `Facture.source = IMPORTEE` + lien vers
+   l'original archivé (Vercel Blob), à côté du snapshot.
+2. **D6 — dates d'émission** : la date d'origine est **restaurée pendant le
+   backfill** (échéance et pénalités recalculées, FEC). Liste préalable :
+   `~/Desktop/prodbill-immuabilite-listes/dates-emission-a-restaurer.csv`
+   (36 factures ; date lue sur l'original pour 8, 27 sans original local).
+   **Bloquant avant backfill** : Rose vérifie avec Vanda que son comptable
+   n'a pas déjà utilisé des exports FEC de ProdBill portant ces dates.
+   ⚠️ Le phénomène continue : des factures anciennes sont encore ré-émises
+   (F26150 → F26161 le 03/11) avec la date du jour ; la date d'émission
+   modifiable de la fiche facture permet de la corriger à la saisie.
+3. **F26042** : l'original fait foi, le figé est aligné dessus (HT
+   3 018,71 €, TTC 3 622,45 €, ligne unique à 1 452 €).
+4. **Différences d'adresse (CHANGE, ARTEFACT, ELMA, L'Oréal) et « MALMÖ »** :
+   décision n° 3, on fige la valeur de l'original.
 
 ### 2.3 Décision par pièce (arbitrage Rose, 29/10)
 
