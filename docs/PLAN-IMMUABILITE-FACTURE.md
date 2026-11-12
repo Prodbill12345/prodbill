@@ -228,6 +228,12 @@ reçu fait foi.**
    (36 factures ; date lue sur l'original pour 8, 27 sans original local).
    **Bloquant avant backfill** : Rose vérifie avec Vanda que son comptable
    n'a pas déjà utilisé des exports FEC de ProdBill portant ces dates.
+   La liste se regénère avant le backfill : toute ré-émission future y
+   entre (contrôle D6 relancé). F26150 → F26161 y figurent à part : ce ne
+   sont **pas** des recréations (devis récents, aucun original), leur date
+   n'est pas restaurée automatiquement (Vanda confirme).
+   Voir aussi **C-REPRISE-HISTORIQUE** (TODO-SPRINTS) : décalage de
+   numérotation des factures recréées à partir de F26070.
    ⚠️ Le phénomène continue : des factures anciennes sont encore ré-émises
    (F26150 → F26161 le 03/11) avec la date du jour ; la date d'émission
    modifiable de la fiche facture permet de la corriger à la saisie.

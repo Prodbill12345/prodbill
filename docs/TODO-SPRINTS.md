@@ -538,6 +538,78 @@ des 3 options sur un devis réel avant push.
 
 ---
 
+## C-REPRISE-HISTORIQUE — ressaisie sûre des factures de l'ancien outil (plan, pas de code)
+
+Ouvert le 12/11/2026. Contexte : l'import automatique de l'historique a été
+tenté et n'a jamais bien marché ; Vanda recrée à la main les anciennes
+factures. Principe (Rose) : **le document que le client a reçu fait foi**.
+
+### Constat (lecture seule, 12/11/2026)
+
+Comparaison des 90 originaux lisibles d'`import-prodbill/factures/`
+(Caleson F26001 → F26133) avec la base :
+`~/Desktop/prodbill-immuabilite-listes/numerotation-caleson-vs-originaux.csv`.
+
+- **70 originaux** : présents sous **leur numéro**, même montant. OK.
+- **Décalage de numérotation à partir de F26070** : une dizaine de ventes
+  recréées portent dans ProdBill un **autre numéro** que celui du document
+  envoyé au client (ex. ARTEFACT Coyote : envoyée **F26084**, ProdBill
+  **F26085** ; ELMA : F26086 → F26087 ; BIRTH : F26087 → F26088, F26088 →
+  F26089 ; HOMERUN : F26089 → F26090 ; ARTEFACT : F26091 → F26092 ;
+  NOVEMBRE LIDL : F26133 → F26134 ; LACTALIS / WNP : F26070 ↔ F26071
+  inversées). Chaque numéro d'origine est donc occupé par **une autre
+  vente**. 10 objets annoncent eux-mêmes le numéro voulu (« F26094 -
+  Riyadh Air » stockée F26095, « F26108 - Loyer 03 » stockée F26109…).
+- **Double comptabilisation : aucune avérée.** Les deux ventes recréées deux
+  fois ont leur première version annulée par avoir : Riyadh Air (F26065 +
+  avoir FAV-26065, puis F26095) et SACEM avril (F26084 + avoir FAV-26084 ;
+  vente aussi sous F26033). Le FEC exporte les annulées et les avoirs (net
+  nul). À confirmer par Vanda, avec le reste de la liste.
+- **Montant à vérifier** : F26013 NOVEMBRE — original 16 746,96 € TTC, base
+  16 474,80 € (écart 272,16 €). (SACEM F26005 / F26033 : écart = TVA 10 %,
+  probablement le HT lu sur l'original — à confirmer.)
+- **Faux positifs écartés** : mêmes montants récurrents d'un même client
+  (EVEREST droits mensuels, NONNA loyers, RAYMONDE castings) = ventes
+  distinctes. F26099 (Sephora 2 films) et F26161 (Clarins) restent à
+  confirmer par Vanda (même montant que F26048).
+- **F26150 → F26161 ne sont pas des recréations** : devis récents, aucun
+  original. Date d'émission à confirmer par Vanda (règlement antérieur).
+
+### Plan du mode « reprise d'historique »
+
+1. **Création** : depuis le devis (ou sans devis), case « Reprise d'une
+   facture de l'ancien outil ». Champs obligatoires : **numéro d'origine**,
+   **date d'origine** (garde-fou C-DATES-GARDE-FOU), **PDF original**.
+2. **Numéro** : le numéro d'origine est utilisé tel quel ; **aucun numéro
+   consommé** dans le compteur F26xxx.
+3. **Anti-doublon, bloquant** : refus si le numéro existe déjà pour la société
+   (contrainte unique existante, message clair : « F26084 est déjà utilisé
+   par ARTEFACT – Coyote, 6 759,90 € »). **Avertissement** (non bloquant) si
+   une facture du même client au même montant TTC existe déjà.
+4. **Pièce officielle** : le PDF original est archivé (Vercel Blob) et sert
+   au téléchargement, à l'envoi, aux relances et au Factur-X ; **jamais de
+   PDF regénéré** (décision IMMUABILITE-FACTURE du 12/11). Page détail :
+   badge « Importée », lien vers l'original.
+5. **Statut et dates** : la pièce entre directement émise (ou payée), date
+   d'émission = date d'origine, échéance recalculée depuis celle-ci ; snapshot
+   (montants, client, objet) comme toute pièce émise.
+6. **Exports** : FEC, CSV, Excel avec le numéro et la date d'origine.
+7. **Modèle** : `Facture.source` (`PRODBILL` | `IMPORTEE`) + référence de
+   l'original archivé ; même migration que la brique A d'IMMUABILITE-FACTURE
+   si les deux chantiers se suivent.
+
+### Remise en ordre de l'existant (opération de données, après décisions)
+
+Le décalage F26070 → F26134 ne se corrige pas en émettant de nouvelles
+pièces : il faut **renuméroter en chaîne** les ventes concernées vers leur
+numéro d'origine (numéros temporaires dans une transaction, AuditLog,
+entrée DATA-OPERATIONS) et les passer en « importée » avec leur original.
+**Bloquant avant toute écriture** : savoir si le comptable a déjà reçu des
+exports ProdBill portant les numéros actuels (même question que pour les
+dates). Décision Rose + Vanda + comptable.
+
+---
+
 ## C-DATES-GARDE-FOU — refuser les années aberrantes à la saisie
 
 Ouvert le 12/11/2026 (Rose). Origine : BUG-FACTURE-PERIODE-FIN-INVALIDE
