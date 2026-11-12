@@ -657,16 +657,17 @@ export function DevisBuilder({
                   <input
                     type="text"
                     {...register("periodeExploitationLibelle")}
-                    placeholder="Libellé (ex: Web Global + TV France)"
+                    placeholder="ex : 1 an, TV + web France"
                     maxLength={255}
-                    aria-label="Libellé de la période d'exploitation"
+                    aria-label="Précision sur la période d'exploitation"
                     className="w-full px-3 py-2 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                   />
-                  <p className="text-xs text-brand-ink-muted mt-0.5">Libellé (optionnel)</p>
+                  <p className="text-xs text-brand-ink-muted mt-0.5">Précision sur la période (optionnel)</p>
                 </div>
               </div>
               <p className="text-xs text-brand-ink-muted mt-1.5">
                 Optionnel — durée pendant laquelle le client peut exploiter la production.
+                Imprimée sur le PDF seulement si une date est renseignée.
               </p>
             </div>
 
@@ -1404,7 +1405,7 @@ function SectionBlock({
                       placeholder="Description de la prestation"
                       className="grow shrink basis-48 min-w-0 px-2.5 py-1.5 border border-brand-rule rounded-[var(--radius-control)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
                     />
-                    {/* Hors marge + Hors CS groupés : ils passent à la ligne
+                    {/* Hors marge + Exonéré de CS groupés : ils passent à la ligne
                         ensemble, jamais l'un sans l'autre (C-DEVIS-LIBELLE-LARGEUR). */}
                     <span className="flex items-center gap-1.5 shrink-0">
                       {/* Toggle horsMarge — exclut la ligne du calcul Marge/FG.
@@ -1436,10 +1437,16 @@ function SectionBlock({
                       {(tagValue === "ARTISTE" || tagValue === "TECHNICIEN_HCS") && (
                         <label
                           className="flex items-center gap-1 shrink-0 cursor-pointer select-none group"
+                          // C-HORS-CS-LIBELLE (12/11/2026) : « hors cs » dans un libellé
+                          // veut dire « tarif hors charges » (CS ajoutées) ; la case,
+                          // elle, supprime les CS. Libellé et infobulle sans ambiguïté.
+                          // La phrase FG / marge ne vaut que pour un technicien : ses CS
+                          // entrent dans la base marge, celles d'un artiste non.
                           title={
-                            tagValue === "ARTISTE"
-                              ? "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS comédien. Utile quand l'artiste facture lui-même (société, auto-entrepreneur)."
-                              : "Décocher les charges sociales sur cette ligne : elle reste facturée dans le HT mais ne porte aucune CS technicien. Attention : la part de CS disparaissant de la base, les FG et la Marge baissent aussi."
+                            "Aucune charge sociale sur cette ligne. Ne pas cocher pour un tarif hors charges : les charges s'ajoutent automatiquement." +
+                            (tagValue === "TECHNICIEN_HCS"
+                              ? " Attention : la part de CS disparaissant de la base, les FG et la Marge baissent aussi."
+                              : "")
                           }
                         >
                           <input
@@ -1454,7 +1461,7 @@ function SectionBlock({
                                 : "text-brand-ink-subtle group-hover:text-brand-ink-muted"
                             }`}
                           >
-                            hors cs
+                            exonéré de cs
                           </span>
                         </label>
                       )}
