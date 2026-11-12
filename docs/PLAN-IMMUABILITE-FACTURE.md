@@ -15,7 +15,8 @@ change, parce qu'une partie de son contenu est relue en direct.
 |---|---|---|
 | Totaux, décomposition CS / FG / marge, taux, TVA | figés (#99) | inchangé |
 | Émetteur (SIRET, TVA, IBAN, adresse…) | figé | inchangé |
-| Objet, description, période d'exploitation | figés | inchangé |
+| Description, période d'exploitation | figées | inchangé |
+| **Objet du devis** | **figé seulement sur les pièces créées depuis le 22/10** (FEAT-FACTURE-OBJET-DESCRIPTION) ; ailleurs **relu en direct** sur le devis | **figé sur toutes les pièces émises** (brique A, § 1) |
 | Accent PDF | figé (29/10) | inchangé |
 | **Sections et lignes** | **relues sur le devis, au prorata** | **figées** (brique A) |
 | **Liste des devis d'une récap** | **relue sur les devis** | **figée** (brique A) |
@@ -59,6 +60,32 @@ Cas particuliers :
 - **Avoir** : une seule ligne (« Avoir sur devis n° … » + montant), comme le
   rendu actuel.
 - **Brouillon** : rien de figé, rendu en direct comme aujourd'hui.
+
+### A bis — Objet du devis figé (ajouté le 12/11/2026)
+
+L'objet du devis est **imprimé sur la facture** : en ligne « Objet : » quand
+`Facture.objet` est renseigné, sinon dans la ligne « Réf. : Solde sur devis
+n° … — *objet du devis* », **relu en direct** (`factureObjetDisplay`). Il sert
+aussi au **nom du fichier PDF** (C-NOM-FICHIERS-PDF : `facture.objet`, sinon
+`devis.objet`) et à la page détail.
+
+Chiffres prod (lecture seule, 12/11/2026) : sur 179 pièces émises, **102
+n'ont pas d'objet figé** — 92 factures mono-devis et 2 avoirs (émis avant le
+22/10, donc objet relu sur le devis), 8 récaps (normal : couvertes par
+`sourceDevisObjet` sur leurs lignes).
+
+À faire :
+- **Émission** : `emettre` garantit `Facture.objet` (copie de `Devis.objet`
+  si vide) dans la même transaction que le reste du snapshot. Un avoir copie
+  l'objet de la facture qu'il annule.
+- **Backfill** : `Facture.objet` rempli depuis l'objet actuel du devis pour
+  les 92 + 2 pièces, avec les mêmes règles que les lignes (§ 2.3) : une pièce
+  signalée en liste 1 (devis modifié après émission) reste `A_REVOIR` et son
+  objet n'est figé qu'après comparaison avec l'original.
+- **Rendu** : plus de lecture en direct de `devis.objet` pour une pièce émise
+  (PDF, page détail, nom de fichier, Factur-X).
+- **Test** : « toute pièce émise mono-devis ou avoir a un objet figé (ou est
+  `A_REVOIR`) ».
 
 ### B — Client figé
 
@@ -136,6 +163,11 @@ actuel, total TTC figé / actuel, écart TTC, contrôles en écart. Les 5 pièce
 signalées par D4 aujourd'hui y figurent toutes, même sans écart de montant
 (changement possible du texte seul : seul l'original peut le dire).
 
+**Première génération : 12/11/2026** (lecture seule, 179 pièces émises
+analysées) — `~/Desktop/prodbill-immuabilite-listes/` (CSV + Markdown).
+Liste 1 : 5 pièces, toutes signalées par D4 seulement (aucun écart de
+montant D1 à D3). Liste 2 : 14 pièces. À regénérer juste avant le backfill.
+
 *Liste 2 — clients modifiés (D5)*, une ligne par pièce : numéro, date
 d'émission, client, date de dernière modification de la fiche, puis la
 **valeur actuelle de chaque champ imprimé** (raison sociale, adresse, code
@@ -179,6 +211,7 @@ actuels (§ 6.1).
 
 ### 2.4 Exécution
 
+- Le backfill couvre aussi l'**objet** (§ 1, A bis).
 - Script de données séparé de la migration, **dry-run** par défaut,
   transaction par pièce, idempotent (ignore une pièce déjà figée).
 - Entrée dans `docs/DATA-OPERATIONS.md` + AuditLog
@@ -250,11 +283,12 @@ pièce émise pendant l'opération n'échappe au snapshot.
 
 | Sortie | Aujourd'hui | Après |
 |---|---|---|
-| **PDF facture / avoir** (routes pdf, envoyer, relancer) | Lignes du devis × ratio, client en direct | Lecture du snapshot ; brouillon inchangé (direct). Rendu identique pour les pièces `BACKFILL`, vérifié par la comparaison automatique. |
+| **PDF facture / avoir** (routes pdf, envoyer, relancer) | Lignes du devis × ratio, client en direct, objet du devis en direct (ligne « Réf. ») sur 94 pièces | Lecture du snapshot ; brouillon inchangé (direct). Rendu identique pour les pièces `BACKFILL`, vérifié par la comparaison automatique. |
 | **Page détail facture** | Idem (sections du devis × ratio, client en direct) | Lecture du snapshot. Le lien « Réf. devis » reste (relation conservée). |
 | **Facture récap multi-devis** | Liste des devis relue (montant HT net, objet, numéro) | Une ligne figée par devis. Modifier un devis regroupé ne change plus la récap émise. |
 | **Factur-X actuel** (profil MINIMUM) | Totaux figés ; nom, adresse et SIRET du client en direct dans le XML ; PDF conteneur en direct | XML : client depuis le snapshot. PDF conteneur : suit le PDF. Pas de lignes en MINIMUM : rien d'autre ne change. |
 | **Exports FEC / CSV / Excel** | Nom et SIRET client en direct ; le **compte 411 du FEC est dérivé du SIRET** | Snapshot pour les pièces émises : changer le SIRET d'un client ne réécrit plus les comptes des écritures passées. |
+| **Nom du fichier PDF** (C-NOM-FICHIERS-PDF) | `facture.objet`, sinon objet du devis **en direct** | Objet figé : le nom d'une pièce émise ne change plus |
 | **Devis, brouillons, suivi budgétaire, dashboard** | — | Aucun changement. |
 
 ---
