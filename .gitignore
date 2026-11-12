@@ -41,3 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Documents clients et sorties locales (jamais dans le repo) — 12/11/2026.
+# Convention : tout dossier de sortie à la racine est nommé `prodbill-*/`
+# (captures, aperçus PDF, listes) ou placé dans `sorties/`.
+/import-prodbill/
+/backups/
+/prodbill-*/
+/sorties/
+# Dossiers temporaires des scripts d'aperçu (.tmp-shell, .tmp-dnd…)
+/.tmp-*/
