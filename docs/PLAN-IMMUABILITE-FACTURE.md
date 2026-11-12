@@ -188,6 +188,46 @@ donc en comparant chaque champ à l'original :
 journalisée avec l'avant / après (`CLIENT_MODIFIE`) : la question « quel champ
 a changé » aura une réponse pour l'avenir.
 
+### 2.2 bis — Comparaison automatique avec les originaux locaux (12/11/2026)
+
+Les originaux Caleson F26001 → F26133 (91 PDF de l'ancien outil) sont dans
+`import-prodbill/factures/` (exclu de git). Pour les pièces des listes 1 et 2
+qui ont un original local, le texte des pages facture est extrait et comparé
+à la base : `~/Desktop/prodbill-immuabilite-listes/comparaison-originaux.{md,csv}`.
+
+Résultat (10 pièces, lecture seule) :
+- **F26026** : identique sur les données.
+- **8 différentes sur les données** : adresse client changée depuis
+  l'émission (CHANGE : F26002, F26021, F26042 — « 1-3 rue de Caumartin
+  75009 » sur l'original ; ARTEFACT : F26022 — « 19 rue Pierre Sémard » ;
+  ELMA : F26047 — « 21b, Rue Jean Leclaire » ; L'Oréal F26010 : pas de ligne
+  rue sur l'original) ; raison sociale F26009 (« MALMÖ » sur l'original,
+  « MALMO » en base) ; libellés de lignes (F26002, F26010, F26014).
+- **F26042 : totaux différents d'1 centime** — original HT 3 018,71 € /
+  TTC 3 622,45 € ; figés en base 3 018,70 € / 3 622,44 €, et deux lignes à
+  726 € en base pour une ligne à 1 452 € sur l'original. **Contredit la
+  règle « les totaux figés font foi »** : à trancher (l'original envoyé est
+  la pièce légale).
+- **F26123** : pas d'original local → Vanda. Les 5 pièces NONNA aussi.
+- **Écarts de rendu, sur toutes** (pas des modifications de données) :
+  l'ancien outil n'imprimait ni le SIRET / la TVA du client, ni de ligne
+  « Objet », et libellait « Agent comédien » ce que ProdBill appelle « Agent
+  Voix Off (10 %) ».
+
+**Questions ouvertes nées de la comparaison** (à trancher avant le backfill) :
+1. Pièces émises dans l'ancien outil (Caleson F26001 → F26133 au moins) :
+   « figer l'original » veut-il dire reproduire ses champs dans le rendu
+   ProdBill (sans SIRET client, sans objet, libellés d'origine), ou bien
+   **archiver le PDF original comme pièce officielle** (Vercel Blob) et
+   marquer le rendu ProdBill comme copie ? Proposition : la seconde — plus
+   simple, et seule fidèle à 100 %.
+2. **D6 — date d'émission** : 36 factures ont une date de règlement
+   antérieure à leur date d'émission, parce que leur `dateEmission` est celle
+   de la ré-émission dans ProdBill, pas celle de l'original (F26002 :
+   05/01/2026 sur l'original, 11/08/2026 en base). Impact : FEC (date
+   comptable), échéance, pénalités de retard. À intégrer au backfill (date de
+   l'original) après décision.
+
 ### 2.3 Décision par pièce (arbitrage Rose, 29/10)
 
 **Les totaux figés à l'émission font foi.** Aucune correction automatique.
@@ -204,7 +244,10 @@ a changé » aura une réponse pour l'avenir.
      l'original (ou fournit les lignes de l'original), puis snapshot ;
   3. l'original lui-même était faux → avoir + nouvelle facture (procédure
      normale, hors backfill).
-- **Client modifié (D5)** → voir la décision n° 3 au § 7.
+- **Client modifié (D5)** → on fige la **valeur de l'original** (décision
+  n° 3) : tout champ imprimé compte, adresse incluse ; seul l'email est
+  anodin. Les pièces dont l'original est dans `import-prodbill/` sont
+  comparées automatiquement ; les autres (a priori NONNA) par Vanda.
 
 Tant qu'une pièce est `A_REVOIR`, son devis reste protégé par les verrous
 actuels (§ 6.1).
@@ -246,6 +289,12 @@ restauration** (history retention) : c'est la seconde ligne de défense
 Sauvegarde secondaire, facultative : `npx tsx scripts/backup-full-db.ts`
 (pg_dump, fichier dans `backups/`). **À lancer hors réseau d'entreprise**,
 sinon il échoue au TLS.
+
+**Moment et réseau du backfill** (décision n° 5, Rose, 29/10) : un **soir ou
+un week-end**, **Vanda prévenue** (aucune émission pendant l'opération),
+branche Neon créée **juste avant**. Si le script tourne depuis le Mac de Rose :
+**jamais sur le réseau leboncoin** (il bloque le TLS vers Neon) — 4G ou
+réseau de la maison uniquement.
 
 ### 3.2 Procédures de retour arrière, du plus léger au plus lourd
 
@@ -311,10 +360,13 @@ Une fois les pièces figées, modifier un devis ne touche plus aucune facture
 - **Réordonnancement des sections : verrou levé** pour toute pièce figée ;
   maintenu tant qu'une pièce liée au devis est `A_REVOIR`.
 - **Client** : verrou conservé dès qu'une facture est émise.
-- **Montants (lignes, taux, remise)** : proposition à confirmer en session
-  (décision n° 4) — bloqués si un **solde** est émis (le devis est entièrement
-  facturé et doit rester égal à la somme de ses factures) ; autorisés avec
-  bandeau d'avertissement si seuls des acomptes sont émis.
+- **Montants (lignes, taux, remise)** — décision n° 4 (Rose, 29/10) :
+  **verrou complet une fois le solde émis** (le devis est entièrement facturé
+  et doit rester égal à la somme de ses factures). Avec **seulement un
+  acompte émis**, montants modifiables avec un **bandeau d'avertissement**
+  sur l'impact sur le solde à venir. La facture d'acompte, elle, est figée à
+  son émission comme toute pièce (brique A) : modifier le devis ne la change
+  pas.
 - **Textes (objet, notes, description)** : toujours modifiables.
 
 ### 6.2 Réactivation des mails (`MAIL_KILL_SWITCH`)
@@ -343,15 +395,15 @@ A+B est **nécessaire mais pas suffisant**. Restent, dans cet ordre :
 
 ---
 
-## 7. Décisions
+## 7. Décisions (toutes tranchées par Rose le 29/10, reportées le 12/11)
 
-| # | Décision | Statut |
-|---|---|---|
-| 1 | Figer `clientSiren` dès le commit 1 | **Tranché : oui** (Rose, 29/10) |
-| 2 | Pièces à montants divergents | **Tranché** : les totaux figés font foi ; pièce marquée `A_REVOIR`, lignes non figées, aucune correction automatique ; décision de Vanda pièce par pièce après comparaison avec l'original (§ 2.3) |
-| 3 | Pièces au client modifié (D5) : figer les coordonnées actuelles, ou attendre la confirmation de Vanda pièce par pièce ? | **Ouvert.** Proposition : figer l'état actuel pour celles que Vanda classe « anodin » après comparaison (liste 2) ; pour les « sensibles » (SIRET, raison sociale), elle fournit la valeur de l'original et on fige celle-là |
-| 4 | Verrou métier (brique C) | **Tranché en partie** : déclenché par une facture émise, jamais un brouillon ; flux acompte + solde préservé. **Reste à confirmer** : montants bloqués après un solde émis, autorisés avec bandeau après des acomptes seuls (§ 6.1) |
-| 5 | Moment du backfill | **Ouvert.** Proposition : un soir, quand personne n'émet de facture, après la décision de Vanda sur les listes 1 et 2 |
+| # | Décision |
+|---|---|
+| 1 | `clientSiren` figé dès le commit 1. |
+| 2 | Pièces à montants divergents : les totaux figés font foi ; pièce marquée `A_REVOIR`, lignes non figées, aucune correction automatique ; décision de Vanda pièce par pièce après comparaison avec l'original (§ 2.3). |
+| 3 | Client modifié après émission : on fige la **valeur de l'original**. Tout champ imprimé compte (raison sociale, adresse, code postal, ville, SIRET, TVA) ; seul l'**email** est anodin. |
+| 4 | Verrou métier (brique C) : déclenché par une facture **émise**, jamais un brouillon. **Verrou complet une fois le solde émis.** Avec seulement un acompte émis : montants modifiables, **bandeau d'avertissement** sur l'impact sur le solde. La facture d'acompte est figée à son émission (§ 6.1). |
+| 5 | Backfill un **soir ou un week-end**, **Vanda prévenue**, **branche Neon juste avant**. Depuis le Mac de Rose : **jamais sur le réseau leboncoin** (bloque le TLS Neon), 4G ou maison (§ 3.1). |
 
 ## 8. Risques identifiés
 

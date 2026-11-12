@@ -418,7 +418,8 @@ Ouvert le 27/10/2026 (demande Vanda, arbitrage Rose : après l'étape 6).
 **Livré le 29/10/2026.** Palette finale (Rose) : Majorelle (défaut),
 Bordeaux #962A3A, Olive #5C6B1F, Pétrole #0E6A7A, Encre — wine et olive
 éclaircis par rapport aux teintes testées (#5E1A1A / #3A3D2B, lues noires) ;
-Vanda tranche sur les 5 PDF et on swappe si elle préfère les originales.
+**Attente fermée le 12/11/2026** : wine et olive éclaircis conservés ; Vanda
+a choisi **Majorelle pour Caleson** (valeur par défaut : rien à changer en base).
 `Company.pdfAccent` (clé, NULL = Majorelle), `Facture.pdfAccent` figé à
 l'émission, réglage « Couleur des documents PDF » dans les Paramètres ;
 l'app garde le Majorelle. Le texte ci-dessous est l'énoncé d'origine.
@@ -534,6 +535,48 @@ pas de reprise).
 Calcul (cas de référence + ligne offerte, offert + hors marge / hors CS,
 indexation), base agent selon la décision, payload et duplication, rendu PDF
 des 3 options sur un devis réel avant push.
+
+---
+
+## C-DATES-GARDE-FOU — refuser les années aberrantes à la saisie
+
+Ouvert le 12/11/2026 (Rose). Origine : BUG-FACTURE-PERIODE-FIN-INVALIDE
+(devis Caleson 26018, fin de période **42027-07-14**, toujours en base).
+
+### Règle
+
+Toute date saisie doit avoir une année dans **[année en cours − 5 ;
+année en cours + 10]** (en 2026 : 2021 → 2036). Refus **à la saisie** et
+**côté serveur**, message clair : « Année hors plage : saisissez une date
+entre 2021 et 2036. »
+
+### Périmètre
+
+- Un helper partagé (`isPlausibleYear` / message unique) remplaçant les
+  bornes 1900–2100 actuelles (`PERIODE_YEAR_MIN/MAX` dans
+  `src/lib/periode-exploitation.ts`, message dans `src/lib/zod-helpers.ts`).
+- Champs : devis (émission, validité, séance, période début / fin), facture
+  (date d'émission modifiable, date de règlement, période), paiement (date).
+- Saisie : attributs `min` / `max` des `<input type="date">` + validation
+  zod du formulaire (le navigateur seul ne suffit pas : saisie clavier).
+- Serveur : schémas zod des routes devis, factures (dates), paiements.
+- Bornes calculées à l'exécution (pas d'année codée en dur) ; tests aux
+  bornes (31/12 de Y−6 refusé, 01/01 de Y−5 accepté, Y+10 accepté, Y+11 refusé).
+- Données existantes : non modifiées par ce ticket (une date déjà hors plage
+  reste lisible ; seule une nouvelle saisie est bloquée).
+
+### État des données (lecture seule, 12/11/2026)
+
+Liste : `~/Desktop/prodbill-dates-aberrantes.csv`.
+- **Hors plage : 1 seule** — devis Caleson 26018, fin de période
+  42027-07-14 (à ressaisir par Vanda).
+- **Dans la plage mais incohérentes : 36 factures** dont la **date de
+  règlement précède la date d'émission** (33 Caleson, 3 NONNA). Pas une
+  faute de frappe : ce sont des factures émises dans l'ancien outil puis
+  ré-émises dans ProdBill, dont la `dateEmission` est celle de la
+  ré-émission (ex. F26002 Caleson : « 05 janvier 2026 » sur l'original,
+  11/08/2026 en base). Traité dans IMMUABILITE-FACTURE (plan, contrôle D6),
+  pas par ce ticket. Le garde-fou ne bloque pas ce cas.
 
 ---
 
