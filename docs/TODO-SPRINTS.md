@@ -565,8 +565,10 @@ Comparaison des 90 originaux lisibles d'`import-prodbill/factures/`
   avoir FAV-26065, puis F26095) et SACEM avril (F26084 + avoir FAV-26084 ;
   vente aussi sous F26033). Le FEC exporte les annulées et les avoirs (net
   nul). À confirmer par Vanda, avec le reste de la liste.
-- **Montant à vérifier** : F26013 NOVEMBRE — original 16 746,96 € TTC, base
-  16 474,80 € (écart 272,16 €). (SACEM F26005 / F26033 : écart = TVA 10 %,
+- **Montant** : F26013 NOVEMBRE — original 16 746,96 € TTC, base
+  16 474,80 € : écart = la ligne « Complément BDC n°98993 du devis n°25752 —
+  226,80 € HT » de l'original, absente de ProdBill (détail dans le plan
+  IMMUABILITE-FACTURE). (SACEM F26005 / F26033 : écart = TVA 10 %,
   probablement le HT lu sur l'original — à confirmer.)
 - **Faux positifs écartés** : mêmes montants récurrents d'un même client
   (EVEREST droits mensuels, NONNA loyers, RAYMONDE castings) = ventes
@@ -604,9 +606,9 @@ Le décalage F26070 → F26134 ne se corrige pas en émettant de nouvelles
 pièces : il faut **renuméroter en chaîne** les ventes concernées vers leur
 numéro d'origine (numéros temporaires dans une transaction, AuditLog,
 entrée DATA-OPERATIONS) et les passer en « importée » avec leur original.
-**Bloquant avant toute écriture** : savoir si le comptable a déjà reçu des
-exports ProdBill portant les numéros actuels (même question que pour les
-dates). Décision Rose + Vanda + comptable.
+**Bloquant avant toute écriture (Rose, 12/11)** : rien n'est corrigé avant
+la réponse du comptable de Vanda sur les exports ProdBill déjà reçus
+(numéros actuels), au même titre que les dates.
 
 ---
 

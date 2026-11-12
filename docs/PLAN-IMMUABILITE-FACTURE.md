@@ -225,13 +225,13 @@ reçu fait foi.**
 2. **D6 — dates d'émission** : la date d'origine est **restaurée pendant le
    backfill** (échéance et pénalités recalculées, FEC). Liste préalable :
    `~/Desktop/prodbill-immuabilite-listes/dates-emission-a-restaurer.csv`
-   (36 factures ; date lue sur l'original pour 8, 27 sans original local).
+   (**29 factures** après retrait de F26150 → F26161, vraies factures
+   récentes — Rose, 12/11 ; date lue sur l'original pour 8).
    **Bloquant avant backfill** : Rose vérifie avec Vanda que son comptable
    n'a pas déjà utilisé des exports FEC de ProdBill portant ces dates.
    La liste se regénère avant le backfill : toute ré-émission future y
-   entre (contrôle D6 relancé). F26150 → F26161 y figurent à part : ce ne
-   sont **pas** des recréations (devis récents, aucun original), leur date
-   n'est pas restaurée automatiquement (Vanda confirme).
+   entre (contrôle D6 relancé), en excluant F26150 → F26161 (vraies factures
+   récentes, pas des recréations).
    Voir aussi **C-REPRISE-HISTORIQUE** (TODO-SPRINTS) : décalage de
    numérotation des factures recréées à partir de F26070.
    ⚠️ Le phénomène continue : des factures anciennes sont encore ré-émises
@@ -239,6 +239,14 @@ reçu fait foi.**
    modifiable de la fiche facture permet de la corriger à la saisie.
 3. **F26042** : l'original fait foi, le figé est aligné dessus (HT
    3 018,71 €, TTC 3 622,45 €, ligne unique à 1 452 €).
+   **F26013** (même principe) : récap de 7 devis NOVEMBRE (D26054 → D26062)
+   dont les montants nets égalent les 7 lignes « Séance … » de l'original
+   (13 729,00 € HT). L'original porte une 8ᵉ ligne, « Complément BDC
+   n°98993 du devis n°25752 — 226,80 € HT », **absente de ProdBill** (devis
+   25752 inexistant en base) : original 13 955,80 € HT / 16 746,96 € TTC,
+   ProdBill 13 729,00 € / 16 474,80 € (écart 272,16 € TTC = 226,80 × 1,2).
+   Le figé est aligné sur l'original, ligne de complément comprise — à
+   confirmer par Vanda (vente bien facturée sur F26013).
 4. **Différences d'adresse (CHANGE, ARTEFACT, ELMA, L'Oréal) et « MALMÖ »** :
    décision n° 3, on fige la valeur de l'original.
 
